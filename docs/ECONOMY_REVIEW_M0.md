@@ -1,6 +1,6 @@
 # M0 Economy Review — PHỞ ĐẦU NGÕ
 
-**Status:** Analytical review for owner decision; not a change to approved design.  
+**Status:** Owner-approved provisional economy targets recorded on 2026-10-21; other balance assumptions remain open.  
 **Inputs:** GDD v1.2 economy assumptions. All prices and costs below are game-balancing values, not verified market data.
 
 ## Executive finding
@@ -43,13 +43,13 @@ Formula used: bowls/day × 10 days × 15,100 VND contribution margin − 550,000
 
 The GDD's 10–14 bowls/day learning target and 14–20 bowls/day stable-cart target do not reliably cover a 2,000,000 VND installment. Even 20 bowls/day leaves only 470,000 VND for the entire 10-day game month after the modeled fixed cost and debt payment.
 
-**Recommendation:** keep the nine-payment debt schedule as a story/design rule, but set a playtest acceptance target of at least 20 bowls/day average by the first repayment month, and test 17 bowls/day as a failure/buffer scenario. This target is provisional and must be validated in playtests; do not silently guarantee sales to force repayment.
+**Owner decision (2026-10-21):** retain the nine-payment debt schedule; use 20 bowls/day as a provisional average sales target to test from the first repayment month, and 17 bowls/day as a stress case. This is a playtest target, not guaranteed customer behavior. Do not force or guarantee sales to make the installment affordable. Validate the progression through simulation and playtests.
 
 ### R2 — The model omits a safety buffer
 
 The 17-bowl break-even point excludes spoilage, discarded broth, emergency market purchases, repairs, and labor. The GDD already requires a resilience test and recommends a 1,500,000 VND reserve before opening a shop.
 
-**Recommendation:** do not allow shop expansion solely because the player can pay the nominal opening cost. Require the opening cost plus the reserve to remain available after the decision, and test at least one low-sales month and one ingredient-cost shock.
+**Owner decision (2026-10-21):** shop expansion remains optional and requires the opening cost plus a 1,500,000 VND reserve to remain available after the decision. Before implementation, test at least one low-sales month and one ingredient-cost shock.
 
 ### R3 — Initial working capital and purchase timing are underspecified
 
@@ -80,13 +80,20 @@ The shop requires approximately 3,666,666 VND to open and the GDD recommends an 
 - [ ] Confirm a player cannot become unable to buy any ingredients after an ordinary low-sales day without a warning or recovery path.
 - [ ] Simulate the optional shop-opening decision and preserve the 1,500,000 VND reserve.
 
-## 5. Owner decisions requested
+## 5. Owner decisions recorded and remaining blockers
 
-1. **Debt schedule:** retain nine 2,000,000 VND installments in game months 2–10? Recommendation: retain; it is already a core story rule.
-2. **Repayment-month sales target:** approve a provisional 20 bowls/day target by the first installment month, with 17 bowls/day treated as a stress case? Recommendation: approve for playtesting, not as guaranteed customer behavior.
-3. **Shop expansion:** confirm it remains optional and requires opening cost plus 1,500,000 VND reserve? Recommendation: yes.
-4. **Initial inventory:** define the exact ingredient quantities contained in the 300,000 VND opening stock and the supplier-order timing before implementing inventory logic.
-5. **Recurring payments:** define the order and warning UX for rent/utilities and debt installment at a month boundary.
+### Approved provisionally on 2026-10-21
+
+1. Retain the debt principal of 18,000,000 VND and nine installments of 2,000,000 VND at the ends of game months 2–10; do not add automatic interest.
+2. Use 20 bowls/day as a provisional average sales target from the first repayment month, with 17 bowls/day as a stress case. This is a test target, not a guaranteed customer curve.
+3. Keep shop expansion optional and require the opening cost plus 1,500,000 VND reserve to remain available after opening.
+
+### Still unresolved before implementation
+
+4. Define exact ingredient quantities in the 300,000 VND opening stock, the first-day replenishment, and supplier-order timing.
+5. Define the transaction order and warning UX for rent/utilities and debt installment at a month boundary.
+6. Run the full cash-flow matrix with 10/14/17/20/25 bowls/day, +10%/+20% direct-cost shocks, waste, and emergency purchases.
+7. Validate opening cash, deposits, prepaid rent, cost of goods sold, and stock purchases without double-counting.
 
 ## Conclusion
 
