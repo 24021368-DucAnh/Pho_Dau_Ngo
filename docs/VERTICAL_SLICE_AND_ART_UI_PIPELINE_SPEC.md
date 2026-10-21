@@ -29,7 +29,7 @@ The approved M0 Godot spike is a **technical probe**, not the production vertica
 
 The final engine decision remains open until the spike evidence is reviewed. The art/UI pipeline described here is engine-agnostic; engine-specific implementation details belong in a later implementation plan.
 
-After the engine is selected, the first **production vertical slice** should demonstrate one representative short service session with a coherent visual/UI finish. The exact day length and economy numbers remain test assumptions, not locked requirements.
+After the engine is selected, the first **production vertical slice** should demonstrate one complete representative game day: preparation, opening, the core service loop, closing, and an end-of-day summary, with a coherent visual/UI finish. The 15–25 minute day length and economy numbers remain test assumptions, not locked requirements.
 
 ## 4. Production maturity levels
 
@@ -80,7 +80,7 @@ These tracks follow the same rule: prototype the function first, then establish 
 
 ## 5. Initial production vertical slice
 
-The slice should be the smallest experience that proves the intended feel, not a miniature version of every system in the 100-day campaign.
+The slice should be the smallest complete playable day that proves the intended feel, not a miniature version of every system in the 100-day campaign.
 
 ### Environment
 - One representative section of the old Hanoi alley and one pho-stall work area.
@@ -92,7 +92,7 @@ The slice should be the smallest experience that proves the intended feel, not a
 - Move and look around.
 - Focus an interactable object and receive clear feedback.
 - Pick up a bowl and place it at a valid target; invalid placement is rejected without corrupting object state.
-- Demonstrate a representative order-to-serving path when the production slice is authorized.
+- Complete the day-level loop: preparation, opening, representative order-to-serving cycles, closing and end-of-day review.
 - Payment must be applied exactly once when payment is included in the slice; no duplicate revenue.
 - End the test session and inspect a simple summary when the corresponding data path is implemented.
 
@@ -108,7 +108,7 @@ The slice should be the smallest experience that proves the intended feel, not a
 - Full supplier, spoilage, expansion, save/load and debt systems unless a later approved slice specifically requires them.
 - Near-photorealistic asset detail or expensive bespoke animation that does not improve the validated player experience.
 
-The slice must use clearly labeled provisional economy values if any money UI is demonstrated. It must not silently turn unresolved economy assumptions into locked game rules.
+The slice must cover the full day from preparation through closing, while keeping the number of recipes, customers, props and systems deliberately small. It must use clearly labeled provisional economy values if any money UI is demonstrated. It must not silently turn unresolved economy assumptions into locked game rules.
 
 ## 6. Parallel workflow and integration
 
