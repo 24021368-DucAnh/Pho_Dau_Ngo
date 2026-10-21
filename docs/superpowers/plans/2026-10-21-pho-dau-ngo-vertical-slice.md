@@ -4,16 +4,16 @@
 
 **Goal:** Deliver one complete, testable game day that proves the core service loop, visual direction, UI, and desktop build quality before scaling the 100-day campaign.
 
-**Architecture:** Keep the existing Godot spike isolated as technical evidence. Do not create production gameplay files until DUC-47/DUC-48 evidence is reviewed and the owner selects the engine. If Godot 4 is selected, create a clean production project with separate scene, domain-state, UI, and test responsibilities; use explicit state transitions and a single authoritative source for orders, inventory, and ledger transactions. Build the 3D-art and UI/UX tracks in parallel, then review them in the running game rather than in Blender/Figma alone.
+**Architecture:** Keep the existing Godot spike isolated as technical evidence. The owner selected Godot 4 on 2026-10-22. The clean production project is under `game/`, with separate scene, domain-state, UI and test responsibilities; use explicit state transitions and a single authoritative source for orders, inventory and ledger transactions. Build the 3D-art and UI/UX tracks in parallel, then review them in the running game rather than in Blender/Figma alone.
 
-**Tech Stack:** Engine-neutral design artifacts first; candidate implementation stack is Godot 4.4.1 + GDScript + GitHub Actions only if the owner selects Godot after the M0 spike. Blender for 3D assets, Figma for visual/UI design, Linear for tasks and gates. Do not add a test framework or asset dependency without a documented reason.
+**Tech Stack:** Godot 4.4.1 + GDScript + GitHub Actions. Blender for 3D assets, Figma for visual/UI design, Linear for tasks and gates. Do not add a test framework or asset dependency without a documented reason.
 
 **Spec:** `docs/VERTICAL_SLICE_AND_ART_UI_PIPELINE_SPEC.md`; product baseline: `docs/PHO_DAU_NGO_GDD_v1_2_Tieng_Viet.md`; decisions: `docs/DECISION_LOG.md`.
 
 ## Global Constraints
 
 - The approved product baseline is first-person 3D PC/Steam with a 100-day campaign, but only one representative complete day is in the first production slice.
-- Godot 4 is a candidate, not the selected production engine. All tasks under the Godot production path are blocked until the owner makes the engine decision after the M0 spike.
+- Godot 4 is the owner-selected production engine (2026-10-22). The production scaffold passed the owner-reported 10/10 PC checklist; the current gate is the kitchen/recipe checkpoint.
 - The M0 spike remains technical probe code under `godot_spike/`; do not extend it into full gameplay architecture.
 - Visual direction: grounded stylized realism; old Hanoi collective-housing alley; worn plaster/concrete/wood/metal; restrained cinematic practical lighting; believable food props; humor through character and situations.
 - 3D maturity gates: Graybox → Whitebox → Proxy Assets → First Art Pass → Final Assets → Final Environment Art Pass → Polish → QA.
@@ -148,7 +148,7 @@
 
 ## Task 3: Create the clean production project (conditional on engine selection)
 
-**This task is blocked until Task 0 records an owner-approved engine.** If Godot 4 is selected, use the paths below; if another engine is selected, rewrite this task and the engine-specific tasks before implementation.
+**Completed:** Godot 4 was selected by the owner on 2026-10-22. The clean production scaffold is merged under `game/`; the M0 spike remains preserved under `godot_spike/`.
 
 **Conditional Godot files:**
 - Create: `game/project.godot`
