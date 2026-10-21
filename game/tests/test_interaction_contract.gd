@@ -26,6 +26,11 @@ func _run() -> void:
 	var scene_player: Node = scene_instance.get_node_or_null("Player")
 	var scene_zone: Area3D = scene_instance.get_node_or_null("PlacementZone") as Area3D
 	_check(scene_player is CharacterBody3D, "scene has a first-person CharacterBody3D player")
+	_check(scene_instance.get_node_or_null("LeftWall") is StaticBody3D, "graybox has a left alley wall")
+	_check(scene_instance.get_node_or_null("RightWall") is StaticBody3D, "graybox has a right alley wall")
+	_check(scene_instance.get_node_or_null("PhoCart") is StaticBody3D, "graybox has a pho cart/workstation proxy")
+	_check(scene_instance.get_node_or_null("PhoCart/StockPotProxy") is MeshInstance3D, "graybox has a stock-pot visual proxy")
+	_check(scene_instance.get_node_or_null("CustomerStoolProxy") is MeshInstance3D, "graybox has a customer stool proxy")
 	_check(scene_instance.get_node_or_null("Bowl") is StaticBody3D, "scene has one physical bowl")
 	_check(scene_zone != null, "scene has a placement target")
 	var scene_raycast: RayCast3D = scene_player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
