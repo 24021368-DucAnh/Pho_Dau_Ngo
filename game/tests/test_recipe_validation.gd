@@ -112,11 +112,13 @@ func _run() -> void:
 	_check(bool(cancel_step.get("ok", false)), "cancellation test consumes noodles before cancellation")
 	var stock_before_cancel := cancel_inventory.get_stock(&"noodles")
 	var cancel_result: Dictionary = cancel_bowl.cancel_preparation()
+	beef_station.reset_blanching(cancel_bowl)
 	_check(bool(cancel_result.get("ok", false)), "in-progress bowl can be cancelled")
 	_check(cancel_bowl.preparation_state == InteractiveBowl.PreparationState.CLEAN, "cancel resets bowl preparation state")
 	_check(cancel_bowl.recipe_step_index == 0, "cancel resets recipe progress")
 	_check(cancel_inventory.get_stock(&"noodles") == stock_before_cancel, "cancel does not refund already-used ingredients")
 	_check(cancel_result.get("wasted", []).size() == 1, "cancel reports consumed ingredients as waste")
+	_check(not beef_station._blanch_started_msec.has(cancel_bowl.get_instance_id()), "cancel clears any active blanch timer for the bowl")
 
 	var empty_inventory := InventoryService.new()
 	empty_inventory.starting_stock = {&"broth": 0, &"noodles": 0, &"beef": 0}
