@@ -135,7 +135,7 @@ func _refresh_prompt() -> void:
 	if held_bowl != null:
 		if target is KitchenStation:
 			var station: KitchenStation = target as KitchenStation
-			var preview: Dictionary = station.preview_action(held_bowl, PHO_BO_RECIPE, inventory)
+			var preview: Dictionary = station.preview_action(held_bowl, active_recipe, inventory)
 			prompt_label.text = String(preview.get("message", "E / Click: thao tác tại trạm"))
 			var prompt_color: Color = Color(0.35, 1.0, 0.55) if bool(preview.get("ok", false)) else Color(1.0, 0.72, 0.28)
 			prompt_label.modulate = prompt_color
@@ -145,7 +145,7 @@ func _refresh_prompt() -> void:
 			prompt_label.modulate = Color(0.35, 1.0, 0.55)
 			crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 		else:
-			prompt_label.text = "Mang bát tới: bánh phở → thịt bò → chan nước dùng cuối cùng · Q: hủy bát"
+			prompt_label.text = "Mang bát tới: bánh phở → trụng thịt → chan nước dùng cuối cùng · Q: hủy bát"
 			prompt_label.modulate = Color(1.0, 0.72, 0.28)
 			crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 	elif target is InteractiveBowl:
