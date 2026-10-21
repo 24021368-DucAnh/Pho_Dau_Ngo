@@ -18,7 +18,7 @@ on:
       - ".github/workflows/godot-production.yml"
 
 concurrency:
-  group: godot-production-scaffold
+  group: godot-production-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
