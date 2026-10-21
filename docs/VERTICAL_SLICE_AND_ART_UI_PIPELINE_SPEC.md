@@ -2,7 +2,7 @@
 
 **Version:** 0.1  
 **Date:** 2026-10-21  
-**Status:** Draft for owner review — not an implementation plan and not authorization for full production  
+**Status:** Owner-approved production specification — planning may proceed; implementation remains gated  
 **Product baseline:** [GDD v1.2](PHO_DAU_NGO_GDD_v1_2_Tieng_Viet.md)  
 **Decision record:** [Decision Log](DECISION_LOG.md)  
 **Technical constraint:** Godot 4 is only the first engine candidate; the final engine remains undecided until the approved technical spike is evaluated.
@@ -176,12 +176,10 @@ A gate is passed only when evidence is attached or linked and the reviewer recor
 - The visual direction is now agreed at the style-family level, but detailed references, exact palette, typography, target resolution/performance budget and asset budgets still need to be documented in the detailed visual/UI system.
 - Character art and animation cost may exceed the initial scope; the slice should prioritize first-person props and the stall environment.
 
-## 11. Owner review requested
+## 11. Approval and next gate
 
-Please review this specification for:
-1. Whether the three production decisions in Section 2 are accurate.
-2. Whether the eight 3D maturity levels and five UI maturity levels describe the intended production process.
-3. Whether the proposed first production vertical slice is the right minimum proof of quality.
-4. Whether any exclusion or acceptance criterion conflicts with GDD v1.2.
+**Owner approval recorded on 2026-10-21:** the production approach, full-campaign/incremental-slice strategy, grounded stylized realism, 3D maturity ladder, UI/UX maturity ladder, and one-complete-day vertical-slice scope are approved as the working production specification.
 
-**No detailed file-by-file implementation plan or full gameplay production should begin until this specification is approved.** After approval, the next artifact will be a detailed implementation plan broken down by task, file/scene, tests, dependencies, acceptance criteria and review owner. The current M0 technical spike remains a separate, already-approved probe.
+This approval authorizes creation and review of the detailed implementation plan. It does **not** authorize full gameplay production, select the final engine, or lock unresolved economy assumptions.
+
+The next gate is implementation-plan review. Engine-specific product tasks remain blocked until the M0 technical spike has runnable evidence and the owner explicitly selects the engine.
