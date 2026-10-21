@@ -1,0 +1,206 @@
+[gd_scene load_steps=20 format=3]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
+[ext_resource type="Script" path="res://scripts/placement_zone.gd" id="3_zone"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(20, 0.2, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(20, 0.2, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_table"]
+size = Vector3(2, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_table"]
+size = Vector3(2, 1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
+size = Vector3(12, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+size = Vector3(12, 3, 0.2)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_bowl"]
+radius = 0.24
+height = 0.12
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_bowl"]
+top_radius = 0.26
+bottom_radius = 0.22
+height = 0.12
+radial_segments = 24
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_zone"]
+size = Vector3(1.4, 0.25, 0.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_zone"]
+size = Vector3(1.4, 0.02, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.28, 0.3, 0.33, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_table"]
+albedo_color = Color(0.48, 0.37, 0.25, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.42, 0.44, 0.47, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bowl"]
+albedo_color = Color(0.88, 0.83, 0.7, 1)
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_zone"]
+transparency = 1
+albedo_color = Color(0.12, 0.72, 0.4, 0.28)
+roughness = 0.8
+
+[node name="Main" type="Node3D"]
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-45, -25, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_floor")
+material_override = SubResource("StandardMaterial3D_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="BackWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.5, -5.4)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
+mesh = SubResource("BoxMesh_wall")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="Table" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.5, -2.7)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Table"]
+mesh = SubResource("BoxMesh_table")
+material_override = SubResource("StandardMaterial3D_table")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Table"]
+shape = SubResource("BoxShape3D_table")
+
+[node name="PlacementZone" type="Area3D" parent="."]
+position = Vector3(0, 1, -2.7)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("3_zone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlacementZone"]
+shape = SubResource("BoxShape3D_zone")
+
+[node name="PlacementMarker" type="Marker3D" parent="PlacementZone"]
+position = Vector3(0, 0.06, 0)
+
+[node name="ZoneVisual" type="MeshInstance3D" parent="PlacementZone"]
+position = Vector3(0, 0.02, 0)
+mesh = SubResource("BoxMesh_zone")
+material_override = SubResource("StandardMaterial3D_zone")
+
+[node name="Bowl" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.06, -2.7)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_bowl")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Bowl"]
+mesh = SubResource("CylinderMesh_bowl")
+material_override = SubResource("StandardMaterial3D_bowl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bowl"]
+shape = SubResource("CylinderShape3D_bowl")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 0.9, 1)
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+position = Vector3(0, 0.65, 0)
+rotation_degrees = Vector3(-7, 0, 0)
+current = true
+fov = 75.0
+
+[node name="RayCast3D" type="RayCast3D" parent="Player/Camera3D"]
+target_position = Vector3(0, 0, -4)
+collision_mask = 2
+collide_with_areas = true
+
+[node name="HUD" type="CanvasLayer" parent="Player"]
+
+[node name="Center" type="Control" parent="Player/HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Crosshair" type="Label" parent="Player/HUD/Center"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -14.0
+offset_right = 10.0
+offset_bottom = 14.0
+theme_override_font_sizes/font_size = 22
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Prompt" type="Label" parent="Player/HUD/Center"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.56
+anchor_right = 0.5
+anchor_bottom = 0.56
+offset_left = -280.0
+offset_top = 12.0
+offset_right = 280.0
+offset_bottom = 42.0
+theme_override_font_sizes/font_size = 18
+text = "WASD di chuyển · Chuột nhìn · E / Click tương tác"
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="Player/HUD/Center"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.65
+anchor_right = 0.5
+anchor_bottom = 0.65
+offset_left = -340.0
+offset_top = 8.0
+offset_right = 340.0
+offset_bottom = 36.0
+theme_override_font_sizes/font_size = 16
+text = "Nhắm vào bát để cầm."
+horizontal_alignment = 1
