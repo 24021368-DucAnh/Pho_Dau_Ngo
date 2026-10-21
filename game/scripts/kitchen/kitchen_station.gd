@@ -4,8 +4,6 @@ class_name KitchenStation
 @export var action_id: StringName = &"add_broth"
 @export var ingredient_id: StringName = &"broth"
 @export var station_label: String = "Nồi nước dùng"
-@export_range(0.0, 30.0, 0.25) var blanch_duration_seconds: float = 1.0
-
 var _blanch_started_msec: Dictionary = {}
 
 
@@ -39,8 +37,8 @@ func preview_action(
 		return {"ok": false, "message": "Trạm chưa được cấu hình đúng nguyên liệu."}
 
 	if action_id == &"add_beef":
-		if not is_finite(blanch_duration_seconds) or blanch_duration_seconds < 0.0:
-			return {"ok": false, "message": "Thời gian trụng của trạm chưa hợp lệ."}
+		if not is_finite(recipe.blanch_duration_seconds) or recipe.blanch_duration_seconds < 0.0:
+			return {"ok": false, "message": "Thời gian trụng trong phiếu công thức chưa hợp lệ."}
 		var key := bowl.get_instance_id()
 		if not _blanch_started_msec.has(key):
 			return {
