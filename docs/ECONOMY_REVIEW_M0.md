@@ -37,6 +37,28 @@ Formula used: bowls/day × 10 days × 15,100 VND contribution margin − 550,000
 | 20 | 3,020,000 | 2,470,000 | +470,000 | Positive but still vulnerable to waste and shocks |
 | 25 | 3,775,000 | 3,225,000 | +1,225,000 | More resilient; still excludes unmodeled costs |
 
+## 2A. Stress-test định lượng — tháng có trả nợ
+
+Đây là mô hình lãi góp đơn giản để kiểm tra sức chịu đựng, không phải dự báo doanh thu hay mô phỏng dòng tiền đầy đủ. Giả định 10 ngày/tháng chơi, tiền mặt sau khi bán hàng trừ chi phí cố định và khoản trả nợ 2.000.000đ; chưa tính tiền mua bổ sung theo thời điểm, tồn kho, hao hụt, sửa chữa, tiền công hoặc biến cố.
+
+**Xe phở:** chi phí cố định 550.000đ/tháng chơi + khoản trả nợ 2.000.000đ.
+
+| Kịch bản giá vốn | 10 bát/ngày | 14 bát/ngày | 17 bát/ngày | 20 bát/ngày | 25 bát/ngày |
+|---|---:|---:|---:|---:|---:|
+| Cơ sở — lãi góp 15.100đ/bát | -1.040.000đ | -436.000đ | +17.000đ | +470.000đ | +1.225.000đ |
+| Toàn bộ giá vốn tăng 10% — lãi góp 12.460đ/bát | -1.304.000đ | -805.600đ | -431.800đ | -58.000đ | +565.000đ |
+| Toàn bộ giá vốn tăng 20% — lãi góp 9.820đ/bát | -1.568.000đ | -1.175.200đ | -880.600đ | -586.000đ | -95.000đ |
+
+**Cửa hàng trong khi vẫn thuê phòng:** chi phí cố định 1.383.333đ/tháng chơi + khoản trả nợ 2.000.000đ. Bảng này không bao gồm chi phí mở cửa hàng một lần và quỹ dự phòng.
+
+| Kịch bản giá vốn | 10 bát/ngày | 14 bát/ngày | 17 bát/ngày | 20 bát/ngày | 25 bát/ngày |
+|---|---:|---:|---:|---:|---:|
+| Cơ sở — lãi góp 15.100đ/bát | -1.873.333đ | -1.269.333đ | -816.333đ | -363.333đ | +391.667đ |
+| Toàn bộ giá vốn tăng 10% — lãi góp 12.460đ/bát | -2.137.333đ | -1.638.933đ | -1.265.133đ | -891.333đ | -268.333đ |
+| Toàn bộ giá vốn tăng 20% — lãi góp 9.820đ/bát | -2.401.333đ | -2.008.533đ | -1.713.933đ | -1.419.333đ | -928.333đ |
+
+**Diễn giải:** mục tiêu 20 bát/ngày chỉ tạo khoảng 470.000đ dư địa ở kịch bản cơ sở khi vận hành xe phở, và gần như không còn dư địa nếu toàn bộ giá vốn tăng 10%. Nếu vẫn thuê phòng sau khi mở cửa hàng, 20 bát/ngày còn âm khoảng 363.333đ trong kịch bản cơ sở. Vì vậy mục tiêu 20 bát/ngày không tự động chứng minh khả năng mở cửa hàng; phải xét quỹ dự phòng, thời điểm mua hàng và đường cong tiền mặt tích lũy. Kịch bản tăng 20% toàn bộ giá vốn là stress test nghiêm trọng, không được dùng làm sự kiện thường xuyên hoặc tạo phá sản tất yếu.
+
 ## 3. Risks requiring an explicit decision
 
 ### R1 — Debt-month volume target conflicts with the current customer curve
