@@ -28,6 +28,11 @@ func _run() -> void:
 	_check(scene_player is CharacterBody3D, "scene has a first-person CharacterBody3D player")
 	_check(scene_instance.get_node_or_null("Bowl") is StaticBody3D, "scene has one physical bowl")
 	_check(scene_zone != null, "scene has a placement target")
+	var scene_raycast: RayCast3D = scene_player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
+	_check(scene_raycast != null, "player has a look-at raycast")
+	if scene_raycast != null:
+		_check(scene_raycast.collision_mask == 2, "raycast is restricted to the interaction layer")
+		_check(scene_raycast.collide_with_areas, "raycast can focus the placement Area3D")
 	if scene_player != null and scene_zone != null:
 		_check(scene_zone.collision_layer == 0, "placement zone is not raycast-visible before pickup")
 		scene_player.call("_set_placement_zone_active", true)
