@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -67,6 +67,9 @@ roughness = 0.8
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station"]
 size = Vector3(0.34, 0.3, 0.34)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_stool"]
+size = Vector3(0.84, 0.5, 0.42)
 
 [sub_resource type="BoxMesh" id="BoxMesh_station"]
 size = Vector3(0.36, 0.12, 0.34)
@@ -230,11 +233,18 @@ shape = SubResource("BoxShape3D_station")
 mesh = SubResource("BoxMesh_station")
 material_override = SubResource("StandardMaterial3D_table")
 
-[node name="CustomerStoolProxy" type="MeshInstance3D" parent="."]
+[node name="CustomerStoolProxy" type="StaticBody3D" parent="."]
 position = Vector3(1.65, 0.25, -2.7)
+collision_layer = 1
+collision_mask = 1
+
+[node name="StoolMesh" type="MeshInstance3D" parent="CustomerStoolProxy"]
 scale = Vector3(0.42, 0.5, 0.42)
 mesh = SubResource("BoxMesh_table")
 material_override = SubResource("StandardMaterial3D_table")
+
+[node name="StoolCollision" type="CollisionShape3D" parent="CustomerStoolProxy"]
+shape = SubResource("BoxShape3D_stool")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 position = Vector3(0, 0.9, 1)
