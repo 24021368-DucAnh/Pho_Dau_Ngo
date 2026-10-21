@@ -25,7 +25,7 @@ var consumed_ingredients: Array[Dictionary] = []
 
 func _ready() -> void:
 	collision_layer = 2
-	collision_mask = 0
+	collision_mask = 1
 
 
 func set_held() -> bool:
@@ -48,7 +48,7 @@ func try_place(target: Node) -> bool:
 	global_transform = zone.get_placement_transform()
 	state = BowlState.PLACED
 	collision_layer = 2
-	collision_mask = 0
+	collision_mask = 1
 	collision_shape.set_deferred("disabled", false)
 	return true
 

@@ -20,7 +20,7 @@ func _ready() -> void:
 	_set_placement_zone_active(false)
 	if not OS.has_feature("headless"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	status_label.text = "Nhắm vào bát để cầm. Công thức thử nghiệm: nước dùng → bánh phở → thịt bò."
+	status_label.text = "Nhắm vào bát để cầm. Công thức: bánh phở → thịt bò → chan nước dùng cuối cùng."
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -102,7 +102,7 @@ func _interact() -> void:
 		if bowl.set_held():
 			held_bowl = bowl
 			_set_placement_zone_active(true)
-			status_label.text = "Đã cầm bát. Thực hiện đúng thứ tự trạm để nấu phở."
+			status_label.text = "Đã cầm bát. Cho bánh phở, xếp thịt bò, rồi chan nước dùng cuối cùng."
 		else:
 			status_label.text = "Bát đang được giữ."
 	elif target is KitchenStation:
@@ -137,7 +137,7 @@ func _refresh_prompt() -> void:
 			prompt_label.modulate = Color(0.35, 1.0, 0.55)
 			crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 		else:
-			prompt_label.text = "Mang bát tới: nước dùng → bánh phở → thịt bò · Q: hủy bát"
+			prompt_label.text = "Mang bát tới: bánh phở → thịt bò → chan nước dùng cuối cùng · Q: hủy bát"
 			prompt_label.modulate = Color(1.0, 0.72, 0.28)
 			crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 	elif target is InteractiveBowl:
