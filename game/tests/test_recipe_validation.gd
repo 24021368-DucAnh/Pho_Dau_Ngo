@@ -21,6 +21,14 @@ func _run() -> void:
 	_check(KitchenStation.blanch_duration_is_acceptable(2.0, 1.0), "blanching within tolerance is accepted")
 	_check(not KitchenStation.blanch_duration_is_acceptable(0.5, 1.0), "under-blanching is rejected")
 	_check(not KitchenStation.blanch_duration_is_acceptable(3.1, 1.0), "over-blanching beyond tolerance is rejected")
+	if tai_recipe != null:
+		var invalid_recipe := tai_recipe.duplicate(true) as RecipeData
+		invalid_recipe.steps = tai_recipe.steps.duplicate(true)
+		invalid_recipe.steps[1]["ingredient_id"] = &"noodles"
+		_check(not invalid_recipe.is_valid_recipe(), "recipe rejects mismatched ingredient mapping")
+		invalid_recipe = tai_recipe.duplicate(true) as RecipeData
+		invalid_recipe.blanch_duration_seconds = -1.0
+		_check(not invalid_recipe.is_valid_recipe(), "recipe rejects negative blanch duration")
 	if recipe == null:
 		_finish()
 		return
