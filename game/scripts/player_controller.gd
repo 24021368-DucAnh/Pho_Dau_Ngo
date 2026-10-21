@@ -17,9 +17,11 @@ var active_recipe: RecipeData = PHO_BO_TAI_RECIPE
 @onready var status_label: Label = $HUD/Center/Status
 
 var held_bowl: InteractiveBowl
+var _stations: Array[KitchenStation] = []
 
 
 func _ready() -> void:
+	_stations = [get_node("../NoodlesStation") as KitchenStation, get_node("../BeefStation") as KitchenStation, get_node("../BrothStation") as KitchenStation]
 	_set_placement_zone_active(false)
 	if not OS.has_feature("headless"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -129,6 +131,10 @@ func _cancel_preparation() -> void:
 		status_label.text = "Cần cầm bát để hủy phần đang chế biến."
 		return
 	var result: Dictionary = held_bowl.cancel_preparation()
+	if bool(result.get("ok", false)):
+		for station in _stations:
+			if station != null:
+				station.reset_blanching(held_bowl)
 	status_label.text = String(result.get("message", "Không thể hủy bát."))
 
 
