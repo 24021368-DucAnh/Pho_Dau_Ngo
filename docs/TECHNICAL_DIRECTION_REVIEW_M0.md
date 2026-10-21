@@ -46,7 +46,7 @@ Keep the choice reversible until the spike proves that the interaction model and
 - Automated interaction-contract checks and Linux desktop export.
 
 ### Evidence
-- **Automated CI:** [Run 39617160306](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39617160306) passed project import/parse, interaction contract tests, Linux desktop export, and artifact upload. Artifact: `pho-dau-ngo-linux-debug`.
+- **Automated CI:** [Run 39639633957](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39639633957) passed project import/parse, interaction contract tests, Linux desktop export, and artifact upload. Artifact: `pho-dau-ngo-linux-debug`.
 - **Manual PC result — owner-reported 2026-10-21:** 12/12 checks PASS, including startup, WASD, mouse-look, collision, focus feedback, both pickup inputs, held-bowl movement, valid placement, invalid-placement rejection, repeated pick/place without loss or duplication, and Esc release/capture. Detailed record: [`godot_spike/TEST_PLAN.md`](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/blob/spike/godot4-m0/godot_spike/TEST_PLAN.md).
 - **Evidence limitation:** no runtime screenshot or short recording is attached to the repository yet. The manual result is recorded from the owner's report; it has not been independently reviewed from a runtime capture.
 - **Integration status:** PR #1 remains draft. The spike branch is 19 commits ahead and 2 behind `main`; GitHub currently reports it mergeable, but integration review and a fresh CI run on the latest head remain required before merge.
