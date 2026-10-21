@@ -13,6 +13,8 @@ on:
   pull_request:
     paths:
       - "game/**"
+      - "README.md"
+      - "docs/architecture/**"
       - ".github/workflows/godot-production.yml"
 
 concurrency:
