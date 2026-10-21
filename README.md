@@ -19,6 +19,8 @@ A first-person Vietnamese phở-stall simulation set in an old Hanoi collective-
 - [Implementation roadmap and milestone gates](docs/IMPLEMENTATION_ROADMAP.md)
 - [Superpowers execution plan](docs/Superpowers_Plan_v0.1.md)
 
+> **Archival note:** The GDD and audit files above preserve the original v1.2 documents. The audit's final paragraph about repository write access describes the situation when that audit was written; it is historical, not the current repository status.
+
 ## Working rules
 
 1. Treat unresolved economy and pacing values as assumptions until reviewed.
