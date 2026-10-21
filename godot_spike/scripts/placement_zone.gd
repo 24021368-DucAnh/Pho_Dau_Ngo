@@ -5,7 +5,6 @@ class_name PlacementZone
 
 
 func _ready() -> void:
-	collision_layer = 2
 	collision_mask = 0
 	monitoring = true
 	monitorable = true
