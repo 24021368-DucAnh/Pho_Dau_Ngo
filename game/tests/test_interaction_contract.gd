@@ -96,6 +96,35 @@ func _run() -> void:
 	await process_frame
 	_check(int(bowl.get("state")) == 2, "repeated pick-up/place leaves one PLACED bowl")
 
+
+	# Player-level ownership and recipe-selection contracts.
+	var interaction_scene: Node = main_scene.instantiate()
+	root.add_child(interaction_scene)
+	await process_frame
+	var player: Node = interaction_scene.get_node("Player")
+	var scene_bowl: InteractiveBowl = interaction_scene.get_node("Bowl") as InteractiveBowl
+	var player_inventory: InventoryService = interaction_scene.get_node("Inventory") as InventoryService
+	_check(scene_bowl != null and player != null, "player ownership fixture is present")
+	_check(bool(scene_bowl.set_held()), "player ownership fixture can acquire bowl")
+	player.set("held_bowl", scene_bowl)
+	_check(not bool(scene_bowl.set_held()), "same bowl cannot be acquired twice while held")
+	_check(player.get("held_bowl") == scene_bowl, "player remains the single authoritative bowl owner")
+
+	var original_recipe: RecipeData = player.get("active_recipe") as RecipeData
+	var other_recipe: RecipeData = load("res://data/recipes/pho_bo_chin.tres") as RecipeData
+	var recipe_locked_bowl: InteractiveBowl = scene_bowl
+	recipe_locked_bowl.prepared_recipe_id = original_recipe.recipe_id
+	var input_event := InputEventKey.new()
+	input_event.keycode = KEY_V
+	input_event.pressed = true
+	player.call("_unhandled_input", input_event)
+	_check((player.get("active_recipe") as RecipeData).recipe_id == original_recipe.recipe_id, "recipe cannot change after bowl preparation starts")
+	_check(recipe_locked_bowl.prepared_recipe_id == original_recipe.recipe_id, "locked bowl keeps its original recipe identity")
+	_check(other_recipe.recipe_id != original_recipe.recipe_id, "test recipes have distinct identities")
+	_check(player_inventory != null, "player shares the scene's authoritative inventory")
+	interaction_scene.queue_free()
+	await process_frame
+
 	_finish()
 
 
