@@ -111,13 +111,10 @@ func _interact() -> void:
 		return
 
 	if target is InteractiveBowl:
-		var bowl: InteractiveBowl = target as InteractiveBowl
-		if bowl.set_held():
-			held_bowl = bowl
-			_set_placement_zone_active(true)
+		if _try_pick_up_bowl(target as InteractiveBowl):
 			status_label.text = "Đã cầm bát. Cho bánh phở, trụng thịt theo phiếu, rồi chan nước dùng cuối cùng."
 		else:
-			status_label.text = "Bát đang được giữ."
+			status_label.text = "Bát đang được giữ hoặc người chơi đã cầm một bát."
 	elif target is KitchenStation:
 		status_label.text = "Cầm bát trước khi thao tác tại trạm."
 	elif target is PlacementZone:
@@ -174,3 +171,15 @@ func _refresh_prompt() -> void:
 
 func _set_placement_zone_active(active: bool) -> void:
 	placement_zone.collision_layer = 2 if active else 0
+
+
+func _try_pick_up_bowl(bowl: InteractiveBowl) -> bool:
+	if bowl == null or not is_instance_valid(bowl):
+		return false
+	if held_bowl != null and is_instance_valid(held_bowl):
+		return false
+	if not bowl.set_held():
+		return false
+	held_bowl = bowl
+	_set_placement_zone_active(true)
+	return true
