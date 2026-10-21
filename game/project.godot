@@ -32,6 +32,10 @@ interact={
 "deadzone": 0.2,
 "events": [Object(InputEventKey, "physical_keycode": 69)]
 }
+cancel_preparation={
+"deadzone": 0.2,
+"events": [Object(InputEventKey, "physical_keycode": 81)]
+}
 primary_action={
 "deadzone": 0.2,
 "events": [Object(InputEventMouseButton, "button_index": 1)]

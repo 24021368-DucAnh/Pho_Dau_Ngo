@@ -1,8 +1,10 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
 [ext_resource type="Script" path="res://scripts/placement_zone.gd" id="3_zone"]
+[ext_resource type="Script" path="res://scripts/kitchen/kitchen_station.gd" id="4_station"]
+[ext_resource type="Script" path="res://scripts/inventory/inventory_service.gd" id="5_inventory"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(20, 0.2, 20)
@@ -62,6 +64,12 @@ roughness = 0.55
 transparency = 1
 albedo_color = Color(0.12, 0.72, 0.4, 0.28)
 roughness = 0.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_station"]
+size = Vector3(0.34, 0.3, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_station"]
+size = Vector3(0.36, 0.12, 0.34)
 
 [node name="Main" type="Node3D"]
 
@@ -173,6 +181,54 @@ position = Vector3(0.35, 0.78, 0)
 scale = Vector3(1.7, 3.5, 1.7)
 mesh = SubResource("CylinderMesh_bowl")
 material_override = SubResource("StandardMaterial3D_bowl")
+
+
+[node name="Inventory" type="Node" parent="."]
+script = ExtResource("5_inventory")
+
+[node name="BrothStation" type="Area3D" parent="."]
+position = Vector3(-2.45, 1.28, -0.3)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("4_station")
+action_id = &"add_broth"
+ingredient_id = &"broth"
+station_label = "Nồi nước dùng"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BrothStation"]
+shape = SubResource("BoxShape3D_station")
+
+[node name="NoodlesStation" type="Area3D" parent="."]
+position = Vector3(-3.1, 1.18, -0.3)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("4_station")
+action_id = &"add_noodles"
+ingredient_id = &"noodles"
+station_label = "Khay bánh phở"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NoodlesStation"]
+shape = SubResource("BoxShape3D_station")
+
+[node name="StationVisual" type="MeshInstance3D" parent="NoodlesStation"]
+mesh = SubResource("BoxMesh_station")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="BeefStation" type="Area3D" parent="."]
+position = Vector3(-3.58, 1.18, -0.3)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("4_station")
+action_id = &"add_beef"
+ingredient_id = &"beef"
+station_label = "Khay thịt bò"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BeefStation"]
+shape = SubResource("BoxShape3D_station")
+
+[node name="StationVisual" type="MeshInstance3D" parent="BeefStation"]
+mesh = SubResource("BoxMesh_station")
+material_override = SubResource("StandardMaterial3D_table")
 
 [node name="CustomerStoolProxy" type="MeshInstance3D" parent="."]
 position = Vector3(1.65, 0.25, -2.7)

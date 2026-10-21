@@ -1,6 +1,6 @@
 # Implementation Roadmap — PHỞ ĐẦU NGÕ
 
-**Status:** Owner-approved production direction; implementation plan v0.2 awaits owner review.  
+**Status:** Implementation Plan v0.2 approved by owner on 2026-10-22; execution mode is subagent-driven. Godot 4 is the selected vertical-slice engine.  
 **Sources of truth:** [Linear project](https://linear.app/ducanh/project/pho-djau-ngo-vertical-slice-098596fd5d5a), [production specification](VERTICAL_SLICE_AND_ART_UI_PIPELINE_SPEC.md), and [detailed implementation plan](superpowers/plans/2026-10-21-pho-dau-ngo-vertical-slice.md).
 
 ## Approved production decisions
@@ -29,15 +29,16 @@
 ## Current M0 status
 
 - **DUC-46 — Baseline:** Done. GDD v1.2 is the working product baseline; unmeasured economy assumptions remain provisional.
-- **DUC-47 — Phaser-vs-3D assessment:** still open.
-- **DUC-48 — Godot 4 technical spike:** code and CI evidence exist. Latest observed CI run 39617160306 passed import/parse, interaction contract tests, Linux export and artifact upload. Manual owner-PC testing, screenshot evidence, PR integration and the final engine decision remain outstanding.
+- **DUC-47 — Phaser-vs-3D assessment:** engine comparison gate resolved by the owner’s explicit Godot 4 selection on 2026-10-22.
+- **DUC-48 — Godot 4 technical spike:** closed for engine selection. M0 spike and production scaffold are merged; owner reports 10/10 production PC checks PASS. CI passed import, interaction tests and Linux/Windows export. No screenshot/video is claimed.
 - **DUC-49 — Economy review:** still open; rent, starting inventory, supplier timing, month-boundary transaction order and affordability require reconciliation.
 
 ## Implementation rules
 
 1. The M0 spike is a technical probe, not the production project.
-2. Do not begin production gameplay code until DUC-47/DUC-48 evidence is reviewed and the owner explicitly selects the engine.
-3. The implementation plan must be approved before product implementation; engine-specific paths are conditional until the engine decision.
+2. Godot 4 is selected for the vertical slice; the production project lives under `game/`.
+3. The owner-approved Implementation Plan v0.2 governs the task order and gates.
 4. Build a graybox/whitebox before proxy assets; approve a First Art Pass benchmark before final asset mass production.
 5. The first slice ends at the day summary. Calendar progression, debt scheduling, save/load, supplier/spoilage, expansion, optional waiter and all 100 days remain later-campaign scope unless the owner changes it.
 6. Every task records artifacts changed, tests/checks run, evidence, known limitations and reviewer decision.
+7. Current checkpoint: kitchen station/recipe foundation. Do not expand to customer/order/serving logic until the owner verifies the new station interaction build on PC.

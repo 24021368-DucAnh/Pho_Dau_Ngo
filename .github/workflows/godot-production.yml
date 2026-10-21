@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   validate-and-export:
-    name: Import, test interaction contracts, and export Linux desktop build
+    name: Import, test interaction and recipe contracts, and export desktop builds
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,6 +39,9 @@ jobs:
       - name: Run interaction contract tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_interaction_contract.gd
+      - name: Run kitchen recipe validation tests
+        working-directory: game
+        run: godot --headless --path . --script res://tests/test_recipe_validation.gd
       - name: Export Linux desktop build
         working-directory: game
         run: |
