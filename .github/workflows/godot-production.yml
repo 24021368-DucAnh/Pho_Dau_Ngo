@@ -44,9 +44,14 @@ jobs:
         run: |
           mkdir -p build
           godot --headless --path . --export-debug "Linux/X11" build/pho-dau-ngo.x86_64
-      - name: Upload Linux desktop artifact
+      - name: Export Windows desktop build
+        working-directory: game
+        run: godot --headless --path . --export-debug "Windows Desktop" build/pho-dau-ngo.exe
+      - name: Upload desktop artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pho-dau-ngo-godot-linux
-          path: game/build/pho-dau-ngo.x86_64
+          name: pho-dau-ngo-godot-builds
+          path: |
+            game/build/pho-dau-ngo.x86_64
+            game/build/pho-dau-ngo.exe
           if-no-files-found: error
