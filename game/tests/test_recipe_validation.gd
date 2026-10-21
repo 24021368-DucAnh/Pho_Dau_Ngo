@@ -64,6 +64,13 @@ func _run() -> void:
 	var complete_repeat: Dictionary = beef_station.apply_to_bowl(bowl, recipe, inventory)
 	_check(not bool(complete_repeat.get("ok", false)), "completed recipe rejects additional station actions")
 	_check(inventory.get_stock(&"beef") == 1, "completed recipe cannot consume extra beef")
+	var completed_waste_count := bowl.consumed_ingredients.size()
+	var cancel_completed: Dictionary = bowl.cancel_preparation()
+	_check(not bool(cancel_completed.get("ok", false)), "completed bowl cannot be cancelled as an in-progress preparation")
+	_check(bowl.preparation_state == InteractiveBowl.PreparationState.READY_TO_SERVE, "rejected cancellation preserves ready-to-serve state")
+	_check(bowl.recipe_step_index == recipe.steps.size(), "rejected cancellation preserves completed recipe progress")
+	_check(bowl.consumed_ingredients.size() == completed_waste_count, "rejected cancellation preserves completed ingredient records")
+	_check(inventory.get_stock(&"beef") == 1, "rejected cancellation does not change stock")
 
 	var cancel_inventory := InventoryService.new()
 	cancel_inventory.starting_stock = {&"broth": 1, &"noodles": 1, &"beef": 1}

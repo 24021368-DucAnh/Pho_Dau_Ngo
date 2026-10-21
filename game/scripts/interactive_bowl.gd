@@ -85,8 +85,12 @@ func apply_recipe_step(action: StringName, recipe: RecipeData) -> bool:
 
 
 func cancel_preparation() -> Dictionary:
-	if state != BowlState.HELD or recipe_step_index <= 0:
-		return {"ok": false, "message": "Bát chưa có bước chế biến nào để hủy.", "wasted": []}
+	if state != BowlState.HELD or preparation_state != PreparationState.IN_PROGRESS:
+		return {
+			"ok": false,
+			"message": "Chỉ có thể hủy bát đang chế biến dở.",
+			"wasted": [],
+		}
 
 	var wasted: Array[Dictionary] = consumed_ingredients.duplicate(true)
 	recipe_step_index = 0
