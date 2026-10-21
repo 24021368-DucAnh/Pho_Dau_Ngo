@@ -11,6 +11,8 @@ A first-person Vietnamese phở-stall simulation set in an old Hanoi collective-
 
 ## Start here
 
+- [Canonical GDD v1.2 — Vietnamese](docs/PHO_DAU_NGO_GDD_v1_2_Tieng_Viet.md)
+- [GDD v1.2 audit and decision log — original](docs/PHO_DAU_NGO_AUDIT_DECISION_LOG_v1_2_Tieng_Viet.md)
 - [Project baseline](docs/PROJECT_BASELINE.md)
 - [Open decision log](docs/DECISION_LOG.md)
 - [M0 economy review](docs/ECONOMY_REVIEW_M0.md)
