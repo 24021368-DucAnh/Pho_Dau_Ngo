@@ -4,5 +4,7 @@
 
 [resource]
 script = ExtResource("1_recipe")
-recipe_id = &"pho_bo"
-display_name = "Phở bò"
+recipe_id = &"pho_bo_tai"
+display_name = "Phở bò tái"
+beef_variant = "tai"
+blanch_duration_seconds = 1.0

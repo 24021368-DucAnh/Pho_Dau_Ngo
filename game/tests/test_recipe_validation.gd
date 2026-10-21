@@ -10,6 +10,25 @@ func _initialize() -> void:
 func _run() -> void:
 	var recipe := load("res://data/recipes/pho_bo.tres") as RecipeData
 	_check(recipe != null, "phở bò recipe data loads")
+	var tai_recipe := load("res://data/recipes/pho_bo.tres") as RecipeData
+	var chin_recipe := load("res://data/recipes/pho_bo_chin.tres") as RecipeData
+	_check(tai_recipe != null and tai_recipe.is_valid_recipe(), "phở tái recipe is valid")
+	_check(chin_recipe != null and chin_recipe.is_valid_recipe(), "phở chín recipe is valid")
+	if tai_recipe != null and chin_recipe != null:
+		_check(tai_recipe.beef_variant == "tai" and chin_recipe.beef_variant == "chin", "recipe variants are distinct")
+		_check(tai_recipe.blanch_duration_seconds < chin_recipe.blanch_duration_seconds, "phở chín requires longer blanching than phở tái")
+	_check(KitchenStation.blanch_duration_is_acceptable(1.0, 1.0), "exact blanching duration is accepted")
+	_check(KitchenStation.blanch_duration_is_acceptable(2.0, 1.0), "blanching within tolerance is accepted")
+	_check(not KitchenStation.blanch_duration_is_acceptable(0.5, 1.0), "under-blanching is rejected")
+	_check(not KitchenStation.blanch_duration_is_acceptable(3.1, 1.0), "over-blanching beyond tolerance is rejected")
+	if tai_recipe != null:
+		var invalid_recipe := tai_recipe.duplicate(true) as RecipeData
+		invalid_recipe.steps = tai_recipe.steps.duplicate(true)
+		invalid_recipe.steps[1]["ingredient_id"] = &"noodles"
+		_check(not invalid_recipe.is_valid_recipe(), "recipe rejects mismatched ingredient mapping")
+		invalid_recipe = tai_recipe.duplicate(true) as RecipeData
+		invalid_recipe.blanch_duration_seconds = -1.0
+		_check(not invalid_recipe.is_valid_recipe(), "recipe rejects negative blanch duration")
 	if recipe == null:
 		_finish()
 		return
@@ -20,6 +39,7 @@ func _run() -> void:
 	_check(StringName(recipe.step_at(2).get("action_id", &"")) == &"add_broth", "broth is the final recipe step")
 	_check(recipe.step_at(3).is_empty(), "recipe returns no step after completion")
 
+	recipe.blanch_duration_seconds = 0.0 # Keep the contract test deterministic; the variant tests cover configured durations.
 	var inventory := InventoryService.new()
 	inventory.starting_stock = {&"broth": 2, &"noodles": 2, &"beef": 2}
 	root.add_child(inventory)
@@ -59,8 +79,10 @@ func _run() -> void:
 	_check(inventory.get_stock(&"noodles") == 1, "repeated station action cannot double-consume noodles")
 	_check(bowl.consumed_ingredients.size() == 1, "repeated action does not duplicate bowl ingredient records")
 
+	var beef_start: Dictionary = beef_station.apply_to_bowl(bowl, recipe, inventory)
+	_check(bool(beef_start.get("ok", false)) and bool(beef_start.get("blanching", false)), "beef station starts the blanching step")
 	var beef_result: Dictionary = beef_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(bool(beef_result.get("ok", false)), "beef station accepts the second step")
+	_check(bool(beef_result.get("ok", false)), "beef station completes the second step after blanching")
 	var broth_result: Dictionary = broth_station.apply_to_bowl(bowl, recipe, inventory)
 	_check(bool(broth_result.get("ok", false)), "broth station accepts the final step")
 	_check(bowl.preparation_state == InteractiveBowl.PreparationState.READY_TO_SERVE, "final recipe step marks bowl ready to serve")
