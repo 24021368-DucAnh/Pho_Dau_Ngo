@@ -27,6 +27,7 @@ func _run() -> void:
 
 	var broth_station := _make_station(&"add_broth", &"broth", "Nồi nước dùng")
 	var noodles_station := _make_station(&"add_noodles", &"noodles", "Khay bánh phở")
+	var misconfigured_noodles_station := _make_station(&"add_noodles", &"beef", "Trạm cấu hình sai")
 	var beef_station := _make_station(&"add_beef", &"beef", "Khay thịt bò")
 	root.add_child(broth_station)
 	root.add_child(noodles_station)
@@ -37,6 +38,11 @@ func _run() -> void:
 	root.add_child(bowl)
 	await process_frame
 	_check(bowl.set_held(), "available bowl can be held for preparation")
+
+	var misconfigured_result: Dictionary = misconfigured_noodles_station.apply_to_bowl(bowl, recipe, inventory)
+	_check(not bool(misconfigured_result.get("ok", false)), "misconfigured station is rejected before consumption")
+	_check(inventory.get_stock(&"beef") == 2 and inventory.get_stock(&"noodles") == 2, "misconfigured station leaves all stock unchanged")
+	_check(bowl.recipe_step_index == 0 and bowl.consumed_ingredients.is_empty(), "misconfigured station leaves bowl unchanged")
 
 	var broth_first: Dictionary = broth_station.apply_to_bowl(bowl, recipe, inventory)
 	_check(not bool(broth_first.get("ok", false)), "broth cannot be added before noodles and beef")
