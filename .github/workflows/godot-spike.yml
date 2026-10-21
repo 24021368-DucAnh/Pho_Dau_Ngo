@@ -1,6 +1,12 @@
 name: Godot spike smoke tests
 
 on:
+  push:
+    branches:
+      - spike/godot4-m0
+    paths:
+      - "godot_spike/**"
+      - ".github/workflows/godot-spike.yml"
   pull_request:
     paths:
       - "godot_spike/**"
