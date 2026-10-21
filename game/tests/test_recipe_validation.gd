@@ -58,6 +58,7 @@ func _run() -> void:
 	root.add_child(bowl)
 	await process_frame
 	_check(bowl.set_held(), "available bowl can be held for preparation")
+	_check(not bowl.set_held(), "repeated pickup cannot acquire an already-held bowl twice")
 
 	var misconfigured_result: Dictionary = misconfigured_noodles_station.apply_to_bowl(bowl, recipe, inventory)
 	_check(not bool(misconfigured_result.get("ok", false)), "misconfigured station is rejected before consumption")
@@ -73,6 +74,7 @@ func _run() -> void:
 	_check(bool(noodles_result.get("ok", false)), "noodle station accepts the first step")
 	_check(inventory.get_stock(&"noodles") == 1, "valid noodle step consumes one unit")
 	_check(bowl.recipe_step_index == 1, "valid noodle step advances recipe state")
+	_check(not bowl.can_apply_recipe_step(&"add_beef", chin_recipe), "bowl cannot switch recipe identity after preparation begins")
 
 	var repeated_noodles: Dictionary = noodles_station.apply_to_bowl(bowl, recipe, inventory)
 	_check(not bool(repeated_noodles.get("ok", false)), "repeating a completed station action is rejected")
@@ -112,11 +114,16 @@ func _run() -> void:
 	_check(bool(cancel_step.get("ok", false)), "cancellation test consumes noodles before cancellation")
 	var stock_before_cancel := cancel_inventory.get_stock(&"noodles")
 	var cancel_result: Dictionary = cancel_bowl.cancel_preparation()
+	beef_station.reset_blanching(cancel_bowl)
 	_check(bool(cancel_result.get("ok", false)), "in-progress bowl can be cancelled")
 	_check(cancel_bowl.preparation_state == InteractiveBowl.PreparationState.CLEAN, "cancel resets bowl preparation state")
 	_check(cancel_bowl.recipe_step_index == 0, "cancel resets recipe progress")
 	_check(cancel_inventory.get_stock(&"noodles") == stock_before_cancel, "cancel does not refund already-used ingredients")
 	_check(cancel_result.get("wasted", []).size() == 1, "cancel reports consumed ingredients as waste")
+	var cancel_again: Dictionary = cancel_bowl.cancel_preparation()
+	_check(not bool(cancel_again.get("ok", false)), "cancellation can only record waste once")
+	_check(cancel_again.get("wasted", []).is_empty(), "repeated cancellation cannot duplicate waste records")
+	_check(not beef_station._blanch_started_msec.has(cancel_bowl.get_instance_id()), "cancel clears any active blanch timer for the bowl")
 
 	var empty_inventory := InventoryService.new()
 	empty_inventory.starting_stock = {&"broth": 0, &"noodles": 0, &"beef": 0}

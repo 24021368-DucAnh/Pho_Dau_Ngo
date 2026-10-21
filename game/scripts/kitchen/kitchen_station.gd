@@ -37,9 +37,11 @@ func preview_action(
 		return {"ok": false, "message": "Trạm chưa được cấu hình đúng nguyên liệu."}
 
 	if action_id == &"add_beef":
+		var key := bowl.get_instance_id()
+		if bowl.recipe_step_index != 1:
+			_blanch_started_msec.erase(key)
 		if not is_finite(recipe.blanch_duration_seconds) or recipe.blanch_duration_seconds < 0.0:
 			return {"ok": false, "message": "Thời gian trụng trong phiếu công thức chưa hợp lệ."}
-		var key := bowl.get_instance_id()
 		if not _blanch_started_msec.has(key):
 			return {
 				"ok": true,
@@ -118,3 +120,8 @@ static func blanch_duration_is_acceptable(actual_seconds: float, required_second
 		and actual_seconds >= required_seconds
 		and actual_seconds <= required_seconds + tolerance_seconds
 	)
+
+
+func reset_blanching(bowl: InteractiveBowl) -> void:
+	if bowl != null and is_instance_valid(bowl):
+		_blanch_started_msec.erase(bowl.get_instance_id())
