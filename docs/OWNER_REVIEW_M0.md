@@ -36,12 +36,13 @@ Những số này cần được kiểm thử bằng mô hình kinh tế và b�
 3. Kịch bản dòng tiền theo từng ngày có nhập hàng, hao hụt, mua gấp và số dư tiền mặt.
 4. Engine và kiến trúc tương tác/lưu game.
 
-## 5. Cổng kỹ thuật tiếp theo
+## 5. Quyết định đã được chủ dự án xác nhận — 2026-10-21
 
-Khuyến nghị đánh giá Godot 4 trước như ứng viên spike nhỏ, nhưng chưa chọn engine. Đánh giá sơ bộ và tiêu chí spike được ghi trong [TECHNICAL_DIRECTION_REVIEW_M0.md](TECHNICAL_DIRECTION_REVIEW_M0.md). Chỉ chạy spike sau khi chủ dự án duyệt câu hỏi và tiêu chí nghiệm thu; sau đó mới viết kế hoạch triển khai theo file và xin duyệt kế hoạch.
+- Đã duyệt GDD v1.2 làm *working baseline* cho phạm vi sản phẩm, vòng chơi, bối cảnh/cốt truyện và lịch chiến dịch.
+- Các con số ở mục 3 vẫn là giả định cần kiểm thử; không coi là thông số khóa.
+- Đã duyệt spike kỹ thuật Godot 4 trong phạm vi nhỏ tại [TECHNICAL_DIRECTION_REVIEW_M0.md](TECHNICAL_DIRECTION_REVIEW_M0.md): graybox, điều khiển FPS, va chạm, nhìn/chọn vật thể, nhặt/đặt một bát, từ chối vị trí đặt sai và xuất bản desktop.
+- Spike không đồng nghĩa với việc chốt Godot làm engine cuối cùng hoặc cho phép bắt đầu sản xuất gameplay đầy đủ.
 
-## 6. Quyết định cần chủ dự án đưa ra
+## 6. Bước tiếp theo
 
-**Đề nghị:** duyệt GDD v1.2 làm *working baseline* cho phạm vi, vòng chơi, bối cảnh/cốt truyện và lịch chiến dịch; giữ mọi con số ở mục 3 dưới nhãn giả định để tiếp tục kiểm thử, không coi chúng là thông số khóa. Engine và code vẫn chưa được duyệt.
-
-Trạng thái hiện tại: **chờ chủ dự án xác nhận hoặc yêu cầu sửa baseline**.
+Thực hiện spike theo đúng phạm vi đã duyệt, ghi lại bằng chứng chạy thử và rủi ro kỹ thuật. Sau đó trình chủ dự án khuyến nghị engine dựa trên kết quả thực tế trước khi lập kế hoạch sản xuất.
