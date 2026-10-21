@@ -34,7 +34,9 @@ func _run() -> void:
 	_check(scene_instance.get_node_or_null("NoodlesStation") is KitchenStation, "graybox has an interactive noodle station")
 	_check(scene_instance.get_node_or_null("BeefStation") is KitchenStation, "graybox has an interactive beef station")
 	_check(scene_instance.get_node_or_null("Inventory") is InventoryService, "scene has one authoritative ingredient inventory")
-	_check(scene_instance.get_node_or_null("CustomerStoolProxy") is MeshInstance3D, "graybox has a customer stool proxy")
+	_check(scene_instance.get_node_or_null("CustomerStoolProxy") is StaticBody3D, "graybox has a collidable customer stool")
+	var stool_collision: CollisionShape3D = scene_instance.get_node_or_null("CustomerStoolProxy/StoolCollision") as CollisionShape3D
+	_check(stool_collision != null and stool_collision.shape is BoxShape3D, "customer stool has a physical collision shape")
 	_check(scene_instance.get_node_or_null("Bowl") is StaticBody3D, "scene has one physical bowl")
 	_check(scene_zone != null, "scene has a placement target")
 	var scene_raycast: RayCast3D = scene_player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
