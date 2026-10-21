@@ -42,7 +42,8 @@ func _run() -> void:
 	_check(StringName(recipe.step_at(2).get("action_id", &"")) == &"add_broth", "broth is the final recipe step")
 	_check(recipe.step_at(3).is_empty(), "recipe returns no step after completion")
 
-	recipe.blanch_duration_seconds = 0.0 # Keep the contract test deterministic; the variant tests cover configured durations.
+	recipe = recipe.duplicate(true) as RecipeData # Isolate deterministic contract timing from the shared resource used by variant tests.
+	recipe.blanch_duration_seconds = 0.0
 	var inventory := InventoryService.new()
 	inventory.starting_stock = {&"broth": 2, &"noodles": 2, &"beef": 2}
 	root.add_child(inventory)
