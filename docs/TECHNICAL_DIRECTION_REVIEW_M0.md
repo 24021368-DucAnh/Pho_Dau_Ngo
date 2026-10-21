@@ -1,7 +1,7 @@
 # M0 Technical Direction Review — PHỞ ĐẦU NGÕ
 
-**Status:** Draft recommendation for owner review; not an engine approval.  
-**Gate:** Do not run an engine spike or begin product implementation until the owner approves the probe and the engine-specific plan.
+**Status:** Decision recorded — Godot 4 selected by the owner on 2026-10-22 for the vertical slice.  
+**Gate:** Proceed with the Godot-specific production scaffold and approved milestones; keep full gameplay expansion behind the architecture, graybox and runtime-test gates.
 
 ## 1. Current architecture mismatch
 
@@ -28,39 +28,33 @@ Sources:
 - [Unreal Engine licensing](https://www.unrealengine.com/license) — current royalty and license terms.
 - [Phaser documentation](https://docs.phaser.io/) — 2D HTML5 framework scope.
 
-## 3. Recommendation
+## 3. Decision and rationale
 
-Use **Godot 4 as the first candidate to evaluate**, not as a final engine decision. It is a reasonable fit for a small first-person 3D vertical slice with one stall, a compact alley, interactable stations, and a limited number of objects. It avoids committing to a web-first 2D framework and does not require the high-fidelity production pipeline that Unreal is designed to support.
+**Owner decision (2026-10-22): Godot 4 is the official engine for the PHỞ ĐẦU NGÕ vertical slice.** The decision followed the owner-reported 12/12 manual PC checks and a passing automated CI run for project import/parse, interaction-contract tests, Linux desktop export and artifact upload.
 
-Keep the choice reversible until the spike proves that the interaction model and desktop build work. Do not migrate the old Phaser code line by line; extract only portable gameplay rules, acceptance cases, and domain concepts where they are genuinely reusable.
+Godot 4 fits the current compact first-person 3D slice and has now demonstrated the required basic movement, camera, collision, focus and bowl placement path on the owner's PC. This is sufficient evidence to stop comparing engines for the current slice. Reopen the choice only if a concrete technical blocker emerges or the project scope changes materially.
 
-## 4. Proposed DUC-48 spike — approval required before execution
+Do not migrate the legacy Phaser code line by line; inspect and reuse only portable domain rules, acceptance cases and content where genuinely useful. The M0 spike is a technical reference, not the final production architecture.
 
-**Question:** Can Godot 4 support the intended first-person movement and bowl/table interactions with low implementation complexity and a reliable desktop build?
+## 4. DUC-48 M0 spike — completed evidence
 
-### Minimal scope
+**Question tested:** Can Godot 4 support the intended first-person movement and bowl/table interactions with low implementation complexity and a reliable desktop build?
 
-1. One graybox room/stall and one table; no final art assets.
-2. First-person camera, mouse look, WASD movement, collision and sensible movement limits.
-3. Raycast/look-at interaction with a visible focus state and an `E` interaction.
-4. Pick up one bowl, hold it visibly, place it on a target table, and reject invalid placement with feedback.
-5. Export and launch a desktop build from a clean project checkout.
+### Tested scope and results
 
-### Acceptance criteria to approve
+- One graybox room, table, bowl and valid placement zone.
+- First-person camera, WASD movement, mouse look, and floor/wall collision.
+- Raycast focus feedback; pickup with E or left click; held bowl follows the camera.
+- Valid placement snaps to the marker; invalid placement is rejected without changing the held state; repeated pick/place preserves one authoritative bowl.
+- Owner-reported manual PC result: **12/12 checks PASS** (2026-10-21), recorded in [`godot_spike/TEST_PLAN.md`](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/blob/main/godot_spike/TEST_PLAN.md) after integration.
+- Automated CI run [39639633957](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39639633957) passed import/parse, interaction contract tests, Linux desktop export and artifact upload (`pho-dau-ngo-linux-debug`).
+- The checklist is based on the owner's report; no runtime screenshot/recording is currently attached. The report is sufficient to record the manual test result, but a capture remains useful QA evidence for future reviews.
 
-- A new tester can move, focus, pick up and place the bowl without reading source code.
-- The bowl has one authoritative state/location; it cannot duplicate or disappear through repeated input.
-- Invalid placement does not mutate the bowl state.
-- The exported desktop build starts and completes the same interaction path.
-- The test scene uses graybox assets only and can be built quickly enough to justify continued development.
+### M0 scope boundary
 
-### Explicitly out of scope
+The spike did not validate customers, recipes, order generation, inventory/economy, debt, saving, story events, finished art, audio, or production architecture. These systems remain future milestones and must be tested separately. No additional engine comparison is required absent a concrete blocker.
 
-Customers, recipes, order generation, money, debt, saving, story events, finished art, audio, and performance optimization beyond checking that the spike is usable on the development machine.
-
-**Approval gate:** The spike is only a proposal. Do not execute DUC-48 until the owner approves the question and acceptance criteria. After the spike, compare evidence against Unity only if Godot fails a meaningful criterion or a new constraint justifies a second spike.
-
-## 5. Remaining baseline decisions
+## 5. Production gates and remaining technical uncertainties
 
 - Confirm the GDD's first-person 3D PC/Steam target as the working product direction.
 - Keep 15–25 minutes/day as a test target, not a locked requirement.
@@ -69,4 +63,4 @@ Customers, recipes, order generation, money, debt, saving, story events, finishe
 - Define the deterministic order and player warning for rent/utilities and debt at the month boundary.
 - Confirm the optional waiter remains outside the initial vertical slice.
 
-Until those items are reviewed, DUC-46 remains open. No product code has been written as part of this review.
+Next steps are governed by Implementation Plan v0.2: finish the engine-specific architecture/file-by-file plan; establish the official Godot project scaffold; build and review the graybox; then add gameplay systems in dependency order. Target resolution/hardware, exact camera height/FOV, interaction reach, workstation dimensions and performance budgets remain to be measured in the graybox. Economy assumptions remain provisional until DUC-49 simulation/playtests. Do not scale final asset production until the in-engine First Art Pass is owner-reviewed.
