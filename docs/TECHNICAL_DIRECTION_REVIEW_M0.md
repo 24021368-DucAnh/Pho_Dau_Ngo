@@ -1,7 +1,7 @@
 # M0 Technical Direction Review — PHỞ ĐẦU NGÕ
 
-**Status:** Draft recommendation for owner review; not an engine approval.  
-**Gate:** Do not run an engine spike or begin product implementation until the owner approves the probe and the engine-specific plan.
+**Status:** Updated after the Godot M0 probe; still a recommendation for owner review, not an engine approval.  
+**Gate:** The owner approved and ran the narrow Godot probe on 2026-10-21. Do not begin engine-dependent gameplay until the owner explicitly selects the production engine and approves the engine-specific implementation plan.
 
 ## 1. Current architecture mismatch
 
@@ -34,39 +34,39 @@ Use **Godot 4 as the first candidate to evaluate**, not as a final engine decisi
 
 Keep the choice reversible until the spike proves that the interaction model and desktop build work. Do not migrate the old Phaser code line by line; extract only portable gameplay rules, acceptance cases, and domain concepts where they are genuinely reusable.
 
-## 4. Proposed DUC-48 spike — approval required before execution
+## 4. DUC-48 Godot M0 spike — results and remaining decision
 
-**Question:** Can Godot 4 support the intended first-person movement and bowl/table interactions with low implementation complexity and a reliable desktop build?
+**Question tested:** Can Godot 4 support the intended first-person movement and bowl/table interactions with low implementation complexity and a reliable desktop build?
 
-### Minimal scope
+### Tested scope
+- One graybox room and table; no final art assets.
+- First-person camera, WASD movement, mouse look, and floor/wall collision.
+- Look-at focus feedback and interaction using E or left click.
+- Pick up and carry one bowl, place it in the valid zone, and reject invalid placement without changing the held state.
+- Automated interaction-contract checks and Linux desktop export.
 
-1. One graybox room/stall and one table; no final art assets.
-2. First-person camera, mouse look, WASD movement, collision and sensible movement limits.
-3. Raycast/look-at interaction with a visible focus state and an `E` interaction.
-4. Pick up one bowl, hold it visibly, place it on a target table, and reject invalid placement with feedback.
-5. Export and launch a desktop build from a clean project checkout.
+### Evidence
+- **Automated CI:** [Run 39617160306](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39617160306) passed project import/parse, interaction contract tests, Linux desktop export, and artifact upload. Artifact: `pho-dau-ngo-linux-debug`.
+- **Manual PC result — owner-reported 2026-10-21:** 12/12 checks PASS, including startup, WASD, mouse-look, collision, focus feedback, both pickup inputs, held-bowl movement, valid placement, invalid-placement rejection, repeated pick/place without loss or duplication, and Esc release/capture. Detailed record: [`godot_spike/TEST_PLAN.md`](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/blob/spike/godot4-m0/godot_spike/TEST_PLAN.md).
+- **Evidence limitation:** no runtime screenshot or short recording is attached to the repository yet. The manual result is recorded from the owner's report; it has not been independently reviewed from a runtime capture.
+- **Integration status:** PR #1 remains draft. The spike branch is 19 commits ahead and 2 behind `main`; GitHub currently reports it mergeable, but integration review and a fresh CI run on the latest head remain required before merge.
 
-### Acceptance criteria to approve
+### Interpretation
+The reported manual pass plus the successful automated run make Godot 4 the leading candidate for the current first-person 3D vertical slice. This reduces the principal movement/interactions/export risk, but it is not a final engine selection. Unity remains a reasonable alternative if a concrete requirement favors C# or its asset ecosystem. Phaser remains a poor foundation for the current 3D target; Unreal appears unnecessarily complex for the current compact scope unless visual-fidelity requirements change.
 
-- A new tester can move, focus, pick up and place the bowl without reading source code.
-- The bowl has one authoritative state/location; it cannot duplicate or disappear through repeated input.
-- Invalid placement does not mutate the bowl state.
-- The exported desktop build starts and completes the same interaction path.
-- The test scene uses graybox assets only and can be built quickly enough to justify continued development.
+### Owner decision required
+Choose exactly one:
+1. **Approve Godot 4** as the implementation engine and request the full-game architecture/file-by-file implementation plan.
+2. **Request one bounded follow-up experiment**, naming the uncertainty or acceptance criterion that remains unresolved.
+3. **Reject Godot 4** and request a focused comparison with another engine.
 
-### Explicitly out of scope
+Do not start engine-dependent gameplay before the owner makes this choice and approves the engine-specific implementation plan.
 
-Customers, recipes, order generation, money, debt, saving, story events, finished art, audio, and performance optimization beyond checking that the spike is usable on the development machine.
+## 5. Remaining technical uncertainties
 
-**Approval gate:** The spike is only a proposal. Do not execute DUC-48 until the owner approves the question and acceptance criteria. After the spike, compare evidence against Unity only if Godot fails a meaningful criterion or a new constraint justifies a second spike.
+- Final first-person camera height, FOV, interaction reach, and workstation dimensions should be measured in the accepted graybox.
+- Target resolution and target PC specification still need to be named before performance budgets are locked.
+- The spike validates one bowl/table interaction path only; it does not validate kitchen stations, customers, order flow, economy, saving, or production architecture.
+- Reuse from the legacy Phaser prototype should be limited to domain concepts and acceptance rules until each candidate module is inspected; do not assume direct code portability.
 
-## 5. Remaining baseline decisions
-
-- Confirm the GDD's first-person 3D PC/Steam target as the working product direction.
-- Keep 15–25 minutes/day as a test target, not a locked requirement.
-- Keep room rent and shop rent marked as balance assumptions until the cash-flow model is complete.
-- Define exact opening inventory and first-day purchase timing.
-- Define the deterministic order and player warning for rent/utilities and debt at the month boundary.
-- Confirm the optional waiter remains outside the initial vertical slice.
-
-Until those items are reviewed, DUC-46 remains open. No product code has been written as part of this review.
+These uncertainties do not invalidate the reported M0 result, but they must be addressed in the engine-specific implementation plan. No full gameplay production is authorized by this review.
