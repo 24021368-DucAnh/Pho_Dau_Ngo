@@ -1,0 +1,52 @@
+name: Godot spike smoke tests
+
+on:
+  push:
+    branches:
+      - spike/godot4-m0
+    paths:
+      - "godot_spike/**"
+      - ".github/workflows/godot-spike.yml"
+  pull_request:
+    paths:
+      - "godot_spike/**"
+      - ".github/workflows/godot-spike.yml"
+
+concurrency:
+  group: godot-spike
+  cancel-in-progress: true
+
+jobs:
+  smoke-test:
+    name: Import project, test interactions, and export desktop build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.4.1
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import and parse project
+        run: godot --headless --editor --path godot_spike --quit
+
+      - name: Run interaction contract tests
+        working-directory: godot_spike
+        run: godot --headless --path . --script res://tests/test_interaction_contract.gd
+
+      - name: Export Linux desktop build
+        working-directory: godot_spike
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug "Linux/X11" build/pho-dau-ngo.x86_64
+
+      - name: Upload Linux desktop build
+        uses: actions/upload-artifact@v4
+        with:
+          name: pho-dau-ngo-linux-debug
+          path: godot_spike/build/pho-dau-ngo.x86_64
+          if-no-files-found: error
