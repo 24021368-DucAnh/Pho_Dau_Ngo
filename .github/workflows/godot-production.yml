@@ -7,6 +7,8 @@ on:
       - feat/godot-production-scaffold
     paths:
       - "game/**"
+      - "README.md"
+      - "docs/architecture/**"
       - ".github/workflows/godot-production.yml"
   pull_request:
     paths:
