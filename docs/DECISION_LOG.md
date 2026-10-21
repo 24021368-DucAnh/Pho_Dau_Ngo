@@ -20,6 +20,9 @@ Record decisions and assumptions here. A proposal is not an approved decision un
 | D-012 | Month-boundary payments | Rent/utilities and debt installment timing/order and player warnings are not fully specified | Open | Define deterministic transaction order and low-cash warning in DUC-49 |
 | D-013 | Day duration and customer curve | 15–25 minutes/day and customer volumes are targets/hypotheses, not measured outcomes | Open for playtesting | Measure 10/15/20 bowl day variants in M7; do not guarantee sales volume |
 | D-014 | Engine candidate | Godot 4 is the first candidate for a reversible technical spike; no final engine selection yet | Owner-approved spike scope (2026-10-21) | Execute DUC-48 and submit results for engine decision |
+| D-015 | Production approach | Build a representative vertical slice and validate the complete player experience before scaling production | Owner-approved decision (2026-10-21) | Use the slice as the production quality gate; do not scale content before acceptance |
+| D-016 | Production scope strategy | Preserve the full 100-day campaign as the design target, but produce in small approved slices rather than building every system/content upfront | Owner-approved decision (2026-10-21) | Detail the first production slice only after the pipeline specification is approved |
+| D-017 | Visual direction | Grounded stylized realism: old Hanoi collective-housing alley, worn materials, restrained cinematic lighting, believable food/props, humor through character and situation | Owner-approved direction (2026-10-21); detailed palette/references remain to be documented | Establish a representative art benchmark before mass asset production |
 
 ## Owner-approved provisional economy decisions — 2026-10-21
 
