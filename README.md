@@ -4,12 +4,17 @@ A first-person Vietnamese phở-stall simulation set in an old Hanoi collective-
 
 ## Project status
 
-**Phase:** M0 — baseline and technical direction  
-**Implementation status:** Planning only; no product code has been approved or added yet.  
+**Phase:** M1 — Godot production scaffold and graybox  
+**Implementation status:** Godot 4 selected by owner; M0 spike merged. The official production project is under review in PR #10, with CI import/test/export running.  
 **Canonical planning board:** [Linear — PHỞ ĐẦU NGÕ Vertical Slice](https://linear.app/ducanh/project/pho-djau-ngo-vertical-slice-098596fd5d5a)  
 **Implementation roadmap:** [Linear roadmap document](https://linear.app/ducanh/document/pho-djau-ngo-vertical-slice-implementation-roadmap-v01-d4a7ae75bb49)
 
 ## Start here
+
+- [Official Godot vertical-slice project](game/README.md) — open `game/project.godot` in Godot 4.4.1 Standard.
+- [Godot vertical-slice architecture](docs/architecture/GODOT_VERTICAL_SLICE_ARCHITECTURE.md)
+- [UI Specification](docs/ui/UI_SPEC.md)
+- [UI Components](docs/ui/UI_COMPONENTS.md)
 
 - [Canonical GDD v1.2 — Vietnamese](docs/PHO_DAU_NGO_GDD_v1_2_Tieng_Viet.md)
 - [GDD v1.2 audit and decision log — original](docs/PHO_DAU_NGO_AUDIT_DECISION_LOG_v1_2_Tieng_Viet.md)
@@ -26,8 +31,8 @@ A first-person Vietnamese phở-stall simulation set in an old Hanoi collective-
 ## Working rules
 
 1. Treat unresolved economy and pacing values as assumptions until reviewed.
-2. Resolve the 2D Phaser prototype versus first-person 3D target before committing to an implementation engine.
-3. Do not start product implementation until the owner approves the baseline, technical direction, and engine-specific implementation plan.
+2. Godot 4 is the owner-selected engine for the vertical slice (2026-10-22); reopen the choice only if a concrete technical blocker appears.
+3. Keep the first slice scoped to the end-of-day summary; do not build the full campaign before the slice is tested and accepted.
 4. Keep gameplay rules deterministic and testable; avoid double payment, duplicated item ownership, and ambiguous save/load behavior.
 5. Record meaningful scope and design changes in the decision log and Linear.
 
@@ -38,4 +43,6 @@ Prepare the stall, receive orders, manually assemble/cook bowls, carry the corre
 ## Repository conventions
 
 - docs/: product baseline, design decisions, and delivery plan.
-- Code and engine-specific folders will be added only after the M0 technical gate.
+- game/: official Godot production project.
+- godot_spike/: preserved M0 technical probe and evidence.
+- docs/: product baseline, decisions, architecture and UI/art specs.

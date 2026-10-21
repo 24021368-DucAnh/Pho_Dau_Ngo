@@ -1,0 +1,57 @@
+name: Godot vertical-slice scaffold
+
+on:
+  push:
+    branches:
+      - main
+      - feat/godot-production-scaffold
+    paths:
+      - "game/**"
+      - "README.md"
+      - "docs/architecture/**"
+      - ".github/workflows/godot-production.yml"
+  pull_request:
+    paths:
+      - "game/**"
+      - "README.md"
+      - "docs/architecture/**"
+      - ".github/workflows/godot-production.yml"
+
+concurrency:
+  group: godot-production-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-export:
+    name: Import, test interaction contracts, and export Linux desktop build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Godot 4.4.1 Standard
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.4.1
+          use-dotnet: false
+          include-templates: true
+      - name: Import and parse production project
+        run: godot --headless --editor --path game --quit
+      - name: Run interaction contract tests
+        working-directory: game
+        run: godot --headless --path . --script res://tests/test_interaction_contract.gd
+      - name: Export Linux desktop build
+        working-directory: game
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug "Linux/X11" build/pho-dau-ngo.x86_64
+      - name: Export Windows desktop build
+        working-directory: game
+        run: godot --headless --path . --export-debug "Windows Desktop" build/pho-dau-ngo.exe
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pho-dau-ngo-godot-builds
+          path: |
+            game/build/pho-dau-ngo.x86_64
+            game/build/pho-dau-ngo.exe
+          if-no-files-found: error

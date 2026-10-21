@@ -1,0 +1,126 @@
+extends CharacterBody3D
+
+@export var move_speed: float = 4.5
+@export var mouse_sensitivity: float = 0.0025
+
+@onready var camera: Camera3D = $Camera3D
+@onready var raycast: RayCast3D = $Camera3D/RayCast3D
+@onready var placement_zone: PlacementZone = $"../PlacementZone"
+@onready var crosshair_label: Label = $HUD/Center/Crosshair
+@onready var prompt_label: Label = $HUD/Center/Prompt
+@onready var status_label: Label = $HUD/Center/Status
+
+var held_bowl: InteractiveBowl
+
+
+func _ready() -> void:
+	_set_placement_zone_active(false)
+	if not OS.has_feature("headless"):
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	status_label.text = "Nhắm vào bát để cầm."
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
+
+	if event.is_action_pressed("ui_cancel"):
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
+
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		return
+
+	if event is InputEventMouseMotion:
+		rotate_y(-event.relative.x * mouse_sensitivity)
+		camera.rotate_x(-event.relative.y * mouse_sensitivity)
+		camera.rotation.x = clampf(camera.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
+
+	if event.is_action_pressed("interact") or event.is_action_pressed("primary_action"):
+		_interact()
+
+
+func _physics_process(delta: float) -> void:
+	var input_vector: Vector2 = Input.get_vector(
+		"move_left",
+		"move_right",
+		"move_forward",
+		"move_back"
+	)
+	var move_direction: Vector3 = (
+		global_basis * Vector3(input_vector.x, 0.0, input_vector.y)
+	).normalized()
+
+	velocity.x = move_direction.x * move_speed
+	velocity.z = move_direction.z * move_speed
+
+	if not is_on_floor():
+		velocity.y -= 9.8 * delta
+	elif velocity.y < 0.0:
+		velocity.y = 0.0
+
+	move_and_slide()
+
+
+func _process(_delta: float) -> void:
+	if held_bowl != null and is_instance_valid(held_bowl):
+		held_bowl.global_position = camera.global_position + camera.global_basis * Vector3(0.0, -0.28, -0.72)
+		held_bowl.global_rotation = camera.global_rotation
+	_refresh_prompt()
+
+
+func _interact() -> void:
+	raycast.force_raycast_update()
+	var target: Object = raycast.get_collider() if raycast.is_colliding() else null
+
+	if held_bowl != null:
+		if target is PlacementZone and held_bowl.try_place(target as Node):
+			held_bowl = null
+			_set_placement_zone_active(false)
+			status_label.text = "Đã đặt bát đúng vùng trên bàn."
+		else:
+			status_label.text = "Vị trí không hợp lệ. Bát vẫn đang được giữ."
+		return
+
+	if target is InteractiveBowl:
+		var bowl: InteractiveBowl = target as InteractiveBowl
+		if bowl.set_held():
+			held_bowl = bowl
+			_set_placement_zone_active(true)
+			status_label.text = "Đã cầm bát. Nhắm vào vùng xanh trên bàn để đặt."
+		else:
+			status_label.text = "Bát đang được giữ."
+	elif target is PlacementZone:
+		status_label.text = "Cần cầm bát trước khi đặt."
+	else:
+		status_label.text = "Chưa nhắm vào bát. Hãy đưa tâm ngắm vào bát."
+
+
+func _refresh_prompt() -> void:
+	var target: Object = raycast.get_collider() if raycast.is_colliding() else null
+
+	if held_bowl != null:
+		if target is PlacementZone:
+			prompt_label.text = "E / Click: đặt bát vào vùng xanh"
+			prompt_label.modulate = Color(0.35, 1.0, 0.55)
+			crosshair_label.modulate = Color(0.35, 1.0, 0.55)
+		else:
+			prompt_label.text = "E / Click: thử đặt (cần nhắm vùng xanh)"
+			prompt_label.modulate = Color(1.0, 0.72, 0.28)
+			crosshair_label.modulate = Color(1.0, 0.72, 0.28)
+	elif target is InteractiveBowl:
+		prompt_label.text = "E / Click: cầm bát"
+		prompt_label.modulate = Color(0.35, 1.0, 0.55)
+		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
+	else:
+		prompt_label.text = "WASD di chuyển · Chuột nhìn · E / Click tương tác"
+		prompt_label.modulate = Color(1.0, 1.0, 1.0)
+		crosshair_label.modulate = Color(1.0, 1.0, 1.0)
+
+
+func _set_placement_zone_active(active: bool) -> void:
+	placement_zone.collision_layer = 2 if active else 0
