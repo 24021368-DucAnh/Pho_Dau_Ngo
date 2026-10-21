@@ -17,6 +17,7 @@ A first-person Vietnamese phở-stall simulation set in an old Hanoi collective-
 - [Open decision log](docs/DECISION_LOG.md)
 - [M0 economy review](docs/ECONOMY_REVIEW_M0.md)
 - [M0 technical direction review](docs/TECHNICAL_DIRECTION_REVIEW_M0.md)
+- [M0 owner baseline review](docs/OWNER_REVIEW_M0.md)
 - [Implementation roadmap and milestone gates](docs/IMPLEMENTATION_ROADMAP.md)
 - [Superpowers execution plan](docs/Superpowers_Plan_v0.1.md)
 
