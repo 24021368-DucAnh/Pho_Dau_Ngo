@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="RecipeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/kitchen/recipe_data.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+recipe_id = &"pho_bo_chin"
+display_name = "Phở bò chín"
+beef_variant = "chin"
+blanch_duration_seconds = 4.0
