@@ -51,6 +51,12 @@ func is_valid_recipe() -> bool:
 		return false
 	return (
 		StringName(step_at(0).get("action_id", &"")) == &"add_noodles"
+		and StringName(step_at(0).get("ingredient_id", &"")) == &"noodles"
+		and int(step_at(0).get("amount", 0)) > 0
 		and StringName(step_at(1).get("action_id", &"")) == &"add_beef"
+		and StringName(step_at(1).get("ingredient_id", &"")) == &"beef"
+		and int(step_at(1).get("amount", 0)) > 0
 		and StringName(step_at(2).get("action_id", &"")) == &"add_broth"
+		and StringName(step_at(2).get("ingredient_id", &"")) == &"broth"
+		and int(step_at(2).get("amount", 0)) > 0
 	)
