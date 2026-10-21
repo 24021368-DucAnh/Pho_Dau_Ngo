@@ -3,9 +3,12 @@ extends CharacterBody3D
 @export var move_speed: float = 4.5
 @export var mouse_sensitivity: float = 0.0025
 
+const PHO_BO_RECIPE = preload("res://data/recipes/pho_bo.tres")
+
 @onready var camera: Camera3D = $Camera3D
 @onready var raycast: RayCast3D = $Camera3D/RayCast3D
 @onready var placement_zone: PlacementZone = $"../PlacementZone"
+@onready var inventory: InventoryService = $"../Inventory"
 @onready var crosshair_label: Label = $HUD/Center/Crosshair
 @onready var prompt_label: Label = $HUD/Center/Prompt
 @onready var status_label: Label = $HUD/Center/Status
@@ -17,7 +20,7 @@ func _ready() -> void:
 	_set_placement_zone_active(false)
 	if not OS.has_feature("headless"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	status_label.text = "Nhắm vào bát để cầm."
+	status_label.text = "Nhắm vào bát để cầm. Công thức thử nghiệm: nước dùng → bánh phở → thịt bò."
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -39,6 +42,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		camera.rotate_x(-event.relative.y * mouse_sensitivity)
 		camera.rotation.x = clampf(camera.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
+
+	if event.is_action_pressed("cancel_preparation"):
+		_cancel_preparation()
+		return
 
 	if event.is_action_pressed("interact") or event.is_action_pressed("primary_action"):
 		_interact()
@@ -78,7 +85,11 @@ func _interact() -> void:
 	var target: Object = raycast.get_collider() if raycast.is_colliding() else null
 
 	if held_bowl != null:
-		if target is PlacementZone and held_bowl.try_place(target as Node):
+		if target is KitchenStation:
+			var station: KitchenStation = target as KitchenStation
+			var result: Dictionary = station.apply_to_bowl(held_bowl, PHO_BO_RECIPE, inventory)
+			status_label.text = String(result.get("message", "Thao tác chưa thực hiện."))
+		elif target is PlacementZone and held_bowl.try_place(target as Node):
 			held_bowl = null
 			_set_placement_zone_active(false)
 			status_label.text = "Đã đặt bát đúng vùng trên bàn."
@@ -91,31 +102,53 @@ func _interact() -> void:
 		if bowl.set_held():
 			held_bowl = bowl
 			_set_placement_zone_active(true)
-			status_label.text = "Đã cầm bát. Nhắm vào vùng xanh trên bàn để đặt."
+			status_label.text = "Đã cầm bát. Thực hiện đúng thứ tự trạm để nấu phở."
 		else:
 			status_label.text = "Bát đang được giữ."
+	elif target is KitchenStation:
+		status_label.text = "Cầm bát trước khi thao tác tại trạm."
 	elif target is PlacementZone:
 		status_label.text = "Cần cầm bát trước khi đặt."
 	else:
-		status_label.text = "Chưa nhắm vào bát. Hãy đưa tâm ngắm vào bát."
+		status_label.text = "Chưa nhắm vào vật có thể tương tác."
+
+
+func _cancel_preparation() -> void:
+	if held_bowl == null or not is_instance_valid(held_bowl):
+		status_label.text = "Cần cầm bát để hủy phần đang chế biến."
+		return
+	var result: Dictionary = held_bowl.cancel_preparation()
+	status_label.text = String(result.get("message", "Không thể hủy bát."))
 
 
 func _refresh_prompt() -> void:
 	var target: Object = raycast.get_collider() if raycast.is_colliding() else null
 
 	if held_bowl != null:
-		if target is PlacementZone:
+		if target is KitchenStation:
+			var station: KitchenStation = target as KitchenStation
+			var preview: Dictionary = station.preview_action(held_bowl, PHO_BO_RECIPE, inventory)
+			prompt_label.text = String(preview.get("message", "E / Click: thao tác tại trạm"))
+			var prompt_color: Color = Color(0.35, 1.0, 0.55) if bool(preview.get("ok", false)) else Color(1.0, 0.72, 0.28)
+			prompt_label.modulate = prompt_color
+			crosshair_label.modulate = prompt_color
+		elif target is PlacementZone:
 			prompt_label.text = "E / Click: đặt bát vào vùng xanh"
 			prompt_label.modulate = Color(0.35, 1.0, 0.55)
 			crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 		else:
-			prompt_label.text = "E / Click: thử đặt (cần nhắm vùng xanh)"
+			prompt_label.text = "Mang bát tới: nước dùng → bánh phở → thịt bò · Q: hủy bát"
 			prompt_label.modulate = Color(1.0, 0.72, 0.28)
 			crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 	elif target is InteractiveBowl:
 		prompt_label.text = "E / Click: cầm bát"
 		prompt_label.modulate = Color(0.35, 1.0, 0.55)
 		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
+	elif target is KitchenStation:
+		var station: KitchenStation = target as KitchenStation
+		prompt_label.text = "Cầm bát trước khi dùng: " + station.station_label
+		prompt_label.modulate = Color(1.0, 0.72, 0.28)
+		crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 	else:
 		prompt_label.text = "WASD di chuyển · Chuột nhìn · E / Click tương tác"
 		prompt_label.modulate = Color(1.0, 1.0, 1.0)
