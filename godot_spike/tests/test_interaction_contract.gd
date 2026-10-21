@@ -23,9 +23,17 @@ func _run() -> void:
 	var scene_instance: Node = main_scene.instantiate()
 	root.add_child(scene_instance)
 	await process_frame
-	_check(scene_instance.get_node_or_null("Player") is CharacterBody3D, "scene has a first-person CharacterBody3D player")
+	var scene_player: Node = scene_instance.get_node_or_null("Player")
+	var scene_zone: Area3D = scene_instance.get_node_or_null("PlacementZone") as Area3D
+	_check(scene_player is CharacterBody3D, "scene has a first-person CharacterBody3D player")
 	_check(scene_instance.get_node_or_null("Bowl") is StaticBody3D, "scene has one physical bowl")
-	_check(scene_instance.get_node_or_null("PlacementZone") is Area3D, "scene has a placement target")
+	_check(scene_zone != null, "scene has a placement target")
+	if scene_player != null and scene_zone != null:
+		_check(scene_zone.collision_layer == 0, "placement zone is not raycast-visible before pickup")
+		scene_player.call("_set_placement_zone_active", true)
+		_check(scene_zone.collision_layer == 2, "placement zone becomes raycast-visible while carrying")
+		scene_player.call("_set_placement_zone_active", false)
+		_check(scene_zone.collision_layer == 0, "placement zone is hidden from raycast after placement")
 	scene_instance.queue_free()
 	await process_frame
 
