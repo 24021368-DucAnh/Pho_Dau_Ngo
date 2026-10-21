@@ -81,7 +81,7 @@ func _run() -> void:
 	_check(cancel_bowl.preparation_state == InteractiveBowl.PreparationState.CLEAN, "cancel resets bowl preparation state")
 	_check(cancel_bowl.recipe_step_index == 0, "cancel resets recipe progress")
 	_check(cancel_inventory.get_stock(&"broth") == stock_before_cancel, "cancel does not refund already-used ingredients")
-	_check((cancel_result.get("wasted", []) as Array).size() == 1, "cancel reports consumed ingredients as waste")
+	_check(cancel_result.get("wasted", []).size() == 1, "cancel reports consumed ingredients as waste")
 
 	var empty_inventory := InventoryService.new()
 	empty_inventory.starting_stock = {&"broth": 0, &"noodles": 0, &"beef": 0}
