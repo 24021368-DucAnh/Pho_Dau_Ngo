@@ -2,7 +2,7 @@
 
 Record decisions and assumptions here. A proposal is not an approved decision unless the owner explicitly approves it.
 
-## Open decisions
+## Decision register — approved decisions and open items
 
 | ID | Topic | Current position | Status | Next action |
 |---|---|---|---|---|
@@ -16,6 +16,9 @@ Record decisions and assumptions here. A proposal is not an approved decision un
 | D-008 | Optional waiter | Excluded from the initial vertical slice | Working scope boundary | Revisit only if owner changes scope |
 | D-009 | Repayment-month sales target | 20 bowls/day average target from first repayment month; 17 bowls/day stress case | Owner-approved provisional playtest targets (2026-10-21), not guaranteed sales or locked balance | Validate with deterministic economy simulation and playtests |
 | D-010 | Shop expansion | Optional; opening requires opening cost plus 1,500,000 VND reserve remaining available | Owner-approved provisional gate (2026-10-21) | Simulate cumulative cash and cost shocks before implementing unlock |
+| D-011 | Opening stock | Opening inventory is valued at 300,000 VND, but exact ingredients/quantities and first-day replenishment are not defined | Open | Define stock composition and supplier-order timing in DUC-49 |
+| D-012 | Month-boundary payments | Rent/utilities and debt installment timing/order and player warnings are not fully specified | Open | Define deterministic transaction order and low-cash warning in DUC-49 |
+| D-013 | Day duration and customer curve | 15–25 minutes/day and customer volumes are targets/hypotheses, not measured outcomes | Open for playtesting | Measure 10/15/20 bowl day variants in M7; do not guarantee sales volume |
 
 ## Owner-approved provisional economy decisions — 2026-10-21
 
