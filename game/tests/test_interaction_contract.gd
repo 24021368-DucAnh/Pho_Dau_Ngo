@@ -114,6 +114,8 @@ func _run() -> void:
 	var other_recipe: RecipeData = load("res://data/recipes/pho_bo_chin.tres") as RecipeData
 	var recipe_locked_bowl: InteractiveBowl = scene_bowl
 	recipe_locked_bowl.prepared_recipe_id = original_recipe.recipe_id
+	var previous_mouse_mode := Input.mouse_mode
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	var input_event := InputEventKey.new()
 	input_event.keycode = KEY_V
 	input_event.pressed = true
@@ -121,6 +123,7 @@ func _run() -> void:
 	_check((player.get("active_recipe") as RecipeData).recipe_id == original_recipe.recipe_id, "recipe cannot change after bowl preparation starts")
 	_check(recipe_locked_bowl.prepared_recipe_id == original_recipe.recipe_id, "locked bowl keeps its original recipe identity")
 	_check(other_recipe.recipe_id != original_recipe.recipe_id, "test recipes have distinct identities")
+	Input.mouse_mode = previous_mouse_mode
 	_check(player_inventory != null, "player shares the scene's authoritative inventory")
 	interaction_scene.queue_free()
 	await process_frame
