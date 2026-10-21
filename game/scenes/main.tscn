@@ -130,6 +130,56 @@ material_override = SubResource("StandardMaterial3D_bowl")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Bowl"]
 shape = SubResource("CylinderShape3D_bowl")
 
+[node name="LeftWall" type="StaticBody3D" parent="."]
+position = Vector3(-6, 1.5, -1)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
+mesh = SubResource("BoxMesh_wall")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="RightWall" type="StaticBody3D" parent="."]
+position = Vector3(6, 1.5, -1)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
+mesh = SubResource("BoxMesh_wall")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="PhoCart" type="StaticBody3D" parent="."]
+position = Vector3(-2.8, 0.5, -0.3)
+
+[node name="CartBody" type="MeshInstance3D" parent="PhoCart"]
+mesh = SubResource("BoxMesh_table")
+material_override = SubResource("StandardMaterial3D_table")
+
+[node name="CartCollision" type="CollisionShape3D" parent="PhoCart"]
+shape = SubResource("BoxShape3D_table")
+
+[node name="CartTop" type="MeshInstance3D" parent="PhoCart"]
+position = Vector3(0, 0.58, 0)
+scale = Vector3(1.1, 0.12, 1.1)
+mesh = SubResource("BoxMesh_table")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="StockPotProxy" type="MeshInstance3D" parent="PhoCart"]
+position = Vector3(0.35, 0.78, 0)
+scale = Vector3(1.7, 3.5, 1.7)
+mesh = SubResource("CylinderMesh_bowl")
+material_override = SubResource("StandardMaterial3D_bowl")
+
+[node name="CustomerStoolProxy" type="MeshInstance3D" parent="."]
+position = Vector3(1.65, 0.25, -2.7)
+scale = Vector3(0.42, 0.5, 0.42)
+mesh = SubResource("BoxMesh_table")
+material_override = SubResource("StandardMaterial3D_table")
+
 [node name="Player" type="CharacterBody3D" parent="."]
 position = Vector3(0, 0.9, 1)
 script = ExtResource("1_player")
