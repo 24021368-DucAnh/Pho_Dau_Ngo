@@ -117,6 +117,9 @@ static func blanch_duration_is_acceptable(actual_seconds: float, required_second
 		is_finite(actual_seconds)
 		and is_finite(required_seconds)
 		and is_finite(tolerance_seconds)
+		and actual_seconds >= 0.0
+		and required_seconds >= 0.0
+		and tolerance_seconds >= 0.0
 		and actual_seconds >= required_seconds
 		and actual_seconds <= required_seconds + tolerance_seconds
 	)

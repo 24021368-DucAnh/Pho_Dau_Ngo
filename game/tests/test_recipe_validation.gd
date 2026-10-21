@@ -21,6 +21,9 @@ func _run() -> void:
 	_check(KitchenStation.blanch_duration_is_acceptable(2.0, 1.0), "blanching within tolerance is accepted")
 	_check(not KitchenStation.blanch_duration_is_acceptable(0.5, 1.0), "under-blanching is rejected")
 	_check(not KitchenStation.blanch_duration_is_acceptable(3.1, 1.0), "over-blanching beyond tolerance is rejected")
+	_check(not KitchenStation.blanch_duration_is_acceptable(-0.1, 1.0), "negative elapsed blanch time is rejected")
+	_check(not KitchenStation.blanch_duration_is_acceptable(1.0, -1.0), "negative required blanch time is rejected")
+	_check(not KitchenStation.blanch_duration_is_acceptable(1.0, 1.0, -0.1), "negative blanch tolerance is rejected")
 	if tai_recipe != null:
 		var invalid_recipe := tai_recipe.duplicate(true) as RecipeData
 		invalid_recipe.steps = tai_recipe.steps.duplicate(true)
@@ -39,7 +42,8 @@ func _run() -> void:
 	_check(StringName(recipe.step_at(2).get("action_id", &"")) == &"add_broth", "broth is the final recipe step")
 	_check(recipe.step_at(3).is_empty(), "recipe returns no step after completion")
 
-	recipe.blanch_duration_seconds = 0.0 # Keep the contract test deterministic; the variant tests cover configured durations.
+	recipe = recipe.duplicate(true) as RecipeData # Isolate deterministic contract timing from the shared resource used by variant tests.
+	recipe.blanch_duration_seconds = 0.0
 	var inventory := InventoryService.new()
 	inventory.starting_stock = {&"broth": 2, &"noodles": 2, &"beef": 2}
 	root.add_child(inventory)
@@ -124,6 +128,54 @@ func _run() -> void:
 	_check(not bool(cancel_again.get("ok", false)), "cancellation can only record waste once")
 	_check(cancel_again.get("wasted", []).is_empty(), "repeated cancellation cannot duplicate waste records")
 	_check(not beef_station._blanch_started_msec.has(cancel_bowl.get_instance_id()), "cancel clears any active blanch timer for the bowl")
+
+
+	# Exercise the real station state machine at both timing boundaries without sleeping in CI.
+	var timing_inventory := InventoryService.new()
+	timing_inventory.starting_stock = {&"broth": 2, &"noodles": 2, &"beef": 2}
+	root.add_child(timing_inventory)
+	await process_frame
+	var timing_bowl := _make_bowl()
+	root.add_child(timing_bowl)
+	await process_frame
+	_check(timing_bowl.set_held(), "timing test bowl can be held")
+	var timing_noodles: Dictionary = noodles_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
+	_check(bool(timing_noodles.get("ok", false)), "timing test starts with noodles")
+	var timing_key := timing_bowl.get_instance_id()
+	var timing_start: Dictionary = beef_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
+	_check(bool(timing_start.get("blanching", false)), "timing test starts beef blanching")
+	beef_station._blanch_started_msec[timing_key] = Time.get_ticks_msec() - 500
+	var too_early: Dictionary = beef_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
+	_check(not bool(too_early.get("ok", false)), "beef cannot be consumed before minimum blanch time")
+	_check(timing_inventory.get_stock(&"beef") == 2, "early blanch attempt leaves beef stock unchanged")
+	beef_station._blanch_started_msec[timing_key] = Time.get_ticks_msec() - 4000
+	var overcooked: Dictionary = beef_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
+	_check(not bool(overcooked.get("ok", false)), "overcooked beef is rejected")
+	_check(timing_bowl.preparation_state == InteractiveBowl.PreparationState.CLEAN, "overcooking cancels and resets the in-progress bowl")
+	_check(not beef_station._blanch_started_msec.has(timing_key), "overcooking clears the blanch timer")
+	_check(timing_inventory.get_stock(&"beef") == 2, "overcooking does not consume beef")
+
+	# Both selectable recipes must complete the full noodle -> beef -> broth flow.
+	for selected_recipe in [tai_recipe, chin_recipe]:
+		var variant_inventory := InventoryService.new()
+		variant_inventory.starting_stock = {&"broth": 1, &"noodles": 1, &"beef": 1}
+		root.add_child(variant_inventory)
+		await process_frame
+		var variant_bowl := _make_bowl()
+		root.add_child(variant_bowl)
+		await process_frame
+		_check(variant_bowl.set_held(), String(selected_recipe.display_name) + " bowl can be held")
+		var variant_noodles: Dictionary = noodles_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
+		_check(bool(variant_noodles.get("ok", false)), String(selected_recipe.display_name) + " accepts noodles")
+		var variant_start: Dictionary = beef_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
+		_check(bool(variant_start.get("blanching", false)), String(selected_recipe.display_name) + " starts beef blanching")
+		beef_station._blanch_started_msec[variant_bowl.get_instance_id()] = Time.get_ticks_msec() - int(selected_recipe.blanch_duration_seconds * 1000.0) - 100
+		var variant_beef: Dictionary = beef_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
+		_check(bool(variant_beef.get("ok", false)), String(selected_recipe.display_name) + " completes beef blanching within tolerance")
+		var variant_broth: Dictionary = broth_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
+		_check(bool(variant_broth.get("ok", false)), String(selected_recipe.display_name) + " accepts broth last")
+		_check(variant_bowl.is_ready_to_serve(), String(selected_recipe.display_name) + " reaches ready-to-serve state")
+		_check(variant_inventory.get_stock(&"noodles") == 0 and variant_inventory.get_stock(&"beef") == 0 and variant_inventory.get_stock(&"broth") == 0, String(selected_recipe.display_name) + " consumes each ingredient exactly once")
 
 	var empty_inventory := InventoryService.new()
 	empty_inventory.starting_stock = {&"broth": 0, &"noodles": 0, &"beef": 0}
