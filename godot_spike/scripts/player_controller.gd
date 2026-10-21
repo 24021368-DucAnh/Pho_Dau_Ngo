@@ -5,6 +5,7 @@ extends CharacterBody3D
 
 @onready var camera: Camera3D = $Camera3D
 @onready var raycast: RayCast3D = $Camera3D/RayCast3D
+@onready var placement_zone: PlacementZone = $"../PlacementZone"
 @onready var crosshair_label: Label = $HUD/Center/Crosshair
 @onready var prompt_label: Label = $HUD/Center/Prompt
 @onready var status_label: Label = $HUD/Center/Status
@@ -13,6 +14,7 @@ var held_bowl: InteractiveBowl
 
 
 func _ready() -> void:
+	_set_placement_zone_active(false)
 	if not OS.has_feature("headless"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	status_label.text = "Nhắm vào bát để cầm."
@@ -78,6 +80,7 @@ func _interact() -> void:
 	if held_bowl != null:
 		if target is PlacementZone and held_bowl.try_place(target as Node):
 			held_bowl = null
+			_set_placement_zone_active(false)
 			status_label.text = "Đã đặt bát đúng vùng trên bàn."
 		else:
 			status_label.text = "Vị trí không hợp lệ. Bát vẫn đang được giữ."
@@ -87,6 +90,7 @@ func _interact() -> void:
 		var bowl: InteractiveBowl = target as InteractiveBowl
 		if bowl.set_held():
 			held_bowl = bowl
+			_set_placement_zone_active(true)
 			status_label.text = "Đã cầm bát. Nhắm vào vùng xanh trên bàn để đặt."
 		else:
 			status_label.text = "Bát đang được giữ."
@@ -116,3 +120,7 @@ func _refresh_prompt() -> void:
 		prompt_label.text = "WASD di chuyển · Chuột nhìn · E / Click tương tác"
 		prompt_label.modulate = Color(1.0, 1.0, 1.0)
 		crosshair_label.modulate = Color(1.0, 1.0, 1.0)
+
+
+func _set_placement_zone_active(active: bool) -> void:
+	placement_zone.collision_layer = 2 if active else 0
