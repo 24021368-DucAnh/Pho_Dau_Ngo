@@ -47,6 +47,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.rotation.x = clampf(camera.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
 
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_V:
+		if held_bowl != null and is_instance_valid(held_bowl) and held_bowl.prepared_recipe_id != &"":
+			status_label.text = "Bát này đã bắt đầu theo phiếu " + String(held_bowl.prepared_recipe_id) + ". Hãy hoàn thành hoặc hủy bát trước khi đổi phiếu."
+			return
 		active_recipe = PHO_BO_CHIN_RECIPE if active_recipe == PHO_BO_TAI_RECIPE else PHO_BO_TAI_RECIPE
 		status_label.text = "Đã chọn phiếu: " + active_recipe.display_name + " · thời gian trụng " + str(active_recipe.blanch_duration_seconds) + " giây."
 		return
