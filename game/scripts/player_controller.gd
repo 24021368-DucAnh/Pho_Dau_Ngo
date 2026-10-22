@@ -21,7 +21,7 @@ var _stations: Array[KitchenStation] = []
 
 
 func _ready() -> void:
-	_stations = [get_node("../NoodlesStation") as KitchenStation, get_node("../BeefStation") as KitchenStation, get_node("../BrothStation") as KitchenStation]
+	_stations = [get_node("../NoodlesStation") as KitchenStation, get_node("../BeefStation") as KitchenStation, get_node("../CookedBeefStation") as KitchenStation, get_node("../BrothStation") as KitchenStation]
 	_set_placement_zone_active(false)
 	if not OS.has_feature("headless"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -134,7 +134,7 @@ func _cancel_preparation() -> void:
 	if bool(result.get("ok", false)):
 		for station in _stations:
 			if station != null:
-				station.reset_blanching(held_bowl)
+				
 	status_label.text = String(result.get("message", "Không thể hủy bát."))
 
 
