@@ -4,6 +4,8 @@ class_name RecipeData
 @export var recipe_id: StringName = &"pho_bo"
 @export var display_name: String = "Phở bò"
 @export_enum("tai", "chin") var beef_variant: String = "tai"
+# Deprecated compatibility field; recipe semantics never use a beef blanch timer.
+@export var blanch_duration_seconds: float = 0.0
 
 
 func steps_for_recipe() -> Array[Dictionary]:
