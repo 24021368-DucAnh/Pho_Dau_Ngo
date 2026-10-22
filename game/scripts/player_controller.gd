@@ -131,10 +131,6 @@ func _cancel_preparation() -> void:
 		status_label.text = "Cần cầm bát để hủy phần đang chế biến."
 		return
 	var result: Dictionary = held_bowl.cancel_preparation()
-	if bool(result.get("ok", false)):
-		for station in _stations:
-			if station != null:
-				
 	status_label.text = String(result.get("message", "Không thể hủy bát."))
 
 
