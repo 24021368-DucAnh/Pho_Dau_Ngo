@@ -32,7 +32,8 @@ func _run() -> void:
 	_check(scene_instance.get_node_or_null("PhoCart/StockPotProxy") is MeshInstance3D, "graybox has a stock-pot visual proxy")
 	_check(scene_instance.get_node_or_null("BrothStation") is KitchenStation, "graybox has an interactive broth station")
 	_check(scene_instance.get_node_or_null("NoodlesStation") is KitchenStation, "graybox has an interactive noodle station")
-	_check(scene_instance.get_node_or_null("BeefStation") is KitchenStation, "graybox has an interactive beef station")
+	_check(scene_instance.get_node_or_null("BeefStation") is KitchenStation, "graybox has an interactive raw sliced beef station for pho tai")
+	_check(scene_instance.get_node_or_null("CookedBeefStation") is KitchenStation, "graybox has a separate prepared cooked sliced beef station for pho chin")
 	_check(scene_instance.get_node_or_null("Inventory") is InventoryService, "scene has one authoritative ingredient inventory")
 	_check(scene_instance.get_node_or_null("CustomerStoolProxy") is StaticBody3D, "graybox has a collidable customer stool")
 	var stool_collision: CollisionShape3D = scene_instance.get_node_or_null("CustomerStoolProxy/StoolCollision") as CollisionShape3D
