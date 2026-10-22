@@ -64,10 +64,7 @@ func _build_cart() -> void:
 	_box("SignTextBar", Vector3(1.25, 0.045, 0.02), Vector3(-2.0, 2.08, -0.445), Color("#fff0cf"))
 
 func _build_food_props() -> void:
-	# Stock pot: rounded silhouette, bright rim and amber broth.
-	_cylinder("StockPotBody", 0.47, 0.42, 0.58, Vector3(-1.45, 1.65, -0.5), Color("#aeb3aa"), 32)
-	_cylinder("StockPotRim", 0.49, 0.49, 0.075, Vector3(-1.45, 1.96, -0.5), Color("#d6d8cf"), 32)
-	_cylinder("BrothSurface", 0.425, 0.425, 0.025, Vector3(-1.45, 1.91, -0.5), Color("#b97a2b"), 32)
+	_build_stock_pot()
 	_cylinder("NoodleBasin", 0.27, 0.23, 0.13, Vector3(-2.35, 1.47, -0.5), Color("#e4d4a8"), 28)
 	_cylinder("NoodleTop", 0.22, 0.2, 0.025, Vector3(-2.35, 1.55, -0.5), Color("#e8d8a8"), 28)
 	_cylinder("RawBeefTray", 0.25, 0.25, 0.07, Vector3(-3.0, 1.43, -0.5), Color("#aeb3aa"), 28)
@@ -94,6 +91,66 @@ func _build_stools_and_shopfront() -> void:
 	_box("AwningUnderside", Vector3(2.5, 0.08, 0.92), Vector3(4.6, 2.42, -6.25), Color("#d8ccb5"))
 	for x in [3.45, 4.0, 4.55, 5.1, 5.65]:
 		_box("AwningStripe", Vector3(0.12, 0.02, 0.92), Vector3(x, 2.47, -6.25), Color("#f0d9b5"))
+
+
+func _build_stock_pot() -> void:
+	# A modest, well-used aluminum stockpot: dull finish, rolled rim, worn bands,
+	# simple side handles and a lid set aside. Keep the broth silhouette readable.
+	var pot := Node3D.new()
+	pot.name = "PROP_stock_pot_old_aluminum"
+	add_child(pot)
+
+	var body := _cylinder("PotBody", 0.455, 0.405, 0.58, Vector3(-1.45, 1.65, -0.5), Color("#898d88"), 40, pot)
+	body.material_override = _mat(Color("#898d88"), 0.82)
+	_cylinder("PotBaseFoot", 0.395, 0.395, 0.055, Vector3(-1.45, 1.365, -0.5), Color("#666b67"), 36, pot)
+	_cylinder("RolledTopRim", 0.475, 0.475, 0.065, Vector3(-1.45, 1.958, -0.5), Color("#b1b4ad"), 40, pot)
+	_cylinder("InnerDarkLip", 0.432, 0.432, 0.018, Vector3(-1.45, 1.918, -0.5), Color("#555b55"), 36, pot)
+	_cylinder("BrothSurface", 0.421, 0.421, 0.018, Vector3(-1.45, 1.927, -0.5), Color("#a96e2d"), 36, pot)
+
+	# Subtle dents/wear are broad and low-contrast, not dirt on the food-contact area.
+	_cylinder("LowerWearBand", 0.414, 0.414, 0.035, Vector3(-1.45, 1.43, -0.5), Color("#777b75"), 36, pot)
+	_cylinder("UpperWearBand", 0.457, 0.457, 0.025, Vector3(-1.45, 1.78, -0.5), Color("#777c76"), 40, pot)
+
+	for side in [-1.0, 1.0]:
+		var handle := _cylinder("SideHandleGrip", 0.055, 0.055, 0.20, Vector3(-1.45 + side * 0.53, 1.77, -0.5), Color("#555a55"), 16, pot)
+		handle.rotation_degrees.z = 90.0
+		for rivet_z in [-0.565, -0.435]:
+			var rivet := _cylinder("HandleRivet", 0.022, 0.022, 0.012, Vector3(-1.45 + side * 0.445, 1.80, rivet_z), Color("#c0c1b9"), 12, pot)
+			rivet.rotation_degrees.x = 90.0
+
+	# The lid rests partly over the rear edge, making the vessel feel actively used.
+	var lid := _cylinder("LidSetAside", 0.34, 0.34, 0.035, Vector3(-1.43, 1.985, -0.18), Color("#9a9e97"), 32, pot)
+	lid.rotation_degrees.z = -12.0
+	var lid_knob := _cylinder("LidKnob", 0.055, 0.055, 0.065, Vector3(-1.43, 2.035, -0.18), Color("#676c66"), 16, pot)
+
+	# Light, sparse steam; low opacity keeps the broth and pot rim readable.
+	var steam := CPUParticles3D.new()
+	steam.name = "BrothSteam"
+	steam.position = Vector3(-1.45, 1.97, -0.5)
+	steam.amount = 10
+	steam.lifetime = 1.7
+	steam.emitting = true
+	steam.direction = Vector3(0.0, 1.0, 0.0)
+	steam.spread = 13.0
+	steam.gravity = Vector3(0.0, 0.06, 0.0)
+	steam.initial_velocity_min = 0.10
+	steam.initial_velocity_max = 0.22
+	steam.scale_amount_min = 0.018
+	steam.scale_amount_max = 0.035
+	var steam_mesh := SphereMesh.new()
+	steam_mesh.radius = 0.035
+	steam_mesh.height = 0.07
+	steam.mesh = steam_mesh
+	var steam_material := StandardMaterial3D.new()
+	steam_material.albedo_color = Color(0.92, 0.89, 0.82, 0.22)
+	steam_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	steam_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	steam_material.roughness = 1.0
+	steam_material.no_depth_test = false
+	steam_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	steam_material.vertex_color_use_as_albedo = true
+	steam.material_override = steam_material
+	add_child(steam)
 
 func _box(label: String, size: Vector3, at: Vector3, tint: Color, parent: Node = null) -> MeshInstance3D:
 	var mesh_node := MeshInstance3D.new()
