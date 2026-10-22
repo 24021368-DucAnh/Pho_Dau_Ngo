@@ -135,10 +135,13 @@ func _run() -> void:
 	var scene_bowl: InteractiveBowl = interaction_scene.get_node("Bowl") as InteractiveBowl
 	var player_inventory: InventoryService = interaction_scene.get_node("Inventory") as InventoryService
 	_check(scene_bowl != null and player != null, "player ownership fixture is present")
-	_check(bool(scene_bowl.set_held()), "player ownership fixture can acquire bowl")
-	player.set("held_bowl", scene_bowl)
-	_check(not bool(scene_bowl.set_held()), "same bowl cannot be acquired twice while held")
+	_check(bool(player.call("_try_pick_up_bowl", scene_bowl)), "player ownership fixture acquires bowl through the production transition")
+	_check(not bool(player.call("_try_pick_up_bowl", scene_bowl)), "player cannot acquire the same held bowl twice")
+	var second_bowl: InteractiveBowl = scene_bowl.duplicate() as InteractiveBowl
+	interaction_scene.add_child(second_bowl)
+	_check(not bool(player.call("_try_pick_up_bowl", second_bowl)), "player cannot acquire a second bowl while already holding one")
 	_check(player.get("held_bowl") == scene_bowl, "player remains the single authoritative bowl owner")
+	_check(second_bowl.state == InteractiveBowl.BowlState.AVAILABLE, "rejected second pickup leaves the other bowl available")
 
 	var original_recipe: RecipeData = player.get("active_recipe") as RecipeData
 	var other_recipe: RecipeData = load("res://data/recipes/pho_bo_chin.tres") as RecipeData

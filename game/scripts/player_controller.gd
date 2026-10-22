@@ -144,7 +144,7 @@ func _interact() -> void:
 			_set_placement_zone_active(true)
 			status_label.text = "Đã cầm bát. Cho bánh phở, thêm thịt đúng trạng thái theo phiếu, rồi chan nước dùng cuối cùng."
 		else:
-			status_label.text = "Bát đang được giữ."
+			status_label.text = "Bát đang được giữ hoặc người chơi đã cầm một bát."
 	elif target is KitchenStation:
 		status_label.text = "Cầm bát trước khi thao tác tại trạm."
 	elif target is PlacementZone:
