@@ -21,6 +21,9 @@ concurrency:
   group: godot-production-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   validate-and-export:
     name: Import, test interaction and recipe contracts, and export desktop builds
