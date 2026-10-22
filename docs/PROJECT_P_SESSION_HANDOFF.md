@@ -22,7 +22,7 @@ This file is the operational handoff for continuing work in a new ChatGPT conver
 ## Current open pull requests
 
 - PR #27: vertical-slice acceptance matrix and prototype scope in README — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/27
-- PR #28: ledger transaction contract — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/28
+- PR #28: ledger transaction contract — **merged** into `main` (verify current main if later changes affect the contract).
 - PR #29: ledger contract tests and CI — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/29
 - PR #30: manual playtest evidence template — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/30
 - PR #32: append-only cash ledger implementation, stacked on PR #29's test branch — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/32
@@ -45,12 +45,12 @@ PRs are draft/open unless GitHub metadata says otherwise. Do not merge blindly; 
 - An earlier run #93 failed due to invalid GDScript type inference in the test; this was fixed. Do not treat #93 as the valid RED.
 - PR #32 implements `game/scripts/economy/ledger.gd`, with transaction validation, idempotent replay, copy-on-read, daily totals, and idempotent close. It is stacked on PR #29's branch so the test remains the contract.
 - Current GREEN candidate CI run #95 is in progress for PR #32 head `535f95064a14a5ba1d743445f6b2804ceff30b11`: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39839955978
-- At the latest inspection, import/parse had passed and the job was still running at **Run interaction contract tests**; ledger test step had already been passed according to the run's sequence, but the overall workflow is not green until interaction tests, kitchen recipe tests, order lifecycle/serving tests, Linux and Windows exports, and artifact upload finish successfully. Re-check the current run rather than relying on this snapshot.
+- Latest inspection: `Import and parse production project` and `Run ledger contract tests` both passed. The job is still running at **Run interaction contract tests**. The overall workflow is not green until interaction tests, kitchen recipe tests, order lifecycle/serving tests, Linux and Windows exports, and artifact upload finish successfully. Re-check the current run rather than relying on this snapshot.
 - Workflow uses `cancel-in-progress: true`; new commits can cancel older runs. Always verify the latest run for the exact current head SHA.
 
 ## Required next actions
 
-1. Poll CI run #95 and inspect every job step. If it fails, fetch logs and repair the smallest reproducible issue; add/adjust tests first for newly discovered defects.
+1. Poll CI run #95 and inspect every job step. Ledger contract tests are green on the current PR #32 head; remaining steps are still pending/in progress. If the run fails, fetch logs and repair the smallest reproducible issue; add/adjust tests first for newly discovered defects.
 2. If run #95 is fully green, review PR #32 diff and contract behavior. Then merge PR #29 before PR #32 only with owner approval; after #29 merges, update PR #32's base to `main` or rebase it, and rerun CI against the resulting commit. Do not merge PR #32 before its test contract is present on the target branch.
 3. Review PR #28's ledger transaction contract against the implementation, especially closing-day behavior, sign conventions, idempotency and missing-opening-cash completeness.
 4. After the ledger is green and integrated, add test-first ServingService → Ledger payment integration using a stable transaction ID derived from the served order ID. Invalid/incomplete service must not record revenue; duplicate service must not create duplicate revenue.
