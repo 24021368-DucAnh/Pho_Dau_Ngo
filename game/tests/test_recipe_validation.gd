@@ -53,6 +53,28 @@ func _run() -> void:
 	_check(not bool(repeated_noodles.get("ok", false)), "repeating an already-completed station step is rejected")
 	_check(inventory.get_stock(&"noodles") == noodles_before - 1, "repeated station activation does not consume twice")
 
+	# A bowl's recipe identity is locked after the first successful preparation step.
+	var cooked_station := KitchenStation.new()
+	cooked_station.action_id = &"add_cooked_beef"
+	cooked_station.ingredient_id = &"cooked_sliced_beef"
+	root.add_child(cooked_station)
+	await process_frame
+	var cooked_before := inventory.get_stock(&"cooked_sliced_beef")
+	var recipe_switch := cooked_station.apply_to_bowl(bowl, chin, inventory)
+	_check(not bool(recipe_switch.get("ok", false)), "switching tai bowl to chin after preparation starts is rejected")
+	_check(inventory.get_stock(&"cooked_sliced_beef") == cooked_before, "rejected recipe switch preserves cooked beef stock")
+	_check(int(bowl.get("recipe_step_index")) == 1, "rejected recipe switch preserves current recipe progress")
+
+	# Cancellation records the consumed ingredient as waste exactly once and resets the bowl.
+	var cancellation := bowl.cancel_preparation()
+	_check(bool(cancellation.get("ok", false)), "in-progress bowl can be cancelled")
+	var wasted: Array = cancellation.get("wasted", [])
+	_check(wasted.size() == 1 and StringName(wasted[0].get("ingredient_id", &"")) == &"noodles", "cancellation reports consumed noodles as waste")
+	_check(int(bowl.get("recipe_step_index")) == 0, "cancellation resets recipe progress")
+	_check(StringName(bowl.get("prepared_recipe_id")) == &"", "cancellation clears locked recipe identity")
+	var repeated_cancellation := bowl.cancel_preparation()
+	_check(not bool(repeated_cancellation.get("ok", false)), "cancellation cannot record the same waste twice")
+
 	var empty_inventory := InventoryService.new()
 	empty_inventory.starting_stock = {&"noodles": 0, &"broth": 1}
 	root.add_child(empty_inventory)
@@ -80,6 +102,7 @@ func _run() -> void:
 	empty_bowl.queue_free()
 	noodle_station.queue_free()
 	broth_station.queue_free()
+	cooked_station.queue_free()
 	empty_noodle_station.queue_free()
 	await process_frame
 	_finish()
