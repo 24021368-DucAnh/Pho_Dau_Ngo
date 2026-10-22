@@ -28,5 +28,7 @@
 - [x] Incomplete bowls, unplaced bowls, recipe mismatches and wrong-table deliveries are rejected without payment.
 - [x] Correct delivery transitions the order from READY to SERVED and records exactly one payment event.
 - [x] The production scene owns one OrderManager and one ServingService.
-- [ ] Customer spawning, visible order tickets, player-facing delivery interaction and end-to-end day flow remain unimplemented.
+- [x] A single deterministic starter order is created and shown in the player HUD; status follows ACCEPTED → PREPARING → READY → SERVED.
+- [x] Delivery interaction calls ServingService against the current order and destination table; successful service updates the ticket and payment count.
+- [ ] Customer spawning/behavior and multi-order/day flow remain unimplemented; the current scene uses a static stool/customer-side delivery zone.
 - [ ] Manual playtest remains required; automated CI does not prove visual usability or input feel.
