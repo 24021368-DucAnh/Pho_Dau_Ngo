@@ -14,13 +14,13 @@
 - Warm morning lighting, soft directional shadows, and a restrained ambient fill.
 - Hanoi alley massing: limewashed walls, concrete ground, selective repair patches and a drain channel.
 - Enamel-green pho cart with timber rails, steel worktop, lower shelf and wheels.
-- Stainless stock pot, amber broth, noodle basin, beef tray, bowl of pho, herb jar and red plastic stools.
+- Aged aluminum stock pot with a dull finish, rolled rim, worn bands, side handles, offset lid and subtle steam; amber broth, noodle basin, beef tray, bowl of pho, herb jar and red plastic stools.
 - A fictional shuttered shopfront and restrained red/cream awning.
 - All geometry and materials are generated from built-in Godot primitive meshes in `scripts/art/stylized_vertical_slice.gd`; no external art dependencies.
 
 ## Intentional limitations
 
-This is an **art/runtime slice**, not a replacement for the playable first-person production scene. The existing gameplay scene remains the F5 entry point while art direction is evaluated independently. Current props are deliberately low-poly proxies; the next pass should replace the highest-value silhouettes (cart, stock pot, bowl and food) with reviewed reusable assets, then integrate approved materials into `main.tscn`.
+This is an **art/runtime slice**, not a replacement for the playable first-person production scene. The existing gameplay scene remains the F5 entry point while art direction is evaluated independently. Current props are deliberately low-poly proxies. The stock pot is a first art pass made from built-in meshes; its final silhouette, steam readability and material response still need review in the Godot runtime before it is marked approved or integrated into `main.tscn`.
 
 ## Acceptance checks
 
