@@ -19,6 +19,19 @@ func _run() -> void:
 	_check(not bool(order_manager.transition_order(order_id, OrderManager.OrderStatus.ACCEPTED).get("ok", false)), "illegal order transition is rejected")
 	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "illegal transition preserves order state")
 
+	# Multiple orders must remain independently addressable and filtered by lifecycle state.
+	var second_created: Dictionary = order_manager.create_order(&"order-002", &"pho_bo_chin", &"table-2")
+	_check(bool(second_created.get("ok", false)), "second order can be accepted while first is still open")
+	_check(order_manager.get_orders().size() == 2, "order manager lists all accepted and active orders")
+	_check(order_manager.get_open_orders().size() == 2, "open-order queue includes both active orders")
+	_check(order_manager.get_orders_by_status(OrderManager.OrderStatus.READY).size() == 1, "status filter isolates ready orders")
+	_check(bool(order_manager.transition_order(&"order-002", OrderManager.OrderStatus.CANCELLED).get("ok", false)), "second order can be cancelled independently")
+	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "cancelling second order does not mutate first order")
+	_check(order_manager.get_open_orders().size() == 1, "cancelled order is removed from open-order queue")
+	var detached_snapshot: Dictionary = order_manager.get_order(order_id)
+	detached_snapshot["status"] = OrderManager.OrderStatus.SERVED
+	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "mutating a returned order snapshot cannot mutate manager state")
+
 	var tai := load("res://data/recipes/pho_bo.tres") as RecipeData
 	var inventory := InventoryService.new()
 	root.add_child(inventory)
@@ -71,6 +84,7 @@ func _run() -> void:
 	_check(not bool(duplicate.get("ok", false)), "repeated service action is rejected")
 	_check(int(duplicate.get("payment_events", 0)) == 0, "repeated service records no additional payment")
 	_check(int(serving.get("payment_event_count")) == 1, "payment remains exactly once")
+	_check(order_manager.get_open_orders().size() == 0, "served and cancelled orders are excluded from open-order queue")
 
 	order_manager.queue_free()
 	inventory.queue_free()
