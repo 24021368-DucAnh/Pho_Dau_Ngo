@@ -25,7 +25,7 @@ func _ready() -> void:
 	_set_placement_zone_active(false)
 	if not OS.has_feature("headless"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	status_label.text = "Nhắm vào bát để cầm. V: đổi phở tái/chín. Công thức: bánh phở → trụng thịt → chan nước dùng cuối cùng."
+	status_label.text = "Nhắm vào bát để cầm. V: đổi phở tái/chín. Quy trình: bánh phở → thịt tái hoặc thịt chín đã chuẩn bị → chan nước dùng cuối cùng."
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -150,7 +150,7 @@ func _refresh_prompt() -> void:
 			prompt_label.modulate = Color(0.35, 1.0, 0.55)
 			crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 		else:
-			prompt_label.text = "Mang bát tới: bánh phở → trụng thịt → chan nước dùng cuối cùng · Q: hủy bát"
+			prompt_label.text = "Mang bát tới: bánh phở → thịt đúng trạng thái → chan nước dùng cuối cùng · Q: hủy bát"
 			prompt_label.modulate = Color(1.0, 0.72, 0.28)
 			crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 	elif target is InteractiveBowl:
