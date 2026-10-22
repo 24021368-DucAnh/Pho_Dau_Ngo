@@ -94,7 +94,7 @@ func _build_stools_and_shopfront() -> void:
 	for x in [3.45, 4.0, 4.55, 5.1, 5.65]:
 		_box("AwningStripe", Vector3(0.12, 0.02, 0.92), Vector3(x, 2.47, -6.25), Color("#f0d9b5"))
 
-func _box(label: String, size: Vector3, at: Vector3, tint: Color, parent: Node = self) -> MeshInstance3D:
+func _box(label: String, size: Vector3, at: Vector3, tint: Color, parent: Node = null) -> MeshInstance3D:
 	var mesh_node := MeshInstance3D.new()
 	mesh_node.name = label
 	var mesh := BoxMesh.new()
@@ -102,10 +102,13 @@ func _box(label: String, size: Vector3, at: Vector3, tint: Color, parent: Node =
 	mesh_node.mesh = mesh
 	mesh_node.position = at
 	mesh_node.material_override = _mat(tint, 0.88)
-	parent.add_child(mesh_node)
+	if parent == null:
+		add_child(mesh_node)
+	else:
+		parent.add_child(mesh_node)
 	return mesh_node
 
-func _cylinder(label: String, top_radius: float, bottom_radius: float, height: float, at: Vector3, tint: Color, sides: int = 24, parent: Node = self) -> MeshInstance3D:
+func _cylinder(label: String, top_radius: float, bottom_radius: float, height: float, at: Vector3, tint: Color, sides: int = 24, parent: Node = null) -> MeshInstance3D:
 	var mesh_node := MeshInstance3D.new()
 	mesh_node.name = label
 	var mesh := CylinderMesh.new()
@@ -116,7 +119,10 @@ func _cylinder(label: String, top_radius: float, bottom_radius: float, height: f
 	mesh_node.mesh = mesh
 	mesh_node.position = at
 	mesh_node.material_override = _mat(tint, 0.62)
-	parent.add_child(mesh_node)
+	if parent == null:
+		add_child(mesh_node)
+	else:
+		parent.add_child(mesh_node)
 	return mesh_node
 
 func _mat(tint: Color, rough: float) -> StandardMaterial3D:
