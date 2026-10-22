@@ -43,6 +43,31 @@ func _run() -> void:
 	var stool_collision: CollisionShape3D = scene_instance.get_node_or_null("CustomerStoolProxy/StoolCollision") as CollisionShape3D
 	_check(stool_collision != null and stool_collision.shape is BoxShape3D, "customer stool has a physical collision shape")
 	_check(scene_instance.get_node_or_null("Bowl") is StaticBody3D, "scene has one physical bowl")
+
+	# Regression checks for the reported floating dish / misplaced cart ingredients.
+	var cart_top: MeshInstance3D = scene_instance.get_node_or_null("PhoCart/CartTop") as MeshInstance3D
+	var broth_station: Node3D = scene_instance.get_node_or_null("BrothStation") as Node3D
+	var noodles_station: Node3D = scene_instance.get_node_or_null("NoodlesStation") as Node3D
+	var beef_station: Node3D = scene_instance.get_node_or_null("BeefStation") as Node3D
+	var cooked_station: Node3D = scene_instance.get_node_or_null("CookedBeefStation") as Node3D
+	_check(cart_top != null, "cart has a top surface for ingredient stations")
+	if cart_top != null:
+		var cart_top_world_y: float = cart_top.global_position.y + (0.5 * cart_top.mesh.get_aabb().size.y * cart_top.global_scale.y)
+		for station in [broth_station, noodles_station, beef_station, cooked_station]:
+			if station != null:
+				var visual: MeshInstance3D = station.get_node_or_null("StationVisual") as MeshInstance3D
+				if visual != null:
+					var visual_bottom_y: float = visual.global_position.y - (0.5 * visual.mesh.get_aabb().size.y * visual.global_scale.y)
+					_check(visual_bottom_y <= cart_top_world_y + 0.02 and visual_bottom_y >= cart_top_world_y - 0.08, "%s visual rests on cart top" % station.name)
+				else:
+					_check(station.name == "BrothStation", "%s has a visual proxy when expected" % station.name)
+	var scene_bowl_for_transform: Node3D = scene_instance.get_node_or_null("Bowl") as Node3D
+	var scene_marker: Marker3D = scene_instance.get_node_or_null("PlacementZone/PlacementMarker") as Marker3D
+	_check(scene_bowl_for_transform != null and scene_marker != null, "bowl and placement marker exist for transform regression")
+	if scene_bowl_for_transform != null:
+		_check(absf(scene_bowl_for_transform.global_position.y - 1.06) < 0.01, "serving bowl starts at tabletop height, not elevated")
+	if scene_bowl_for_transform != null and scene_marker != null:
+		_check(absf(scene_marker.global_position.y - 1.06) < 0.01, "placement marker keeps bowl center at tabletop height")
 	_check(scene_zone != null, "scene has a placement target")
 	var scene_raycast: RayCast3D = scene_player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
 	_check(scene_raycast != null, "player has a look-at raycast")
