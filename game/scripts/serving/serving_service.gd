@@ -24,6 +24,8 @@ func serve_order(
 		return {"ok": false, "message": "Không tìm thấy đơn."}
 	if int(order.get("status", -1)) != OrderManager.OrderStatus.READY:
 		return {"ok": false, "message": "Đơn chưa ở trạng thái sẵn sàng nhận món."}
+	if bowl.state != InteractiveBowl.BowlState.PLACED:
+		return {"ok": false, "message": "Đặt bát vào vùng bàn trước khi giao món."}
 	if not bowl.is_ready_to_serve():
 		return {"ok": false, "message": "Bát chưa hoàn thành, chưa thể phục vụ."}
 	if StringName(order.get("recipe_id", &"")) != bowl.prepared_recipe_id:
