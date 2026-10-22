@@ -1,3 +1,4 @@
+# Recipe and transaction regression coverage for both beef variants, station ordering, stock conservation, recipe locking, and cancellation.
 extends SceneTree
 
 var failures := 0
