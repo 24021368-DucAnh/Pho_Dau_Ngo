@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3]
+[gd_scene load_steps=28 format=3]
 
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -47,19 +47,19 @@ size = Vector3(1.4, 0.25, 0.6)
 size = Vector3(1.4, 0.02, 0.6)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.28, 0.3, 0.33, 1)
+albedo_color = Color(0.66, 0.61, 0.49, 1)
 roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_table"]
-albedo_color = Color(0.48, 0.37, 0.25, 1)
+albedo_color = Color(0.30, 0.18, 0.11, 1)
 roughness = 0.9
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
-albedo_color = Color(0.42, 0.44, 0.47, 1)
+albedo_color = Color(0.83, 0.76, 0.61, 1)
 roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bowl"]
-albedo_color = Color(0.88, 0.83, 0.7, 1)
+albedo_color = Color(0.96, 0.91, 0.78, 1)
 roughness = 0.55
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_zone"]
@@ -76,7 +76,18 @@ size = Vector3(0.84, 0.5, 0.42)
 [sub_resource type="BoxMesh" id="BoxMesh_station"]
 size = Vector3(0.36, 0.12, 0.34)
 
+[sub_resource type="Environment" id="Environment_stylized"]
+background_mode = 1
+background_color = Color(0.72, 0.78, 0.72, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.82, 0.75, 0.6, 1)
+ambient_light_energy = 0.65
+tonemap_mode = 2
+
 [node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_stylized")
 
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-45, -25, 0)
