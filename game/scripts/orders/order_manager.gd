@@ -36,6 +36,32 @@ func get_order(order_id: StringName) -> Dictionary:
 	return (_orders[order_id] as Dictionary).duplicate(true)
 
 
+func get_orders() -> Array:
+	var result: Array = []
+	for order_id in _orders:
+		result.append((_orders[order_id] as Dictionary).duplicate(true))
+	return result
+
+
+func get_orders_by_status(status: int) -> Array:
+	var result: Array = []
+	for order_id in _orders:
+		var order: Dictionary = _orders[order_id]
+		if int(order.get("status", -1)) == status:
+			result.append(order.duplicate(true))
+	return result
+
+
+func get_open_orders() -> Array:
+	var result: Array = []
+	for order_id in _orders:
+		var order: Dictionary = _orders[order_id]
+		var status := int(order.get("status", -1))
+		if status != OrderStatus.SERVED and status != OrderStatus.CANCELLED:
+			result.append(order.duplicate(true))
+	return result
+
+
 func transition_order(order_id: StringName, next_status: int) -> Dictionary:
 	if not _orders.has(order_id):
 		return {"ok": false, "message": "Không tìm thấy đơn."}
