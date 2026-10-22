@@ -26,7 +26,7 @@ permissions:
 
 jobs:
   validate-and-export:
-    name: Import, test interaction and recipe contracts, and export desktop builds
+    name: Import, run contract tests, and export desktop builds
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,6 +48,9 @@ jobs:
       - name: Run order lifecycle and serving tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_order_lifecycle.gd
+      - name: Run ledger contract tests
+        working-directory: game
+        run: godot --headless --path . --script res://tests/test_ledger_contract.gd
       - name: Export Linux desktop build
         working-directory: game
         run: |
