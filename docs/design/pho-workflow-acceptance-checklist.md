@@ -1,11 +1,11 @@
 # M2 phở workflow acceptance checklist
 
 ## Recipe semantics
-- [ ] Phở tái is raw thin-sliced beef finished by hot broth in the bowl, not timed beef blanching.
-- [ ] Phở chín requires a pre-cooked/cooked-and-sliced beef state before bowl assembly.
-- [ ] Noodles are blanched separately.
-- [ ] Broth is the finishing action for both bowl variants.
-- [ ] Ingredient identities distinguish beef preparation states; future cut/topping support does not conflate nạm/gầu/gân/sách/bò viên with tai/chin.
+- [x] Phở tái is raw thin-sliced beef finished by hot broth in the bowl, not timed beef blanching.
+- [x] Phở chín requires pre-cooked/cooked-and-sliced beef before bowl assembly (currently represented as prepared stock, not an interactive prep station).
+- [x] Noodles are a separate first recipe step; interactive blanching timing is not implemented.
+- [x] Broth is the finishing action for both bowl variants.
+- [x] Ingredient identities distinguish raw sliced beef from cooked sliced beef; additional cuts/toppings remain out of scope.
 
 ## Domain invariants
 - [x] Invalid order leaves inventory and bowl state unchanged (automated regression test).
@@ -18,5 +18,5 @@
 
 ## Verification
 - [x] Automated recipe tests cover both workflows, invalid order, repeated activation, recipe locking, cancellation and missing stock.
-- [x] CI import/parse and Linux/Windows exports passed on commit `64a755b`; latest test additions on `d37d50e` are pending CI.
+- [ ] CI import/parse, tests and Linux/Windows exports pass on the latest branch head (previous commit `64a755b` passed; latest run is pending).
 - [ ] Manual playtest covers physical interaction, placement and usability before M2 is declared fully accepted.
