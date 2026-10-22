@@ -1,6 +1,6 @@
 # Project_P — Phở Đầu Ngõ: Handoff for the Next Chat
 
-Updated: 2026-10-23 (Asia/Ho_Chi_Minh)
+Updated: 2026-10-23 (Asia/Ho_Chi_Minh; CI/PR state last checked during this session)
 
 ## Purpose
 
@@ -25,6 +25,7 @@ This file is the operational handoff for continuing work in a new ChatGPT conver
 - PR #28: ledger transaction contract — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/28
 - PR #29: ledger contract tests and CI — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/29
 - PR #30: manual playtest evidence template — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/30
+- PR #32: append-only cash ledger implementation, stacked on PR #29's test branch — https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/32
 
 PRs are draft/open unless GitHub metadata says otherwise. Do not merge blindly; check base/head, CI, changed files, and conflicts first.
 
@@ -33,28 +34,29 @@ PRs are draft/open unless GitHub metadata says otherwise. Do not merge blindly; 
 - Aged aluminum stock-pot art implementation exists on branch/PR #26; visual approval is not yet established.
 - Kitchen preparation, recipe validation, minimal inventory, order lifecycle and serving-domain tests exist.
 - Serving and inventory are not yet wired into a complete authoritative cash/economy loop.
-- Missing or not yet integrated: authoritative ledger, customer spawn/wait loop, day controller, end-of-day summary, save/load, final integrated UI/art.
+- Ledger implementation candidate exists in PR #32 (`feat/ledger-implementation`, head `535f95064a14a5ba1d743445f6b2804ceff30b11`), stacked on PR #29. It is not considered validated until the current-head CI run finishes successfully.
+- Missing or not yet integrated: ledger-to-serving/payment integration, customer spawn/wait loop, day controller, end-of-day summary, save/load, final integrated UI/art.
 - Manual gameplay/playtest evidence has not been recorded. Automated CI is not manual acceptance.
 - No local Godot runtime is available in the ChatGPT tool session; use GitHub Actions for Godot runtime validation and report exact job/step evidence.
 
-## TDD / CI incident and correction
+## TDD / CI incident and current ledger gate
 
-The ledger test was added before production implementation. The first CI run failed at the test step, but not cleanly: the missing `Ledger` class caused cascading GDScript type-inference parse errors. This is **not** an acceptable clean RED result.
-
-The ledger test was then changed to dynamically load `res://scripts/economy/ledger.gd`, with explicit types for values returned by the ledger. The expected pre-implementation failure is now a runtime assertion that the ledger script cannot be loaded. A new CI run must confirm this before production implementation is considered TDD-compliant.
-
-The workflow was reordered so ledger tests run immediately after import/parse, before the slower interaction contract test. Because the workflow uses `cancel-in-progress: true`, a new commit can cancel an older run; always inspect the latest run for the current head SHA.
+- PR #29 adds the ledger contract test before the production implementation. CI run #94 confirmed a clean RED: import/parse passed, then the ledger test failed because `res://scripts/economy/ledger.gd` did not exist. Run: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39839772923
+- An earlier run #93 failed due to invalid GDScript type inference in the test; this was fixed. Do not treat #93 as the valid RED.
+- PR #32 implements `game/scripts/economy/ledger.gd`, with transaction validation, idempotent replay, copy-on-read, daily totals, and idempotent close. It is stacked on PR #29's branch so the test remains the contract.
+- Current GREEN candidate CI run #95 is in progress for PR #32 head `535f95064a14a5ba1d743445f6b2804ceff30b11`: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39839955978
+- At the latest inspection, import/parse had passed and the job was still running at **Run interaction contract tests**; ledger test step had already been passed according to the run's sequence, but the overall workflow is not green until interaction tests, kitchen recipe tests, order lifecycle/serving tests, Linux and Windows exports, and artifact upload finish successfully. Re-check the current run rather than relying on this snapshot.
+- Workflow uses `cancel-in-progress: true`; new commits can cancel older runs. Always verify the latest run for the exact current head SHA.
 
 ## Required next actions
 
-1. Inspect the newest Actions run for PR #29 and verify the exact failing step/log. The clean RED must be the missing ledger script assertion, not syntax or import failure.
-2. If the test itself fails to execute cleanly, fix the test first and rerun; do not write production code until RED is valid.
-3. Implement `game/scripts/economy/ledger.gd` minimally to satisfy `game/tests/test_ledger_contract.gd`: append-only transactions; integer amounts; opening cash exactly once per day; sale revenue positive; ingredient purchases negative; transaction IDs idempotent for identical payloads and rejected for conflicting payloads; immutable/copy-on-read transaction dictionaries; day totals/reconciliation; idempotent close; reject transactions after close; mark missing opening cash incomplete.
-4. Add a focused test for every bug discovered, run the ledger test, then all existing Godot tests and both desktop exports in CI. Never claim green based on a partial job.
-5. Integrate ServingService with the ledger only after ledger contract tests pass. Prevent duplicate revenue by using a stable transaction ID derived from the served order ID. Do not charge revenue on incomplete/invalid service.
-6. Add inventory purchase accounting only after the business rule is explicit; do not silently treat ingredient consumption as cash expense if it was already paid at purchase time.
-7. Complete the day summary and its reconciliation tests. Then update README, acceptance matrix, and playtest template with verified outcomes.
-8. Keep art work separate from economy logic. Request owner visual review for the stock pot and lighting; Visual Bible stays Draft until accepted.
+1. Poll CI run #95 and inspect every job step. If it fails, fetch logs and repair the smallest reproducible issue; add/adjust tests first for newly discovered defects.
+2. If run #95 is fully green, review PR #32 diff and contract behavior. Then merge PR #29 before PR #32 only with owner approval; after #29 merges, update PR #32's base to `main` or rebase it, and rerun CI against the resulting commit. Do not merge PR #32 before its test contract is present on the target branch.
+3. Review PR #28's ledger transaction contract against the implementation, especially closing-day behavior, sign conventions, idempotency and missing-opening-cash completeness.
+4. After the ledger is green and integrated, add test-first ServingService → Ledger payment integration using a stable transaction ID derived from the served order ID. Invalid/incomplete service must not record revenue; duplicate service must not create duplicate revenue.
+5. Add inventory purchase accounting only after the business rule is explicit; ingredient consumption is not a new cash expense if the stock was already paid for.
+6. Implement a day controller/end-of-day summary with reconciliation tests. Then update acceptance matrix and playtest evidence based only on verified outcomes.
+7. Keep visual work separate from economy logic. Stock-pot visual approval and Visual Bible owner review remain pending.
 
 ## How to continue in a new chat
 
