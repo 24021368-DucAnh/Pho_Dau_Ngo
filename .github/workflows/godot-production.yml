@@ -39,6 +39,9 @@ jobs:
           include-templates: true
       - name: Import and parse production project
         run: godot --headless --editor --path game --quit
+      - name: Run ledger contract tests
+        working-directory: game
+        run: godot --headless --path . --script res://tests/test_ledger_contract.gd
       - name: Run interaction contract tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_interaction_contract.gd
@@ -48,9 +51,6 @@ jobs:
       - name: Run order lifecycle and serving tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_order_lifecycle.gd
-      - name: Run ledger contract tests
-        working-directory: game
-        run: godot --headless --path . --script res://tests/test_ledger_contract.gd
       - name: Export Linux desktop build
         working-directory: game
         run: |
