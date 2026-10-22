@@ -53,7 +53,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			status_label.text = "Bát này đã bắt đầu theo phiếu " + String(held_bowl.prepared_recipe_id) + ". Hãy hoàn thành hoặc hủy bát trước khi đổi phiếu."
 			return
 		active_recipe = PHO_BO_CHIN_RECIPE if active_recipe == PHO_BO_TAI_RECIPE else PHO_BO_TAI_RECIPE
-		status_label.text = "Đã chọn phiếu: " + active_recipe.display_name + " · thời gian trụng " + str(active_recipe.blanch_duration_seconds) + " giây."
+		status_label.text = "Đã chọn phiếu: " + active_recipe.display_name + " · trạng thái thịt " + str(active_recipe.blanch_duration_seconds) + " giây."
 		return
 
 	if event.is_action_pressed("cancel_preparation"):
@@ -115,7 +115,7 @@ func _interact() -> void:
 		if bowl.set_held():
 			held_bowl = bowl
 			_set_placement_zone_active(true)
-			status_label.text = "Đã cầm bát. Cho bánh phở, trụng thịt theo phiếu, rồi chan nước dùng cuối cùng."
+			status_label.text = "Đã cầm bát. Cho bánh phở, thêm thịt đúng trạng thái theo phiếu, rồi chan nước dùng cuối cùng."
 		else:
 			status_label.text = "Bát đang được giữ."
 	elif target is KitchenStation:
