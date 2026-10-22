@@ -149,8 +149,6 @@ func _interact() -> void:
 		status_label.text = "Cầm bát trước khi thao tác tại trạm."
 	elif target is PlacementZone:
 		status_label.text = "Cần cầm bát trước khi đặt."
-	elif target is Area3D and target.name == "DeliveryZone":
-		status_label.text = "E / Click: giao bát theo phiếu hiện tại"
 	else:
 		status_label.text = "Chưa nhắm vào vật có thể tương tác."
 
