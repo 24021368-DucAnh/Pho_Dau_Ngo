@@ -21,6 +21,9 @@ concurrency:
   group: godot-production-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   validate-and-export:
     name: Import, test interaction and recipe contracts, and export desktop builds
@@ -42,6 +45,9 @@ jobs:
       - name: Run kitchen recipe validation tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_recipe_validation.gd
+      - name: Run order lifecycle and serving tests
+        working-directory: game
+        run: godot --headless --path . --script res://tests/test_order_lifecycle.gd
       - name: Export Linux desktop build
         working-directory: game
         run: |
