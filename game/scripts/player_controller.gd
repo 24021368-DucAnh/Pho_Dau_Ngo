@@ -53,7 +53,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			status_label.text = "Bát này đã bắt đầu theo phiếu " + String(held_bowl.prepared_recipe_id) + ". Hãy hoàn thành hoặc hủy bát trước khi đổi phiếu."
 			return
 		active_recipe = PHO_BO_CHIN_RECIPE if active_recipe == PHO_BO_TAI_RECIPE else PHO_BO_TAI_RECIPE
-		status_label.text = "Đã chọn phiếu: " + active_recipe.display_name + " · trạng thái thịt " + str(active_recipe.blanch_duration_seconds) + " giây."
+		status_label.text = "Đã chọn phiếu: " + active_recipe.display_name + ". Chọn đúng khay thịt theo công thức."
 		return
 
 	if event.is_action_pressed("cancel_preparation"):
