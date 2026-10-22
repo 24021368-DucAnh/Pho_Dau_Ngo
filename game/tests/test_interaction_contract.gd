@@ -52,12 +52,12 @@ func _run() -> void:
 	var cooked_station: Node3D = scene_instance.get_node_or_null("CookedBeefStation") as Node3D
 	_check(cart_top != null, "cart has a top surface for ingredient stations")
 	if cart_top != null:
-		var cart_top_world_y: float = cart_top.global_position.y + (0.5 * cart_top.mesh.get_aabb().size.y * cart_top.global_scale.y)
+		var cart_top_world_y: float = cart_top.global_position.y + (0.5 * cart_top.mesh.get_aabb().size.y * cart_top.global_transform.basis.get_scale().y)
 		for station in [broth_station, noodles_station, beef_station, cooked_station]:
 			if station != null:
 				var visual: MeshInstance3D = station.get_node_or_null("StationVisual") as MeshInstance3D
 				if visual != null:
-					var visual_bottom_y: float = visual.global_position.y - (0.5 * visual.mesh.get_aabb().size.y * visual.global_scale.y)
+					var visual_bottom_y: float = visual.global_position.y - (0.5 * visual.mesh.get_aabb().size.y * visual.global_transform.basis.get_scale().y)
 					_check(visual_bottom_y <= cart_top_world_y + 0.02 and visual_bottom_y >= cart_top_world_y - 0.08, "%s visual rests on cart top" % station.name)
 				else:
 					_check(station.name == "BrothStation", "%s has a visual proxy when expected" % station.name)
