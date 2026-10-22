@@ -51,6 +51,9 @@ func _run() -> void:
 	_check(not bool(incomplete.get("ok", false)), "incomplete bowl cannot be served")
 	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "incomplete bowl rejection preserves order")
 	_check(bool(broth.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "serving fixture finishes bowl with broth")
+	var not_placed := serving.serve_order(bowl, order_manager, order_id, &"table-1")
+	_check(not bool(not_placed.get("ok", false)), "completed bowl must be placed before delivery")
+	_check(int(serving.get("payment_event_count")) == 0, "unplaced bowl records no payment")
 	var placement := PlacementZone.new()
 	var marker := Marker3D.new()
 	marker.name = "PlacementMarker"
