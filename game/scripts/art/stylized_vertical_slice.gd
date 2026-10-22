@@ -14,28 +14,29 @@ func _build_environment() -> void:
 	var world := WorldEnvironment.new()
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color("#b8c7bd")
+	env.background_color = Color("#aebbb3")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color("#e8d7b5")
-	env.ambient_light_energy = 0.65
+	env.ambient_light_color = Color("#d7cbb5")
+	env.ambient_light_energy = 0.42
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_exposure = 0.9
 	world.environment = env
 	add_child(world)
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "MorningSun"
 	sun.rotation_degrees = Vector3(-42.0, -28.0, 0.0)
-	sun.light_color = Color("#ffe4b5")
-	sun.light_energy = 1.15
+	sun.light_color = Color("#f5d9ad")
+	sun.light_energy = 0.78
 	sun.shadow_enabled = true
 	add_child(sun)
 
 	var fill := OmniLight3D.new()
 	fill.name = "StallWarmFill"
 	fill.position = Vector3(-2.5, 3.1, -0.2)
-	fill.light_color = Color("#ffd19a")
-	fill.light_energy = 1.3
-	fill.omni_range = 7.0
+	fill.light_color = Color("#e9bd88")
+	fill.light_energy = 0.38
+	fill.omni_range = 5.0
 	add_child(fill)
 
 func _build_alley() -> void:
