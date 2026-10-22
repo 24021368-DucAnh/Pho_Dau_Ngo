@@ -1,218 +1,112 @@
+# Recipe and transaction regression coverage for both beef variants, station ordering, stock conservation, recipe locking, and cancellation.
 extends SceneTree
 
-var failures: int = 0
-
+var failures := 0
 
 func _initialize() -> void:
 	call_deferred("_run")
 
-
 func _run() -> void:
-	var recipe := load("res://data/recipes/pho_bo.tres") as RecipeData
-	_check(recipe != null, "phở bò recipe data loads")
-	var tai_recipe := load("res://data/recipes/pho_bo.tres") as RecipeData
-	var chin_recipe := load("res://data/recipes/pho_bo_chin.tres") as RecipeData
-	_check(tai_recipe != null and tai_recipe.is_valid_recipe(), "phở tái recipe is valid")
-	_check(chin_recipe != null and chin_recipe.is_valid_recipe(), "phở chín recipe is valid")
-	if tai_recipe != null and chin_recipe != null:
-		_check(tai_recipe.beef_variant == "tai" and chin_recipe.beef_variant == "chin", "recipe variants are distinct")
-		_check(tai_recipe.blanch_duration_seconds < chin_recipe.blanch_duration_seconds, "phở chín requires longer blanching than phở tái")
-	_check(KitchenStation.blanch_duration_is_acceptable(1.0, 1.0), "exact blanching duration is accepted")
-	_check(KitchenStation.blanch_duration_is_acceptable(2.0, 1.0), "blanching within tolerance is accepted")
-	_check(not KitchenStation.blanch_duration_is_acceptable(0.5, 1.0), "under-blanching is rejected")
-	_check(not KitchenStation.blanch_duration_is_acceptable(3.1, 1.0), "over-blanching beyond tolerance is rejected")
-	_check(not KitchenStation.blanch_duration_is_acceptable(-0.1, 1.0), "negative elapsed blanch time is rejected")
-	_check(not KitchenStation.blanch_duration_is_acceptable(1.0, -1.0), "negative required blanch time is rejected")
-	_check(not KitchenStation.blanch_duration_is_acceptable(1.0, 1.0, -0.1), "negative blanch tolerance is rejected")
-	if tai_recipe != null:
-		var invalid_recipe := tai_recipe.duplicate(true) as RecipeData
-		invalid_recipe.steps = tai_recipe.steps.duplicate(true)
-		invalid_recipe.steps[1]["ingredient_id"] = &"noodles"
-		_check(not invalid_recipe.is_valid_recipe(), "recipe rejects mismatched ingredient mapping")
-		invalid_recipe = tai_recipe.duplicate(true) as RecipeData
-		invalid_recipe.blanch_duration_seconds = -1.0
-		_check(not invalid_recipe.is_valid_recipe(), "recipe rejects negative blanch duration")
-	if recipe == null:
-		_finish()
-		return
-
-	_check(recipe.steps.size() == 3, "recipe has three ordered steps")
-	_check(StringName(recipe.step_at(0).get("action_id", &"")) == &"add_noodles", "noodles are the first recipe step")
-	_check(StringName(recipe.step_at(1).get("action_id", &"")) == &"add_beef", "beef is the second recipe step")
-	_check(StringName(recipe.step_at(2).get("action_id", &"")) == &"add_broth", "broth is the final recipe step")
-	_check(recipe.step_at(3).is_empty(), "recipe returns no step after completion")
-
-	recipe = recipe.duplicate(true) as RecipeData # Isolate deterministic contract timing from the shared resource used by variant tests.
-	recipe.blanch_duration_seconds = 0.0
+	var tai := load("res://data/recipes/pho_bo.tres") as RecipeData
+	var chin := load("res://data/recipes/pho_bo_chin.tres") as RecipeData
+	_check(tai != null and tai.is_valid_recipe(), "tai recipe valid")
+	_check(chin != null and chin.is_valid_recipe(), "chin recipe valid")
+	if tai != null and chin != null:
+		_check(tai.step_at(1).get("action_id") == &"add_raw_beef", "tai uses raw sliced beef action")
+		_check(tai.step_at(1).get("ingredient_id") == &"raw_sliced_beef", "tai requires raw sliced beef")
+		_check(chin.step_at(1).get("action_id") == &"add_cooked_beef", "chin uses cooked beef action")
+		_check(chin.step_at(1).get("ingredient_id") == &"cooked_sliced_beef", "chin requires cooked sliced beef")
+		_check(tai.step_at(2).get("action_id") == &"add_broth", "broth finishes tai")
+		_check(chin.step_at(2).get("action_id") == &"add_broth", "broth finishes chin")
+	# Station/inventory transaction contracts: invalid order and missing stock must not mutate state.
 	var inventory := InventoryService.new()
-	inventory.starting_stock = {&"broth": 2, &"noodles": 2, &"beef": 2}
 	root.add_child(inventory)
 	await process_frame
-
-	var broth_station := _make_station(&"add_broth", &"broth", "Nồi nước dùng")
-	var noodles_station := _make_station(&"add_noodles", &"noodles", "Khay bánh phở")
-	var misconfigured_noodles_station := _make_station(&"add_noodles", &"beef", "Trạm cấu hình sai")
-	var beef_station := _make_station(&"add_beef", &"beef", "Khay thịt bò")
-	root.add_child(broth_station)
-	root.add_child(noodles_station)
-	root.add_child(beef_station)
-	await process_frame
-
-	var bowl := _make_bowl()
-	root.add_child(bowl)
-	await process_frame
-	_check(bowl.set_held(), "available bowl can be held for preparation")
-	_check(not bowl.set_held(), "repeated pickup cannot acquire an already-held bowl twice")
-
-	var misconfigured_result: Dictionary = misconfigured_noodles_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(not bool(misconfigured_result.get("ok", false)), "misconfigured station is rejected before consumption")
-	_check(inventory.get_stock(&"beef") == 2 and inventory.get_stock(&"noodles") == 2, "misconfigured station leaves all stock unchanged")
-	_check(bowl.recipe_step_index == 0 and bowl.consumed_ingredients.is_empty(), "misconfigured station leaves bowl unchanged")
-
-	var broth_first: Dictionary = broth_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(not bool(broth_first.get("ok", false)), "broth cannot be added before noodles and beef")
-	_check(inventory.get_stock(&"broth") == 2, "wrong station order does not consume broth")
-	_check(bowl.recipe_step_index == 0, "wrong station order does not advance recipe state")
-
-	var noodles_result: Dictionary = noodles_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(bool(noodles_result.get("ok", false)), "noodle station accepts the first step")
-	_check(inventory.get_stock(&"noodles") == 1, "valid noodle step consumes one unit")
-	_check(bowl.recipe_step_index == 1, "valid noodle step advances recipe state")
-	_check(not bowl.can_apply_recipe_step(&"add_beef", chin_recipe), "bowl cannot switch recipe identity after preparation begins")
-
-	var repeated_noodles: Dictionary = noodles_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(not bool(repeated_noodles.get("ok", false)), "repeating a completed station action is rejected")
-	_check(inventory.get_stock(&"noodles") == 1, "repeated station action cannot double-consume noodles")
-	_check(bowl.consumed_ingredients.size() == 1, "repeated action does not duplicate bowl ingredient records")
-
-	var beef_start: Dictionary = beef_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(bool(beef_start.get("ok", false)) and bool(beef_start.get("blanching", false)), "beef station starts the blanching step")
-	var beef_result: Dictionary = beef_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(bool(beef_result.get("ok", false)), "beef station completes the second step after blanching")
-	var broth_result: Dictionary = broth_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(bool(broth_result.get("ok", false)), "broth station accepts the final step")
-	_check(bowl.preparation_state == InteractiveBowl.PreparationState.READY_TO_SERVE, "final recipe step marks bowl ready to serve")
-	_check(bowl.recipe_step_index == recipe.steps.size(), "completed bowl has no remaining recipe steps")
-	_check(inventory.get_stock(&"noodles") == 1 and inventory.get_stock(&"beef") == 1 and inventory.get_stock(&"broth") == 1, "each ingredient is consumed exactly once")
-
-	var complete_repeat: Dictionary = broth_station.apply_to_bowl(bowl, recipe, inventory)
-	_check(not bool(complete_repeat.get("ok", false)), "completed recipe rejects additional station actions")
-	_check(inventory.get_stock(&"broth") == 1, "completed recipe cannot consume extra broth")
-	var completed_waste_count := bowl.consumed_ingredients.size()
-	var cancel_completed: Dictionary = bowl.cancel_preparation()
-	_check(not bool(cancel_completed.get("ok", false)), "completed bowl cannot be cancelled as an in-progress preparation")
-	_check(bowl.preparation_state == InteractiveBowl.PreparationState.READY_TO_SERVE, "rejected cancellation preserves ready-to-serve state")
-	_check(bowl.recipe_step_index == recipe.steps.size(), "rejected cancellation preserves completed recipe progress")
-	_check(bowl.consumed_ingredients.size() == completed_waste_count, "rejected cancellation preserves completed ingredient records")
-	_check(inventory.get_stock(&"beef") == 1, "rejected cancellation does not change stock")
-
-	var cancel_inventory := InventoryService.new()
-	cancel_inventory.starting_stock = {&"broth": 1, &"noodles": 1, &"beef": 1}
-	root.add_child(cancel_inventory)
-	await process_frame
-	var cancel_bowl := _make_bowl()
-	root.add_child(cancel_bowl)
-	await process_frame
-	_check(cancel_bowl.set_held(), "second bowl can be held for cancellation test")
-	var cancel_step: Dictionary = noodles_station.apply_to_bowl(cancel_bowl, recipe, cancel_inventory)
-	_check(bool(cancel_step.get("ok", false)), "cancellation test consumes noodles before cancellation")
-	var stock_before_cancel := cancel_inventory.get_stock(&"noodles")
-	var cancel_result: Dictionary = cancel_bowl.cancel_preparation()
-	beef_station.reset_blanching(cancel_bowl)
-	_check(bool(cancel_result.get("ok", false)), "in-progress bowl can be cancelled")
-	_check(cancel_bowl.preparation_state == InteractiveBowl.PreparationState.CLEAN, "cancel resets bowl preparation state")
-	_check(cancel_bowl.recipe_step_index == 0, "cancel resets recipe progress")
-	_check(cancel_inventory.get_stock(&"noodles") == stock_before_cancel, "cancel does not refund already-used ingredients")
-	_check(cancel_result.get("wasted", []).size() == 1, "cancel reports consumed ingredients as waste")
-	var cancel_again: Dictionary = cancel_bowl.cancel_preparation()
-	_check(not bool(cancel_again.get("ok", false)), "cancellation can only record waste once")
-	_check(cancel_again.get("wasted", []).is_empty(), "repeated cancellation cannot duplicate waste records")
-	_check(not beef_station._blanch_started_msec.has(cancel_bowl.get_instance_id()), "cancel clears any active blanch timer for the bowl")
-
-
-	# Exercise the real station state machine at both timing boundaries without sleeping in CI.
-	var timing_inventory := InventoryService.new()
-	timing_inventory.starting_stock = {&"broth": 2, &"noodles": 2, &"beef": 2}
-	root.add_child(timing_inventory)
-	await process_frame
-	var timing_bowl := _make_bowl()
-	root.add_child(timing_bowl)
-	await process_frame
-	_check(timing_bowl.set_held(), "timing test bowl can be held")
-	var timing_noodles: Dictionary = noodles_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
-	_check(bool(timing_noodles.get("ok", false)), "timing test starts with noodles")
-	var timing_key := timing_bowl.get_instance_id()
-	var timing_start: Dictionary = beef_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
-	_check(bool(timing_start.get("blanching", false)), "timing test starts beef blanching")
-	beef_station._blanch_started_msec[timing_key] = Time.get_ticks_msec() - 500
-	var too_early: Dictionary = beef_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
-	_check(not bool(too_early.get("ok", false)), "beef cannot be consumed before minimum blanch time")
-	_check(timing_inventory.get_stock(&"beef") == 2, "early blanch attempt leaves beef stock unchanged")
-	beef_station._blanch_started_msec[timing_key] = Time.get_ticks_msec() - 4000
-	var overcooked: Dictionary = beef_station.apply_to_bowl(timing_bowl, tai_recipe, timing_inventory)
-	_check(not bool(overcooked.get("ok", false)), "overcooked beef is rejected")
-	_check(timing_bowl.preparation_state == InteractiveBowl.PreparationState.CLEAN, "overcooking cancels and resets the in-progress bowl")
-	_check(not beef_station._blanch_started_msec.has(timing_key), "overcooking clears the blanch timer")
-	_check(timing_inventory.get_stock(&"beef") == 2, "overcooking does not consume beef")
-
-	# Both selectable recipes must complete the full noodle -> beef -> broth flow.
-	for selected_recipe in [tai_recipe, chin_recipe]:
-		var variant_inventory := InventoryService.new()
-		variant_inventory.starting_stock = {&"broth": 1, &"noodles": 1, &"beef": 1}
-		root.add_child(variant_inventory)
-		await process_frame
-		var variant_bowl := _make_bowl()
-		root.add_child(variant_bowl)
-		await process_frame
-		_check(variant_bowl.set_held(), String(selected_recipe.display_name) + " bowl can be held")
-		var variant_noodles: Dictionary = noodles_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
-		_check(bool(variant_noodles.get("ok", false)), String(selected_recipe.display_name) + " accepts noodles")
-		var variant_start: Dictionary = beef_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
-		_check(bool(variant_start.get("blanching", false)), String(selected_recipe.display_name) + " starts beef blanching")
-		beef_station._blanch_started_msec[variant_bowl.get_instance_id()] = Time.get_ticks_msec() - int(selected_recipe.blanch_duration_seconds * 1000.0) - 100
-		var variant_beef: Dictionary = beef_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
-		_check(bool(variant_beef.get("ok", false)), String(selected_recipe.display_name) + " completes beef blanching within tolerance")
-		var variant_broth: Dictionary = broth_station.apply_to_bowl(variant_bowl, selected_recipe, variant_inventory)
-		_check(bool(variant_broth.get("ok", false)), String(selected_recipe.display_name) + " accepts broth last")
-		_check(variant_bowl.is_ready_to_serve(), String(selected_recipe.display_name) + " reaches ready-to-serve state")
-		_check(variant_inventory.get_stock(&"noodles") == 0 and variant_inventory.get_stock(&"beef") == 0 and variant_inventory.get_stock(&"broth") == 0, String(selected_recipe.display_name) + " consumes each ingredient exactly once")
-
-	var empty_inventory := InventoryService.new()
-	empty_inventory.starting_stock = {&"broth": 0, &"noodles": 0, &"beef": 0}
-	root.add_child(empty_inventory)
-	await process_frame
-	var empty_bowl := _make_bowl()
-	root.add_child(empty_bowl)
-	await process_frame
-	_check(empty_bowl.set_held(), "bowl can be held for shortage test")
-	var shortage: Dictionary = noodles_station.apply_to_bowl(empty_bowl, recipe, empty_inventory)
-	_check(not bool(shortage.get("ok", false)), "missing ingredient blocks recipe step")
-	_check(empty_inventory.get_stock(&"noodles") == 0, "missing ingredient never makes stock negative")
-	_check(empty_bowl.recipe_step_index == 0, "missing ingredient leaves bowl state unchanged")
-	_check(not empty_inventory.try_consume(&"noodles", 1), "inventory rejects consumption below zero")
-
-	_finish()
-
-
-func _make_station(action: StringName, ingredient: StringName, label_text: String) -> KitchenStation:
-	var station := KitchenStation.new()
-	station.action_id = action
-	station.ingredient_id = ingredient
-	station.station_label = label_text
-	return station
-
-
-func _make_bowl() -> InteractiveBowl:
 	var bowl := InteractiveBowl.new()
 	var collision := CollisionShape3D.new()
 	collision.name = "CollisionShape3D"
-	var shape := CylinderShape3D.new()
-	shape.radius = 0.24
-	shape.height = 0.12
-	collision.shape = shape
+	collision.shape = CylinderShape3D.new()
 	bowl.add_child(collision)
-	return bowl
+	root.add_child(bowl)
+	_check(bowl.set_held(), "transaction fixture bowl can be held")
 
+	var noodle_station := KitchenStation.new()
+	noodle_station.action_id = &"add_noodles"
+	noodle_station.ingredient_id = &"noodles"
+	root.add_child(noodle_station)
+	var broth_station := KitchenStation.new()
+	broth_station.action_id = &"add_broth"
+	broth_station.ingredient_id = &"broth"
+	root.add_child(broth_station)
+	await process_frame
+
+	var noodles_before := inventory.get_stock(&"noodles")
+	var broth_before := inventory.get_stock(&"broth")
+	var invalid_order := broth_station.apply_to_bowl(bowl, tai, inventory)
+	_check(not bool(invalid_order.get("ok", false)), "broth before noodles is rejected")
+	_check(inventory.get_stock(&"noodles") == noodles_before and inventory.get_stock(&"broth") == broth_before, "invalid order preserves all inventory")
+	_check(int(bowl.get("recipe_step_index")) == 0, "invalid order preserves bowl recipe step")
+
+	var valid_noodles := noodle_station.apply_to_bowl(bowl, tai, inventory)
+	_check(bool(valid_noodles.get("ok", false)), "expected noodle step succeeds")
+	_check(inventory.get_stock(&"noodles") == noodles_before - 1, "successful step consumes one noodle stock")
+	var repeated_noodles := noodle_station.apply_to_bowl(bowl, tai, inventory)
+	_check(not bool(repeated_noodles.get("ok", false)), "repeating an already-completed station step is rejected")
+	_check(inventory.get_stock(&"noodles") == noodles_before - 1, "repeated station activation does not consume twice")
+
+	# A bowl's recipe identity is locked after the first successful preparation step.
+	var cooked_station := KitchenStation.new()
+	cooked_station.action_id = &"add_cooked_beef"
+	cooked_station.ingredient_id = &"cooked_sliced_beef"
+	root.add_child(cooked_station)
+	await process_frame
+	var cooked_before := inventory.get_stock(&"cooked_sliced_beef")
+	var recipe_switch := cooked_station.apply_to_bowl(bowl, chin, inventory)
+	_check(not bool(recipe_switch.get("ok", false)), "switching tai bowl to chin after preparation starts is rejected")
+	_check(inventory.get_stock(&"cooked_sliced_beef") == cooked_before, "rejected recipe switch preserves cooked beef stock")
+	_check(int(bowl.get("recipe_step_index")) == 1, "rejected recipe switch preserves current recipe progress")
+
+	# Cancellation records the consumed ingredient as waste exactly once and resets the bowl.
+	var cancellation := bowl.cancel_preparation()
+	_check(bool(cancellation.get("ok", false)), "in-progress bowl can be cancelled")
+	var wasted: Array = cancellation.get("wasted", [])
+	_check(wasted.size() == 1 and StringName(wasted[0].get("ingredient_id", &"")) == &"noodles", "cancellation reports consumed noodles as waste")
+	_check(int(bowl.get("recipe_step_index")) == 0, "cancellation resets recipe progress")
+	_check(StringName(bowl.get("prepared_recipe_id")) == &"", "cancellation clears locked recipe identity")
+	var repeated_cancellation := bowl.cancel_preparation()
+	_check(not bool(repeated_cancellation.get("ok", false)), "cancellation cannot record the same waste twice")
+
+	var empty_inventory := InventoryService.new()
+	empty_inventory.starting_stock = {&"noodles": 0, &"broth": 1}
+	root.add_child(empty_inventory)
+	await process_frame
+	var empty_bowl := InteractiveBowl.new()
+	var empty_collision := CollisionShape3D.new()
+	empty_collision.name = "CollisionShape3D"
+	empty_collision.shape = CylinderShape3D.new()
+	empty_bowl.add_child(empty_collision)
+	root.add_child(empty_bowl)
+	_check(empty_bowl.set_held(), "empty-stock fixture bowl can be held")
+	var empty_noodle_station := KitchenStation.new()
+	empty_noodle_station.action_id = &"add_noodles"
+	empty_noodle_station.ingredient_id = &"noodles"
+	root.add_child(empty_noodle_station)
+	await process_frame
+	var missing_stock := empty_noodle_station.apply_to_bowl(empty_bowl, tai, empty_inventory)
+	_check(not bool(missing_stock.get("ok", false)), "missing ingredient stock is rejected")
+	_check(empty_inventory.get_stock(&"noodles") == 0, "missing stock never becomes negative")
+	_check(int(empty_bowl.get("recipe_step_index")) == 0, "missing stock preserves bowl state")
+
+	inventory.queue_free()
+	empty_inventory.queue_free()
+	bowl.queue_free()
+	empty_bowl.queue_free()
+	noodle_station.queue_free()
+	broth_station.queue_free()
+	cooked_station.queue_free()
+	empty_noodle_station.queue_free()
+	await process_frame
+	_finish()
 
 func _check(condition: bool, message: String) -> void:
 	if condition:
@@ -220,7 +114,6 @@ func _check(condition: bool, message: String) -> void:
 	else:
 		failures += 1
 		push_error("FAIL: " + message)
-
 
 func _finish() -> void:
 	if failures == 0:

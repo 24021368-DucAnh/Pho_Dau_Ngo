@@ -1,10 +1,12 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
 [ext_resource type="Script" path="res://scripts/placement_zone.gd" id="3_zone"]
 [ext_resource type="Script" path="res://scripts/kitchen/kitchen_station.gd" id="4_station"]
 [ext_resource type="Script" path="res://scripts/inventory/inventory_service.gd" id="5_inventory"]
+[ext_resource type="Script" path="res://scripts/orders/order_manager.gd" id="6_orders"]
+[ext_resource type="Script" path="res://scripts/serving/serving_service.gd" id="7_serving"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(20, 0.2, 20)
@@ -189,6 +191,12 @@ material_override = SubResource("StandardMaterial3D_bowl")
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource("5_inventory")
 
+[node name="OrderManager" type="Node" parent="."]
+script = ExtResource("6_orders")
+
+[node name="ServingService" type="Node" parent="."]
+script = ExtResource("7_serving")
+
 [node name="BrothStation" type="Area3D" parent="."]
 position = Vector3(-2.45, 1.28, -0.3)
 collision_layer = 2
@@ -222,9 +230,9 @@ position = Vector3(-3.58, 1.18, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
-action_id = &"add_beef"
-ingredient_id = &"beef"
-station_label = "Khay thịt bò"
+action_id = &"add_raw_beef"
+ingredient_id = &"raw_sliced_beef"
+station_label = "Khay thịt tái"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BeefStation"]
 shape = SubResource("BoxShape3D_station")
@@ -232,6 +240,22 @@ shape = SubResource("BoxShape3D_station")
 [node name="StationVisual" type="MeshInstance3D" parent="BeefStation"]
 mesh = SubResource("BoxMesh_station")
 material_override = SubResource("StandardMaterial3D_table")
+
+[node name="CookedBeefStation" type="Area3D" parent="."]
+position = Vector3(-4.05, 1.18, -0.3)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("4_station")
+action_id = &"add_cooked_beef"
+ingredient_id = &"cooked_sliced_beef"
+station_label = "Khay thịt chín đã nấu và thái lát"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CookedBeefStation"]
+shape = SubResource("BoxShape3D_station")
+
+[node name="StationVisual" type="MeshInstance3D" parent="CookedBeefStation"]
+mesh = SubResource("BoxMesh_station")
+material_override = SubResource("StandardMaterial3D_bowl")
 
 [node name="CustomerStoolProxy" type="StaticBody3D" parent="."]
 position = Vector3(1.65, 0.25, -2.7)
@@ -245,6 +269,14 @@ material_override = SubResource("StandardMaterial3D_table")
 
 [node name="StoolCollision" type="CollisionShape3D" parent="CustomerStoolProxy"]
 shape = SubResource("BoxShape3D_stool")
+
+[node name="DeliveryZone" type="Area3D" parent="."]
+position = Vector3(0, 1.1, -1.85)
+collision_layer = 2
+collision_mask = 0
+
+[node name="DeliveryCollision" type="CollisionShape3D" parent="DeliveryZone"]
+shape = SubResource("BoxShape3D_zone")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 position = Vector3(0, 0.9, 1)
@@ -265,6 +297,16 @@ collision_mask = 2
 collide_with_areas = true
 
 [node name="HUD" type="CanvasLayer" parent="Player"]
+
+[node name="OrderTicket" type="Label" parent="Player/HUD"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 390.0
+offset_bottom = 104.0
+theme_override_font_sizes/font_size = 17
+text = "PHIẾU MÓN\nĐang nhận đơn..."
 
 [node name="Center" type="Control" parent="Player/HUD"]
 layout_mode = 3

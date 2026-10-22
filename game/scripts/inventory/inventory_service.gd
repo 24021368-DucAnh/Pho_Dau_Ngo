@@ -6,7 +6,8 @@ signal stock_changed(ingredient_id: StringName, amount: int)
 @export var starting_stock: Dictionary = {
 	&"broth": 3,
 	&"noodles": 3,
-	&"beef": 3,
+	&"raw_sliced_beef": 3,
+	&"cooked_sliced_beef": 3,
 }
 
 var _stock: Dictionary = {}
@@ -23,9 +24,7 @@ func get_stock(ingredient_id: StringName) -> int:
 
 
 func can_consume(ingredient_id: StringName, amount: int = 1) -> bool:
-	if amount <= 0:
-		return false
-	return get_stock(ingredient_id) >= amount
+	return amount > 0 and get_stock(ingredient_id) >= amount
 
 
 func try_consume(ingredient_id: StringName, amount: int = 1) -> bool:
