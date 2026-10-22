@@ -14,9 +14,19 @@
 - [x] Cancellation records consumed ingredients as waste once and resets bowl state (automated regression test). No active station timer exists in the current model.
 - [x] Recipe cannot be switched after bowl preparation begins (player-level and station-level regression tests).
 - [x] Ownership remains singular across pickup/place/re-pickup; cancellation state reset is covered separately.
-- [ ] An incomplete bowl cannot be served.
+- [x] An incomplete bowl cannot be served; a completed bowl must also be placed before delivery (automated order/serving regression tests).
 
 ## Verification
 - [x] Automated recipe tests cover both workflows, invalid order, repeated activation, recipe locking, cancellation and missing stock.
 - [ ] CI import/parse, tests and Linux/Windows exports pass on the latest branch head (previous commit `64a755b` passed; latest run is pending).
 - [ ] Manual playtest covers physical interaction, placement and usability before M2 is declared fully accepted.
+
+
+## M3 order and serving service checkpoint
+- [x] Orders have stable IDs, recipe IDs, destination table IDs and explicit lifecycle states.
+- [x] Duplicate order IDs and illegal state transitions are rejected without mutating order state.
+- [x] Incomplete bowls, unplaced bowls, recipe mismatches and wrong-table deliveries are rejected without payment.
+- [x] Correct delivery transitions the order from READY to SERVED and records exactly one payment event.
+- [x] The production scene owns one OrderManager and one ServingService.
+- [ ] Customer spawning, visible order tickets, player-facing delivery interaction and end-to-end day flow remain unimplemented.
+- [ ] Manual playtest remains required; automated CI does not prove visual usability or input feel.
