@@ -9,7 +9,7 @@ func _run() -> void:
 	var order_manager := OrderManager.new()
 	root.add_child(order_manager)
 	await process_frame
-	var created: Dictionary = order_manager.create_order(&"order-001", &"pho_bo", &"table-1")
+	var created: Dictionary = order_manager.create_order(&"order-001", &"pho_bo_tai", &"table-1")
 	_check(bool(created.get("ok", false)), "valid order can be created")
 	var order_id := StringName(created.get("order_id", &""))
 	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.ACCEPTED, "new order starts accepted")
@@ -51,6 +51,13 @@ func _run() -> void:
 	_check(not bool(incomplete.get("ok", false)), "incomplete bowl cannot be served")
 	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "incomplete bowl rejection preserves order")
 	_check(bool(broth.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "serving fixture finishes bowl with broth")
+	var placement := PlacementZone.new()
+	var marker := Marker3D.new()
+	marker.name = "PlacementMarker"
+	placement.add_child(marker)
+	root.add_child(placement)
+	await process_frame
+	_check(bool(bowl.try_place(placement)), "completed bowl can be placed before delivery")
 	var wrong_table := serving.serve_order(bowl, order_manager, order_id, &"table-2")
 	_check(not bool(wrong_table.get("ok", false)), "delivery to wrong table is rejected")
 	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "wrong table rejection preserves order")
@@ -69,6 +76,7 @@ func _run() -> void:
 	beef.queue_free()
 	broth.queue_free()
 	serving.queue_free()
+	placement.queue_free()
 	await process_frame
 	_finish()
 
