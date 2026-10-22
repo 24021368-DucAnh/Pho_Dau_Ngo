@@ -1,47 +1,76 @@
 [gd_scene load_steps=28 format=3]
+[gd_scene load_steps=28 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_player"]
-[ext_resource type="Script" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
-[ext_resource type="Script" path="res://scripts/placement_zone.gd" id="3_zone"]
-[ext_resource type="Script" path="res://scripts/kitchen/kitchen_station.gd" id="4_station"]
-[ext_resource type="Script" path="res://scripts/inventory/inventory_service.gd" id="5_inventory"]
-[ext_resource type="Script" path="res://scripts/orders/order_manager.gd" id="6_orders"]
-[ext_resource type="Script" path="res://scripts/serving/serving_service.gd" id="7_serving"]
+[ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
+[ext_resource type="Script" uid="uid://cyaavgom0rc5o" path="res://scripts/placement_zone.gd" id="3_zone"]
+[ext_resource type="Script" uid="uid://ooq1nwpdfqwa" path="res://scripts/kitchen/kitchen_station.gd" id="4_station"]
+[ext_resource type="Script" uid="uid://b5yy5omnwf0yx" path="res://scripts/inventory/inventory_service.gd" id="5_inventory"]
+[ext_resource type="Script" uid="uid://d0qjic4v6tgks" path="res://scripts/orders/order_manager.gd" id="6_orders"]
+[ext_resource type="Script" uid="uid://c0mvf4mdc3v6m" path="res://scripts/serving/serving_service.gd" id="7_serving"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(20, 0.2, 20)
+[sub_resource type="Environment" id="Environment_stylized"]
+background_mode = 1
+background_color = Color(0.72, 0.78, 0.72, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.82, 0.75, 0.6, 1)
+ambient_light_energy = 0.65
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.66, 0.61, 0.49, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(20, 0.2, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_table"]
 size = Vector3(2, 1, 1)
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(20, 0.2, 20)
 
 [sub_resource type="BoxMesh" id="BoxMesh_table"]
 size = Vector3(2, 1, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.83, 0.76, 0.61, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
 size = Vector3(12, 3, 0.2)
 
-[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
 size = Vector3(12, 3, 0.2)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
 height = 1.8
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_table"]
+albedo_color = Color(0.3, 0.18, 0.11, 1)
+roughness = 0.9
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_bowl"]
 radius = 0.24
 height = 0.12
+[sub_resource type="BoxMesh" id="BoxMesh_table"]
+size = Vector3(2, 1, 1)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_bowl"]
 top_radius = 0.26
 bottom_radius = 0.22
 height = 0.12
 radial_segments = 24
+[sub_resource type="BoxShape3D" id="BoxShape3D_table"]
+size = Vector3(2, 1, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone"]
 size = Vector3(1.4, 0.25, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_zone"]
+transparency = 1
+albedo_color = Color(0.12, 0.72, 0.4, 0.28)
+roughness = 0.8
 
 [sub_resource type="BoxMesh" id="BoxMesh_zone"]
 size = Vector3(1.4, 0.02, 0.6)
@@ -66,6 +95,15 @@ roughness = 0.55
 transparency = 1
 albedo_color = Color(0.12, 0.72, 0.4, 0.28)
 roughness = 0.8
+[sub_resource type="CylinderMesh" id="CylinderMesh_bowl"]
+top_radius = 0.26
+bottom_radius = 0.22
+height = 0.12
+radial_segments = 24
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_bowl"]
+height = 0.12
+radius = 0.24
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station"]
 size = Vector3(0.34, 0.3, 0.34)
@@ -83,6 +121,12 @@ ambient_light_source = 3
 ambient_light_color = Color(0.82, 0.75, 0.6, 1)
 ambient_light_energy = 0.65
 tonemap_mode = 2
+[sub_resource type="BoxShape3D" id="BoxShape3D_stool"]
+size = Vector3(0.84, 0.5, 0.42)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.35
+height = 1.8
 
 [node name="Main" type="Node3D"]
 
@@ -91,41 +135,49 @@ environment = SubResource("Environment_stylized")
 
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-45, -25, 0)
+transform = Transform3D(0.906308, 0.298836, -0.298836, 0, 0.707107, 0.707107, 0.422618, -0.640856, 0.640856, 0, 0, 0)
 light_energy = 1.2
 shadow_enabled = true
 
 [node name="Floor" type="StaticBody3D" parent="."]
 position = Vector3(0, -0.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
 mesh = SubResource("BoxMesh_floor")
 material_override = SubResource("StandardMaterial3D_floor")
+mesh = SubResource("BoxMesh_floor")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_floor")
 
 [node name="BackWall" type="StaticBody3D" parent="."]
 position = Vector3(0, 1.5, -5.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5.4)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
 mesh = SubResource("BoxMesh_wall")
 material_override = SubResource("StandardMaterial3D_wall")
+mesh = SubResource("BoxMesh_wall")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
 shape = SubResource("BoxShape3D_wall")
 
 [node name="Table" type="StaticBody3D" parent="."]
 position = Vector3(0, 0.5, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2.7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Table"]
 mesh = SubResource("BoxMesh_table")
 material_override = SubResource("StandardMaterial3D_table")
+mesh = SubResource("BoxMesh_table")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Table"]
 shape = SubResource("BoxShape3D_table")
 
 [node name="PlacementZone" type="Area3D" parent="."]
 position = Vector3(0, 1, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.7)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("3_zone")
@@ -135,14 +187,18 @@ shape = SubResource("BoxShape3D_zone")
 
 [node name="PlacementMarker" type="Marker3D" parent="PlacementZone"]
 position = Vector3(0, 0.06, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
 
 [node name="ZoneVisual" type="MeshInstance3D" parent="PlacementZone"]
 position = Vector3(0, 0.02, 0)
 mesh = SubResource("BoxMesh_zone")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
 material_override = SubResource("StandardMaterial3D_zone")
+mesh = SubResource("BoxMesh_zone")
 
 [node name="Bowl" type="StaticBody3D" parent="."]
 position = Vector3(0, 1.06, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.06, -2.7)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("2_bowl")
@@ -150,6 +206,7 @@ script = ExtResource("2_bowl")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Bowl"]
 mesh = SubResource("CylinderMesh_bowl")
 material_override = SubResource("StandardMaterial3D_bowl")
+mesh = SubResource("CylinderMesh_bowl")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Bowl"]
 shape = SubResource("CylinderShape3D_bowl")
@@ -157,10 +214,12 @@ shape = SubResource("CylinderShape3D_bowl")
 [node name="LeftWall" type="StaticBody3D" parent="."]
 position = Vector3(-6, 1.5, -1)
 rotation_degrees = Vector3(0, 90, 0)
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6, 1.5, -1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
 mesh = SubResource("BoxMesh_wall")
 material_override = SubResource("StandardMaterial3D_wall")
+mesh = SubResource("BoxMesh_wall")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
 shape = SubResource("BoxShape3D_wall")
@@ -168,20 +227,24 @@ shape = SubResource("BoxShape3D_wall")
 [node name="RightWall" type="StaticBody3D" parent="."]
 position = Vector3(6, 1.5, -1)
 rotation_degrees = Vector3(0, 90, 0)
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 1.5, -1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
 mesh = SubResource("BoxMesh_wall")
 material_override = SubResource("StandardMaterial3D_wall")
+mesh = SubResource("BoxMesh_wall")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
 shape = SubResource("BoxShape3D_wall")
 
 [node name="PhoCart" type="StaticBody3D" parent="."]
 position = Vector3(-2.8, 0.5, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0.5, -0.3)
 
 [node name="CartBody" type="MeshInstance3D" parent="PhoCart"]
 mesh = SubResource("BoxMesh_table")
 material_override = SubResource("StandardMaterial3D_table")
+mesh = SubResource("BoxMesh_table")
 
 [node name="CartCollision" type="CollisionShape3D" parent="PhoCart"]
 shape = SubResource("BoxShape3D_table")
@@ -190,14 +253,18 @@ shape = SubResource("BoxShape3D_table")
 position = Vector3(0, 0.58, 0)
 scale = Vector3(1.1, 0.12, 1.1)
 mesh = SubResource("BoxMesh_table")
+transform = Transform3D(1.1, 0, 0, 0, 0.12, 0, 0, 0, 1.1, 0, 0.58, 0)
 material_override = SubResource("StandardMaterial3D_wall")
+mesh = SubResource("BoxMesh_table")
 
 [node name="StockPotProxy" type="MeshInstance3D" parent="PhoCart"]
 position = Vector3(0.35, 0.78, 0)
 scale = Vector3(1.7, 3.5, 1.7)
 mesh = SubResource("CylinderMesh_bowl")
+transform = Transform3D(1.7, 0, 0, 0, 3.5, 0, 0, 0, 1.7, 0.35, 0.78, 0)
 material_override = SubResource("StandardMaterial3D_bowl")
 
+mesh = SubResource("CylinderMesh_bowl")
 
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource("5_inventory")
@@ -210,6 +277,7 @@ script = ExtResource("7_serving")
 
 [node name="BrothStation" type="Area3D" parent="."]
 position = Vector3(-2.58, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.58, 1.18, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
@@ -222,6 +290,7 @@ shape = SubResource("BoxShape3D_station")
 
 [node name="NoodlesStation" type="Area3D" parent="."]
 position = Vector3(-2.95, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.95, 1.18, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
@@ -235,9 +304,11 @@ shape = SubResource("BoxShape3D_station")
 [node name="StationVisual" type="MeshInstance3D" parent="NoodlesStation"]
 mesh = SubResource("BoxMesh_station")
 material_override = SubResource("StandardMaterial3D_wall")
+mesh = SubResource("BoxMesh_station")
 
 [node name="BeefStation" type="Area3D" parent="."]
 position = Vector3(-3.32, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.32, 1.18, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
@@ -251,9 +322,11 @@ shape = SubResource("BoxShape3D_station")
 [node name="StationVisual" type="MeshInstance3D" parent="BeefStation"]
 mesh = SubResource("BoxMesh_station")
 material_override = SubResource("StandardMaterial3D_table")
+mesh = SubResource("BoxMesh_station")
 
 [node name="CookedBeefStation" type="Area3D" parent="."]
 position = Vector3(-3.69, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.69, 1.18, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
@@ -267,22 +340,27 @@ shape = SubResource("BoxShape3D_station")
 [node name="StationVisual" type="MeshInstance3D" parent="CookedBeefStation"]
 mesh = SubResource("BoxMesh_station")
 material_override = SubResource("StandardMaterial3D_bowl")
+mesh = SubResource("BoxMesh_station")
 
 [node name="CustomerStoolProxy" type="StaticBody3D" parent="."]
 position = Vector3(1.65, 0.25, -2.7)
 collision_layer = 1
 collision_mask = 1
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.65, 0.25, -2.7)
 
 [node name="StoolMesh" type="MeshInstance3D" parent="CustomerStoolProxy"]
 scale = Vector3(0.42, 0.5, 0.42)
 mesh = SubResource("BoxMesh_table")
+transform = Transform3D(0.42, 0, 0, 0, 0.5, 0, 0, 0, 0.42, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_table")
+mesh = SubResource("BoxMesh_table")
 
 [node name="StoolCollision" type="CollisionShape3D" parent="CustomerStoolProxy"]
 shape = SubResource("BoxShape3D_stool")
 
 [node name="DeliveryZone" type="Area3D" parent="."]
 position = Vector3(0, 1.1, -1.85)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -1.85)
 collision_layer = 2
 collision_mask = 0
 
@@ -291,6 +369,7 @@ shape = SubResource("BoxShape3D_zone")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 position = Vector3(0, 0.9, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 1)
 script = ExtResource("1_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
@@ -299,6 +378,7 @@ shape = SubResource("CapsuleShape3D_player")
 [node name="Camera3D" type="Camera3D" parent="Player"]
 position = Vector3(0, 0.65, 0)
 rotation_degrees = Vector3(-7, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.992546, 0.121869, 0, -0.121869, 0.992546, 0, 0.65, 0)
 current = true
 fov = 75.0
 
@@ -318,6 +398,8 @@ offset_right = 390.0
 offset_bottom = 104.0
 theme_override_font_sizes/font_size = 17
 text = "PHIẾU MÓN\nĐang nhận đơn..."
+text = "PHIẾU MÓN
+Đang nhận đơn..."
 
 [node name="Center" type="Control" parent="Player/HUD"]
 layout_mode = 3
@@ -339,6 +421,8 @@ offset_left = -10.0
 offset_top = -14.0
 offset_right = 10.0
 offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_font_sizes/font_size = 22
 text = "+"
 horizontal_alignment = 1
@@ -347,6 +431,7 @@ vertical_alignment = 1
 [node name="Prompt" type="Label" parent="Player/HUD/Center"]
 layout_mode = 1
 anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.56
 anchor_right = 0.5
@@ -355,6 +440,8 @@ offset_left = -280.0
 offset_top = 12.0
 offset_right = 280.0
 offset_bottom = 42.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_font_sizes/font_size = 18
 text = "WASD di chuyển · Chuột nhìn · E / Click tương tác"
 horizontal_alignment = 1
@@ -362,6 +449,7 @@ horizontal_alignment = 1
 [node name="Status" type="Label" parent="Player/HUD/Center"]
 layout_mode = 1
 anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.65
 anchor_right = 0.5
@@ -370,6 +458,8 @@ offset_left = -340.0
 offset_top = 8.0
 offset_right = 340.0
 offset_bottom = 36.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_font_sizes/font_size = 16
 text = "Nhắm vào bát để cầm."
 horizontal_alignment = 1
