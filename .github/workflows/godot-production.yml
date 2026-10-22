@@ -45,6 +45,9 @@ jobs:
       - name: Run kitchen recipe validation tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_recipe_validation.gd
+      - name: Run order lifecycle and serving tests
+        working-directory: game
+        run: godot --headless --path . --script res://tests/test_order_lifecycle.gd
       - name: Export Linux desktop build
         working-directory: game
         run: |
