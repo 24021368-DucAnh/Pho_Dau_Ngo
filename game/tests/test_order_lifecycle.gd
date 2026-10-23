@@ -62,8 +62,22 @@ func _run() -> void:
 	root.add_child(ledger)
 	await process_frame
 	_check(bool(ledger.record_transaction(&"opening-day-01", &"day-01", &"opening_cash", 100000, &"day-start").get("ok", false)), "ledger opening cash is initialized")
+	var blocked_ledger := Ledger.new()
+	root.add_child(blocked_ledger)
+	await process_frame
+	_check(bool(blocked_ledger.record_transaction(&"opening-closed-day", &"day-closed", &"opening_cash", 50000, &"day-start").get("ok", false)), "closed-day rejection fixture initializes opening cash")
+	_check(bool(blocked_ledger.close_day(&"day-closed").get("ok", false)), "closed-day rejection fixture closes its day")
+	var blocked_serving := ServingService.new()
+	_check(bool(blocked_serving.configure_ledger(blocked_ledger, &"day-closed").get("ok", false)), "serving configures with a valid ledger")
+	root.add_child(blocked_serving)
+	var blocked_result := blocked_serving.serve_order(bowl, order_manager, order_id, &"table-1", 45000)
+	_check(not bool(blocked_result.get("ok", false)), "serving is rejected when ledger day is closed")
+	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "ledger rejection preserves ready order")
+	_check(int(blocked_serving.get("payment_event_count")) == 0, "ledger rejection emits no payment event")
+	_check(blocked_ledger.get_transactions(&"day-closed").size() == 1, "ledger rejection creates no sale transaction")
+
 	var serving := ServingService.new()
-	serving.configure_ledger(ledger, &"day-01")
+	_check(bool(serving.configure_ledger(ledger, &"day-01").get("ok", false)), "serving configures with the active ledger")
 	root.add_child(serving)
 	var incomplete := serving.serve_order(bowl, order_manager, order_id, &"table-1")
 	_check(not bool(incomplete.get("ok", false)), "incomplete bowl cannot be served")
@@ -100,6 +114,8 @@ func _run() -> void:
 	beef.queue_free()
 	broth.queue_free()
 	serving.queue_free()
+	blocked_serving.queue_free()
+	blocked_ledger.queue_free()
 	ledger.queue_free()
 	placement.queue_free()
 	await process_frame
