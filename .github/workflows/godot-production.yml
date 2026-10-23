@@ -42,6 +42,9 @@ jobs:
       - name: Run ledger contract tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_ledger_contract.gd
+      - name: Run day controller and summary tests
+        working-directory: game
+        run: godot --headless --path . --script res://tests/test_day_controller.gd
       - name: Run interaction contract tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_interaction_contract.gd
