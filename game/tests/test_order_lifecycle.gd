@@ -58,7 +58,12 @@ func _run() -> void:
 	await process_frame
 	_check(bool(noodle.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "serving fixture adds noodles")
 	_check(bool(beef.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "serving fixture adds tai beef")
+	var ledger := Ledger.new()
+	root.add_child(ledger)
+	await process_frame
+	_check(bool(ledger.record_transaction(&"opening-day-01", &"day-01", &"opening_cash", 100000, &"day-start").get("ok", false)), "ledger opening cash is initialized")
 	var serving := ServingService.new()
+	serving.configure_ledger(ledger, &"day-01")
 	root.add_child(serving)
 	var incomplete := serving.serve_order(bowl, order_manager, order_id, &"table-1")
 	_check(not bool(incomplete.get("ok", false)), "incomplete bowl cannot be served")
@@ -77,13 +82,15 @@ func _run() -> void:
 	var wrong_table := serving.serve_order(bowl, order_manager, order_id, &"table-2")
 	_check(not bool(wrong_table.get("ok", false)), "delivery to wrong table is rejected")
 	_check(order_manager.get_order(order_id).get("status") == OrderManager.OrderStatus.READY, "wrong table rejection preserves order")
-	var served := serving.serve_order(bowl, order_manager, order_id, &"table-1")
+	var served := serving.serve_order(bowl, order_manager, order_id, &"table-1", 45000)
 	_check(bool(served.get("ok", false)), "completed bowl serves matching order")
 	_check(int(served.get("payment_events", 0)) == 1, "successful service records one payment event")
 	var duplicate := serving.serve_order(bowl, order_manager, order_id, &"table-1")
 	_check(not bool(duplicate.get("ok", false)), "repeated service action is rejected")
 	_check(int(duplicate.get("payment_events", 0)) == 0, "repeated service records no additional payment")
 	_check(int(serving.get("payment_event_count")) == 1, "payment remains exactly once")
+	_check(int(ledger.get_day_totals(&"day-01").get("revenue", -1)) == 45000, "successful serving posts order revenue to ledger")
+	_check(ledger.get_transactions(&"day-01").size() == 2, "one order creates one ledger sale transaction")
 	_check(order_manager.get_open_orders().size() == 0, "served and cancelled orders are excluded from open-order queue")
 
 	order_manager.queue_free()
@@ -93,6 +100,7 @@ func _run() -> void:
 	beef.queue_free()
 	broth.queue_free()
 	serving.queue_free()
+	ledger.queue_free()
 	placement.queue_free()
 	await process_frame
 	_finish()
