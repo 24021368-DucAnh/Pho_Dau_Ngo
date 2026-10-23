@@ -176,3 +176,40 @@ This addendum was checked against live GitHub metadata after the initial handoff
 - **No approval is needed for this documentation-only update.**
 - Owner approval is still required before merging any PR.
 - No manual Godot/playtest action is requested yet because a current verified build artifact is not available.
+
+
+## 10. Continuation update — 2026-10-23, after test commit on PR #34
+
+### Test change committed
+- Commit: [`7852061235c78469bb0a660d488c6233ed6ab848`](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/commit/7852061235c78469bb0a660d488c6233ed6ab848)
+- PR #34 head is now `7852061235c78469bb0a660d488c6233ed6ab848`; base remains PR #32 head `535f95064a14a5ba1d743445f6b2804ceff30b11`.
+- `game/tests/test_order_lifecycle.gd` now explicitly asserts `configure_ledger(...).ok`.
+- Added a closed-day rejection scenario using an isolated Ledger/ServingService fixture. Assertions cover: serving is rejected; order remains READY; no payment event is counted; transaction count remains one opening-cash record, proving no sale was added.
+- The test change is committed and diff-reviewed. It has **not** been verified by Godot runtime because the associated CI run did not execute any workflow steps.
+
+### Run #97 confirms the same CI symptom
+- [Run #97](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39899338387), head `7852061235c78469bb0a660d488c6233ed6ab848`, failed in about two seconds.
+- Job [120237016684](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39899338387/job/120237016684) reports `steps: []`, `runner_id: 0`, blank runner name, and no output summary. This reproduces the same failure signature seen in both attempts of run #96.
+- Therefore the newly added GDScript assertions are **not evidenced as the cause**: no runner/step was recorded. Root cause remains unknown. The pattern now spans runs #96 and #97 (including a retry of #96); do not keep rerunning blindly. Seek GitHub Actions service/runner diagnostics or a separate authorized execution environment before changing workflow configuration.
+- No Godot test result can be inferred from this run.
+
+### Current statuses after this continuation
+| Item | Status | Evidence |
+|---|---|---|
+| Closed-day serving rejection test | COMMITTED; DIFF REVIEWED; RUNTIME NOT VERIFIED | Commit `7852061...`, PR #34 |
+| PR #34 CI | BLOCKED — no runner/steps | Run #97; same signature as #96 |
+| Ledger integration end-to-end | IMPLEMENTED BUT NOT VERIFIED | No current successful complete workflow |
+| Atomicity if order transition fails after Ledger post | OPEN DESIGN/TEST GAP | Ledger post precedes order transition |
+| CI root cause | UNKNOWN / BLOCKED | Three failed executions across runs #96/#97 without runner steps; one retry already used |
+| Merge / deployment | NOT DONE | No merge, reset, deletion, or deployment performed |
+
+### Next action
+1. Do not rerun CI again without a new diagnostic hypothesis or platform-side evidence.
+2. Inspect check-run annotations and GitHub Actions service/runner details if connector/API access permits; if not, record that limitation rather than guessing.
+3. Continue only with code-reviewable, contract-backed tests. Before implementation of recovery/compensation, define the desired atomicity semantics.
+4. Revalidate all live PR heads before future changes.
+
+### Owner action
+- No manual action is required right now.
+- No PR approval/merge requested. Owner approval remains required before any merge.
+- Manual playtest remains blocked until a build artifact is successfully produced and verified.
