@@ -213,3 +213,47 @@ This addendum was checked against live GitHub metadata after the initial handoff
 - No manual action is required right now.
 - No PR approval/merge requested. Owner approval remains required before any merge.
 - Manual playtest remains blocked until a build artifact is successfully produced and verified.
+
+## 8. Live continuation update — 2026-10-23 (after PR #34 test expansion)
+
+### Revalidated repository state
+- `main` remains `0e159599a3b5c6010ffb8ad155d8a1312fa87f1a`; no merge was performed.
+- PR #29 remains open/draft at `244baca94e991c88bff28fe79073cf3e1d1e51b9`.
+- PR #32 remains open/draft at `535f95064a14a5ba1d743445f6b2804ceff30b11`.
+- PR #33 remains open/draft at `82e10cecac658a5f03e5754af7738dc4e0a4fa1a`.
+- PR #34 remains open/draft, based on PR #32, with head now `7f6ca587af2a300c3a0ca33f365709766d0a0b6f`.
+- No merge, reset, deletion, deployment, or blind rerun was performed.
+
+### PR #34 test expansion
+Commit [7f6ca58](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/commit/7f6ca587af2a300c3a0ca33f365709766d0a0b6f) changes only `game/tests/test_order_lifecycle.gd` and adds:
+- **Replay recovery case:** pre-seeds the stable transaction `sale:order-003` with the same payload, then verifies serving can transition the READY order to SERVED without appending another Ledger transaction.
+- **Conflicting replay case:** reserves `sale:order-004` with a different amount, then verifies serving fails, the order stays READY, no payment event is emitted, transaction count is unchanged, and the original amount is preserved.
+- Existing closed-day rejection coverage remains in the same test.
+- The commit diff was inspected. These tests are authored but are **not runtime-verified** until Godot actually executes them.
+
+### Run #98 — same pre-run failure signature
+[Run #98](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39900136848) corresponds exactly to PR #34 head `7f6ca587af2a300c3a0ca33f365709766d0a0b6f`.
+- Job [120239585009](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39900136848/job/120239585009) completed as failure in about two seconds.
+- GitHub reports an empty `steps` array, `runner_id: 0`, blank runner name, no artifacts, and no step-level test output.
+- This is a third run with the same signature after runs #96 and #97; the earlier retry of #96 also reproduced it. The actual cause is still unknown. The evidence does not show that the new GDScript test failed; the runner did not report executing steps.
+- Do **not** rerun the workflow again without new platform diagnostics or a separate authorized execution environment. Do not alter the workflow based on an unproven root cause.
+
+### Updated work statuses
+| Item | Status | Evidence |
+|---|---|---|
+| Serving → Ledger integration | IMPLEMENTED BUT NOT VERIFIED | PR #34 head `7f6ca58...`; no full workflow completed |
+| Closed-day failure safety | TEST AUTHORED; RUNTIME NOT VERIFIED | PR #34 test |
+| Identical transaction replay recovery | TEST AUTHORED; RUNTIME NOT VERIFIED | Commit `7f6ca58...` |
+| Conflicting transaction payload rejection | TEST AUTHORED; RUNTIME NOT VERIFIED | Commit `7f6ca58...` |
+| Actions failure diagnosis | BLOCKED / ROOT CAUSE UNKNOWN | Runs #96, #97, #98 all failed without runner steps |
+| Day controller | NOT STARTED | Must follow serving/ledger contract gate |
+| End-of-day reconciliation | PARTIALLY AVAILABLE AT LEDGER TOTALS ONLY; END-TO-END NOT STARTED | No inventory-aware summary or day-loop integration verified |
+| Recipe-price source | OWNER DECISION EVENTUALLY REQUIRED | Current integration intentionally accepts an explicit positive amount; no provisional recipe-price catalogue has been invented |
+| Merge / manual playtest | NOT DONE / BLOCKED | No merge approval; no current verified build artifact |
+
+### Next execution sequence
+1. Preserve the current no-runner evidence; stop blind Actions retries.
+2. Continue static review and contract-backed test coverage on PR #34 without claiming runtime success.
+3. Before wiring the playable day loop, obtain the owner's decision on whether recipe prices may be represented as **provisional test configuration** or must wait for explicit prices. No prices should be silently invented.
+4. Once the serving/ledger gate has credible runtime evidence, implement the day controller with explicit `day_id` and `opening_cash` inputs (no hard-coded economy balance), then build a read-only end-of-day reconciliation from Ledger totals and an inventory snapshot.
+5. Keep all PRs open until the owner explicitly approves merge. Manual playtest remains blocked until a current build artifact exists.
