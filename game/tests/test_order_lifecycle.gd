@@ -105,7 +105,40 @@ func _run() -> void:
 	_check(int(serving.get("payment_event_count")) == 1, "payment remains exactly once")
 	_check(int(ledger.get_day_totals(&"day-01").get("revenue", -1)) == 45000, "successful serving posts order revenue to ledger")
 	_check(ledger.get_transactions(&"day-01").size() == 2, "one order creates one ledger sale transaction")
-	_check(order_manager.get_open_orders().size() == 0, "served and cancelled orders are excluded from open-order queue")
+
+	# Recovery case: simulate a prior Ledger commit whose order transition was interrupted.
+	var recovery_created: Dictionary = order_manager.create_order(&"order-003", &"pho_bo_tai", &"table-1")
+	_check(bool(recovery_created.get("ok", false)), "recovery order can be created")
+	_check(bool(order_manager.transition_order(&"order-003", OrderManager.OrderStatus.PREPARING).get("ok", false)), "recovery order transitions to preparing")
+	_check(bool(order_manager.transition_order(&"order-003", OrderManager.OrderStatus.READY).get("ok", false)), "recovery order transitions to ready")
+	_check(bool(ledger.record_transaction(&"sale:order-003", &"day-01", &"sale_revenue", 45000, &"order-003").get("ok", false)), "recovery fixture simulates an already committed sale")
+	var recovery_result := serving.serve_order(bowl, order_manager, &"order-003", &"table-1", 45000)
+	_check(bool(recovery_result.get("ok", false)), "serving retry recovers from an existing identical Ledger transaction")
+	_check(order_manager.get_order(&"order-003").get("status") == OrderManager.OrderStatus.SERVED, "recovered sale transitions the order to served")
+	_check(ledger.get_transactions(&"day-01").size() == 3, "recovered sale does not append a duplicate Ledger transaction")
+	_check(int(ledger.get_day_totals(&"day-01").get("revenue", -1)) == 90000, "recovery totals count each order once")
+
+	# Conflict case: a stable transaction ID with a different amount must not serve the order.
+	var conflict_created: Dictionary = order_manager.create_order(&"order-004", &"pho_bo_tai", &"table-1")
+	_check(bool(conflict_created.get("ok", false)), "conflict order can be created")
+	_check(bool(order_manager.transition_order(&"order-004", OrderManager.OrderStatus.PREPARING).get("ok", false)), "conflict order transitions to preparing")
+	_check(bool(order_manager.transition_order(&"order-004", OrderManager.OrderStatus.READY).get("ok", false)), "conflict order transitions to ready")
+	var conflict_ledger := Ledger.new()
+	root.add_child(conflict_ledger)
+	await process_frame
+	_check(bool(conflict_ledger.record_transaction(&"opening-conflict-day", &"day-conflict", &"opening_cash", 100000, &"day-start").get("ok", false)), "conflict fixture initializes its ledger")
+	_check(bool(conflict_ledger.record_transaction(&"sale:order-004", &"day-conflict", &"sale_revenue", 12345, &"order-004").get("ok", false)), "conflict fixture reserves the order transaction ID with another amount")
+	var conflict_serving := ServingService.new()
+	_check(bool(conflict_serving.configure_ledger(conflict_ledger, &"day-conflict").get("ok", false)), "conflict serving configures with its ledger")
+	root.add_child(conflict_serving)
+	var conflict_result := conflict_serving.serve_order(bowl, order_manager, &"order-004", &"table-1", 45000)
+	_check(not bool(conflict_result.get("ok", false)), "serving rejects a conflicting existing transaction payload")
+	_check(order_manager.get_order(&"order-004").get("status") == OrderManager.OrderStatus.READY, "conflicting transaction preserves the ready order")
+	_check(int(conflict_serving.get("payment_event_count")) == 0, "conflicting transaction emits no payment event")
+	_check(conflict_ledger.get_transactions(&"day-conflict").size() == 2, "conflicting transaction adds no Ledger entry")
+	_check(int(conflict_ledger.get_day_totals(&"day-conflict").get("revenue", -1)) == 12345, "conflicting transaction preserves the original amount")
+
+	_check(order_manager.get_open_orders().size() == 1, "only the still-ready conflict order remains open")
 
 	order_manager.queue_free()
 	inventory.queue_free()
@@ -116,6 +149,8 @@ func _run() -> void:
 	serving.queue_free()
 	blocked_serving.queue_free()
 	blocked_ledger.queue_free()
+	conflict_serving.queue_free()
+	conflict_ledger.queue_free()
 	ledger.queue_free()
 	placement.queue_free()
 	await process_frame
