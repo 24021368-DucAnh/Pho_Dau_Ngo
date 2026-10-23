@@ -1,24 +1,24 @@
 # PROJECT_P — Session Handoff (refreshed 2026-10-23)
 
-> **Current-state correction (09:06 ICT):** This handoff was originally drafted before PRs #32 and #34 were merged. The historical snapshot below is superseded where it conflicts with this current-state section. Always verify live GitHub state before acting.
+> **Current-state correction (09:08 ICT):** This handoff was originally drafted before PRs #32 and #34 were merged. The historical snapshot below is superseded where it conflicts with this current-state section. Always verify live GitHub state before acting.
 
 ## Current verified state
 
 - Repository: [24021368-DucAnh/Pho_Dau_Ngo](https://github.com/24021368-DucAnh/Pho_Dau_Ngo) (**public**).
-- `main` HEAD: `6156febbd395aad9814eec9bf9082c30fe35252b` — PR #36 merged.
+- `main` HEAD: `931554c66ddb4eee12928cd929c5d46c463b52b` — PR #37 merged (handoff refresh).
 - PR #32 Ledger implementation: **merged** at `82dc1851f0ccd94576b1e6449f8afe94d8fc1186`.
 - PR #34 ServingService → Ledger idempotency: **merged** at `b0e321ce07faf20905bd56bb43ce1daa701a20f1`.
 - PR #36 DayController and closing summary: **merged** at `6156febbd395aad9814eec9bf9082c30fe35252b`.
 - PR #35 is an older stacked branch and was superseded by PR #36; do not merge it.
-- PR #33 is the previous handoff draft and must be closed as superseded after this update is merged.
+- PR #33, the stale handoff draft, is closed as superseded. PR #37 delivered this corrected handoff.
 - PR #36 CI run #106 passed all contract tests and exported Linux and Windows builds: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929240239
-- The merged `main` push triggered run #107: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929402162. At the time of this update it was pending; check its final conclusion before claiming `main` CI is green.
+- The merged `main` push triggered run #107, which completed successfully on 2026-10-23 09:07 ICT: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929402162. All contract tests and both desktop exports passed, and artifacts uploaded.
 - Run #103 on the previous stacked branch passed tests and exports; it is historical evidence, not a substitute for run #107.
-- No billing settings were changed. The earlier account-spending warning was not addressed by modifying configuration.
+- No billing settings were changed. The earlier account-spending warning was not addressed by modifying configuration. A separate, successful Actions run now verifies the current production workflow.
 
 ## Immediate next steps
 
-1. Verify run #107 on `main` to completion; if it fails, diagnose the actual failing step and fix it on a branch.
+1. Keep verifying the current `main` HEAD and CI after each code merge; run #107 is green for SHA `6156febbd395aad9814eec9bf9082c30fe35252b`.
 2. Verify artifact `pho-dau-ngo-godot-builds` from run #106 is downloadable and record its expiry (2027-01-21).
 3. Inspect current GDD, Visual Bible, acceptance matrix, and playtest template before deciding the next vertical-slice increment.
 4. Perform an actual manual playtest of the exported build if an execution environment is available; CI export success is not proof of playability.
