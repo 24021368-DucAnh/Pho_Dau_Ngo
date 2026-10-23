@@ -155,6 +155,8 @@ func _run() -> void:
 	var other_recipe: RecipeData = load("res://data/recipes/pho_bo_chin.tres") as RecipeData
 	var recipe_locked_bowl: InteractiveBowl = scene_bowl
 	recipe_locked_bowl.prepared_recipe_id = original_recipe.recipe_id
+	# Isolate the prepared-bowl guard from the active order's status guard.
+	player.set("current_order_id", &"missing-test-order")
 	var previous_mouse_mode := Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	var input_event := InputEventKey.new()
