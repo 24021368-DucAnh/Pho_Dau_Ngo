@@ -1,6 +1,6 @@
 # PROJECT_P — Session Handoff (refreshed 2026-10-23)
 
-> **Current-state correction (09:08 ICT):** This handoff was originally drafted before PRs #32 and #34 were merged. The historical snapshot below is superseded where it conflicts with this current-state section. Always verify live GitHub state before acting.
+> **Current-state correction (09:11 ICT):** This handoff was originally drafted before PRs #32 and #34 were merged. The historical snapshot below is superseded where it conflicts with this current-state section. Always verify live GitHub state before acting.
 
 ## Current verified state
 
@@ -9,8 +9,11 @@
 - PR #32 Ledger implementation: **merged** at `82dc1851f0ccd94576b1e6449f8afe94d8fc1186`.
 - PR #34 ServingService → Ledger idempotency: **merged** at `b0e321ce07faf20905bd56bb43ce1daa701a20f1`.
 - PR #36 DayController and closing summary: **merged** at `6156febbd395aad9814eec9bf9082c30fe35252b`.
+- PR #30 manual playtest evidence template: **merged** at `80a9ac4e0888015ee593910303f6172ea2ffa857`.
+- PR #38 acceptance matrix evidence refresh: **merged** at `172c31cdc8547af57eceacb9246aadb27c744827`.
+- PRs #27, #29, #31, #33 and #35 are closed as superseded; do not reopen or merge their old stacked branches.
 - PR #35 is an older stacked branch and was superseded by PR #36; do not merge it.
-- PR #33, the stale handoff draft, is closed as superseded. PR #37 delivered this corrected handoff.
+- PR #33, the stale handoff draft, is closed as superseded. PR #37 delivered the corrected handoff; the current-state section was updated again after later documentation merges.
 - PR #36 CI run #106 passed all contract tests and exported Linux and Windows builds: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929240239
 - The merged `main` push triggered run #107, which completed successfully on 2026-10-23 09:07 ICT: https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929402162. All contract tests and both desktop exports passed, and artifacts uploaded.
 - Run #103 on the previous stacked branch passed tests and exports; it is historical evidence, not a substitute for run #107.
@@ -19,7 +22,7 @@
 ## Immediate next steps
 
 1. Keep verifying the current `main` HEAD and CI after each code merge; run #107 is green for SHA `6156febbd395aad9814eec9bf9082c30fe35252b`.
-2. Verify artifact `pho-dau-ngo-godot-builds` from run #106 is downloadable and record its expiry (2027-01-21).
+2. Download `pho-dau-ngo-godot-builds` from [run #106](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929240239); artifact metadata confirms it exists, is not expired, and expires 2027-01-21. Actual launch/manual playtest is still outstanding.
 3. Inspect current GDD, Visual Bible, acceptance matrix, and playtest template before deciding the next vertical-slice increment.
 4. Perform an actual manual playtest of the exported build if an execution environment is available; CI export success is not proof of playability.
 5. Keep the handoff current and distinguish automated test/export evidence from manual gameplay evidence.
