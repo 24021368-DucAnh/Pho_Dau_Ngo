@@ -8,6 +8,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	print("CHECKPOINT: interaction test started")
+	print("CHECKPOINT: loading production scene and scripts")
 	var main_scene: PackedScene = load("res://scenes/main.tscn") as PackedScene
 	_check(main_scene != null, "main scene exists and can be loaded")
 
@@ -22,7 +24,9 @@ func _run() -> void:
 
 	var scene_instance: Node = main_scene.instantiate()
 	root.add_child(scene_instance)
+	print("CHECKPOINT: production scene added; awaiting first frame")
 	await process_frame
+	print("CHECKPOINT: first production scene frame processed")
 	var scene_player: Node = scene_instance.get_node_or_null("Player")
 	var scene_zone: Area3D = scene_instance.get_node_or_null("PlacementZone") as Area3D
 	_check(scene_player is CharacterBody3D, "scene has a first-person CharacterBody3D player")
@@ -81,8 +85,11 @@ func _run() -> void:
 		scene_player.call("_set_placement_zone_active", false)
 		_check(scene_zone.collision_layer == 0, "placement zone is hidden from raycast after placement")
 	scene_instance.queue_free()
+	print("CHECKPOINT: first production scene queued for deletion; awaiting frame")
 	await process_frame
+	print("CHECKPOINT: first production scene cleanup frame processed")
 
+	print("CHECKPOINT: starting isolated bowl/placement-zone contracts")
 	var bowl: StaticBody3D = bowl_script.new() as StaticBody3D
 	var bowl_shape := CollisionShape3D.new()
 	bowl_shape.name = "CollisionShape3D"
@@ -127,6 +134,7 @@ func _run() -> void:
 	_check(int(bowl.get("state")) == 2, "repeated pick-up/place leaves one PLACED bowl")
 
 
+	print("CHECKPOINT: isolated bowl contracts passed; starting player ownership and recipe contracts")
 	# Player-level ownership and recipe-selection contracts.
 	var interaction_scene: Node = main_scene.instantiate()
 	root.add_child(interaction_scene)
@@ -147,6 +155,8 @@ func _run() -> void:
 	var other_recipe: RecipeData = load("res://data/recipes/pho_bo_chin.tres") as RecipeData
 	var recipe_locked_bowl: InteractiveBowl = scene_bowl
 	recipe_locked_bowl.prepared_recipe_id = original_recipe.recipe_id
+	# Isolate the prepared-bowl guard from the active order's status guard.
+	player.set("current_order_id", &"missing-test-order")
 	var previous_mouse_mode := Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	var input_event := InputEventKey.new()
@@ -159,7 +169,9 @@ func _run() -> void:
 	Input.mouse_mode = previous_mouse_mode
 	_check(player_inventory != null, "player shares the scene's authoritative inventory")
 	interaction_scene.queue_free()
+	print("CHECKPOINT: player ownership scene queued for deletion; awaiting frame")
 	await process_frame
+	print("CHECKPOINT: player ownership scene cleanup frame processed")
 
 	_finish()
 
