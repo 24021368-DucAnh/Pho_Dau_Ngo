@@ -124,3 +124,55 @@ This is **not yet sufficient to claim production acceptance**:
 - Perform or authorize a manual PC playtest when a runnable build is available; record build SHA, platform, scenario, results and defects.
 - Approve changes to game scope, economy assumptions, or design decisions through the Decision Log protocol.
 
+
+
+## 9. Live continuation update — 2026-10-23 (supersedes affected status rows above)
+
+This addendum was checked against live GitHub metadata after the initial handoff snapshot. Re-read live PRs/runs before future actions.
+
+### Live repository / PR snapshot
+- `main` remains at `0e159599a3b5c6010ffb8ad155d8a1312fa87f1a` (PR #28 merge); no merge was performed during this update.
+- PR #29 remains open/draft at `244baca94e991c88bff28fe79073cf3e1d1e51b9`.
+- PR #32 remains open/draft at `535f95064a14a5ba1d743445f6b2804ceff30b11`.
+- PR #33 remains open/draft at `739f2f8e2bdaccbfc37d81a0c8e440acaa98bc0a` before this documentation update.
+- PR #34 [ServingService → Ledger integration](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/pull/34) remains open/draft, head `0ce28d33c4bbf131d35907f42b8c59f1e6317e1c`, base PR #32 head `535f95064a14a5ba1d743445f6b2804ceff30b11`. It adds a stable `sale:<order_id>` transaction ID, caller-supplied positive sale amount, Ledger posting, and order lifecycle assertions. Do not merge the stack without explicit owner approval.
+
+### Run #96 diagnosis — evidence narrows the failure, but does not prove root cause
+- [Run #96](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39892936199) uses workflow `.github/workflows/godot-production.yml` at head `0ce28d33c4bbf131d35907f42b8c59f1e6317e1c`.
+- Attempt 1 job [120216659859](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39892936199/job/120216659859) and attempt 2 job [120221726186](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39892936199/job/120221726186) both report `completed / failure`, `steps: []`, `runner_id: 0`, blank runner name, and only about two seconds between job start and completion.
+- Job-log retrieval returns Azure `BlobNotFound`; the run exposes no artifacts. By contrast, run #94 has a real runner ID, step records, and took about 32 seconds.
+- This is strong evidence that run #96 failed before normal runner step execution/step reporting. **It is not enough to identify the underlying cause** (e.g. GitHub Actions scheduling, cancellation/runner infrastructure, or another platform-level failure); do not label it a GDScript/test failure and do not claim an infrastructure root cause as proven.
+- One retry of failed jobs was already performed; attempt 2 reproduced the same no-runner/no-steps signature. Do not repeatedly rerun without new evidence.
+- The workflow file itself has the expected checkout → setup Godot 4.4.1 → import/parse → ledger test → interaction test → recipe test → order/serving test → desktop exports. No workflow edit is justified by current evidence alone.
+- Links: [attempt 1 job](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39892936199/job/120216659859), [attempt 2 job](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39892936199/job/120221726186).
+
+### Updated implementation review
+- PR #34 is **IMPLEMENTED BUT NOT VERIFIED**. The lifecycle test now expects a successful serve to create one revenue transaction and a total of two ledger records including opening cash. This has not passed CI because run #96 did not execute/report any steps.
+- Concrete review gap: `game/tests/test_order_lifecycle.gd` calls `serving.configure_ledger(ledger, &"day-01")` without asserting its returned `ok` flag. The later revenue assertion would likely detect a failed configuration indirectly, but an explicit assertion would make the setup failure local and diagnostic. Treat this as a small test-quality follow-up, not the cause of run #96.
+- Known transactional risk remains: Ledger posting occurs before OrderManager transitions to SERVED. If that transition fails after the sale record is accepted, Ledger and order state can diverge. Do not invent rollback/compensation semantics; first define a deliberate contract and test the failure path.
+- The ledger remains in-memory. Do not claim persistence or cross-process exactly-once behavior.
+- PR #34 still needs full CI evidence for import/parse, Ledger contract, interaction, recipe validation, order lifecycle/serving, Linux/Windows export and artifact upload. Manual desktop playtest is a separate later gate.
+
+### Corrected current status
+| Work item | Status | Evidence |
+|---|---|---|
+| Ledger contract docs | DONE & VERIFIED as merged docs | PR #28 at `0e159599...` |
+| Ledger test-first RED | DONE & VERIFIED as historical RED evidence | Run #94: setup/import passed; Ledger test failed as expected because implementation was absent |
+| Ledger implementation | IMPLEMENTED BUT NOT VERIFIED end-to-end | PR #32; run #95 ledger test passed, workflow cancelled before downstream gates |
+| ServingService → Ledger integration | IMPLEMENTED BUT NOT VERIFIED | PR #34 head `0ce28d3...`; run #96 never reported steps |
+| Run #96 failure cause | BLOCKED / root cause unknown | Two attempts, both no runner/steps; logs BlobNotFound |
+| Atomicity/recovery contract | IN PROGRESS | Sale is posted before order transition; no failure-path contract/test yet |
+| Day controller and end-of-day reconciliation | NOT STARTED / NOT VERIFIED | No current evidence of implementation |
+| Manual vertical-slice playtest | NOT STARTED | No verified runnable artifact from this gate |
+
+### Next execution gate
+1. Preserve run #94; do not recreate the clean RED.
+2. Do not make code changes to “fix” run #96 without a runner/step-level failure signal.
+3. Resume TDD work only on independently grounded gaps: explicitly assert Ledger configuration in the lifecycle test, then add tests for Ledger rejection/no order transition and duplicate/conflicting replay. Before implementing recovery, agree on the order/Ledger atomicity contract.
+4. Obtain a usable current-head Actions run (with real runner and steps) before claiming CI green. If GitHub again reports no runner and no steps, collect run/check-suite metadata and use GitHub Actions service diagnostics rather than changing game code speculatively.
+5. Keep all PRs open pending owner approval; no merge/reset/delete/deploy has been performed.
+
+### Owner action clarity
+- **No approval is needed for this documentation-only update.**
+- Owner approval is still required before merging any PR.
+- No manual Godot/playtest action is requested yet because a current verified build artifact is not available.
