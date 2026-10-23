@@ -257,3 +257,20 @@ Commit [7f6ca58](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/commit/7f6ca587a
 3. Before wiring the playable day loop, obtain the owner's decision on whether recipe prices may be represented as **provisional test configuration** or must wait for explicit prices. No prices should be silently invented.
 4. Once the serving/ledger gate has credible runtime evidence, implement the day controller with explicit `day_id` and `opening_cash` inputs (no hard-coded economy balance), then build a read-only end-of-day reconciliation from Ledger totals and an inventory snapshot.
 5. Keep all PRs open until the owner explicitly approves merge. Manual playtest remains blocked until a current build artifact exists.
+
+## 9. Root cause confirmed from owner-provided Actions annotation — 2026-10-23
+
+The owner supplied the visible annotation from [Actions run #98](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39900136848):
+> The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings.
+
+This resolves the earlier unknown-root-cause status: GitHub Actions refused to start the job due to an account billing/payment issue or spending limit. The Ubuntu 26 migration notice is informational and is not the failure cause.
+
+### Required unblock
+- Repository owner must review GitHub account **Settings → Billing & plans**, resolve any failed payment or increase the Actions spending limit as appropriate, and confirm billing is active before another workflow run.
+- Do not rerun CI until the billing blocker is resolved. No workflow/code change is justified by this annotation.
+- Once unblocked, rerun the workflow against the latest PR #34 head and require the job to show actual steps; then inspect import/parse, Ledger tests, interaction tests, recipe tests, order/serving tests, and exports separately.
+- Until a successful run exists, PR #34 runtime behavior and build artifacts remain unverified; no downstream day-loop implementation should be treated as accepted.
+
+### Corrected status
+- CI blocker: **CONFIRMED — account payment/spending-limit gate** (not a GDScript failure diagnosis).
+- Owner action is required to restore Actions execution. No PR merge approval is being requested at this stage.
