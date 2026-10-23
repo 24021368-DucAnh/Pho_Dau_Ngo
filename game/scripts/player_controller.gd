@@ -136,12 +136,10 @@ func _interact() -> void:
 		_refresh_order_ticket()
 	elif target is InteractiveBowl:
 		var bowl: InteractiveBowl = target as InteractiveBowl
-		if bowl.set_held():
-			held_bowl = bowl
+		if _try_pick_up_bowl(bowl):
 			var order := order_manager.get_order(current_order_id)
 			if int(order.get("status", -1)) == OrderManager.OrderStatus.ACCEPTED:
 				order_manager.transition_order(current_order_id, OrderManager.OrderStatus.PREPARING)
-			_set_placement_zone_active(true)
 			status_label.text = "Đã cầm bát. Cho bánh phở, thêm thịt đúng trạng thái theo phiếu, rồi chan nước dùng cuối cùng."
 		else:
 			status_label.text = "Bát đang được giữ hoặc người chơi đã cầm một bát."
@@ -221,3 +219,15 @@ func _refresh_order_ticket() -> void:
 	}
 	var recipe_name := active_recipe.display_name
 	order_ticket_label.text = "PHIẾU #001  ·  BÀN 1\n%s\nTrạng thái: %s\nĐã thu: %d đơn" % [recipe_name, status_names.get(int(order.get("status", -1)), "KHÔNG RÕ"), serving_service.payment_event_count]
+
+
+func _try_pick_up_bowl(bowl: InteractiveBowl) -> bool:
+	if bowl == null or not is_instance_valid(bowl):
+		return false
+	if held_bowl != null and is_instance_valid(held_bowl):
+		return false
+	if not bowl.set_held():
+		return false
+	held_bowl = bowl
+	_set_placement_zone_active(true)
+	return true
