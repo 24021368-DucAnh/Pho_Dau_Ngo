@@ -28,6 +28,7 @@ jobs:
   validate-and-export:
     name: Import, run contract tests, and export desktop builds
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,7 +48,8 @@ jobs:
         run: godot --headless --path . --script res://tests/test_day_controller.gd
       - name: Run interaction contract tests
         working-directory: game
-        run: godot --headless --path . --script res://tests/test_interaction_contract.gd
+        timeout-minutes: 3
+        run: timeout --signal=TERM --kill-after=10s 120s godot --headless --path . --script res://tests/test_interaction_contract.gd
       - name: Run kitchen recipe validation tests
         working-directory: game
         run: godot --headless --path . --script res://tests/test_recipe_validation.gd
