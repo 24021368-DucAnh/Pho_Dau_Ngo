@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=30 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://b5yy5omnwf0yx" path="res://scripts/inventory/inventory_service.gd" id="5_inventory"]
 [ext_resource type="Script" uid="uid://d0qjic4v6tgks" path="res://scripts/orders/order_manager.gd" id="6_orders"]
 [ext_resource type="Script" uid="uid://c0mvf4mdc3v6m" path="res://scripts/serving/serving_service.gd" id="7_serving"]
+[ext_resource type="Script" uid="uid://bt46enlfwlndn" path="res://scripts/economy/ledger.gd" id="8_ledger"]
+[ext_resource type="Script" uid="uid://buew2gb0adptx" path="res://scripts/day_controller.gd" id="9_day"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -200,6 +202,12 @@ script = ExtResource("6_orders")
 
 [node name="ServingService" type="Node" parent="."]
 script = ExtResource("7_serving")
+
+[node name="Ledger" type="Node" parent="."]
+script = ExtResource("8_ledger")
+
+[node name="DayController" type="Node" parent="."]
+script = ExtResource("9_day")
 
 [node name="BrothStation" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.58, 1.18, -0.3)
