@@ -32,7 +32,7 @@ Evidence:
 - James Beard Foundation / Charles Phan recipe divides cooked noodles into bowls, tops with cooked and raw beef, then ladles hot stock: https://www.jamesbeard.org/recipes/pho-b-beef-noodle-soup
 - SBS Food describes blanching noodles, adding cooked brisket and raw sirloin, then pouring hot stock over the bowl: https://www.sbs.com.au/food/recipe/beef-and-rice-noodle-soup-pho-bo/epcxgtp9i
 
-**Important distinction:** the current gameplay recipe validator is a separate interaction contract and currently accepts broth → noodles → beef. Do not silently change that code or claim it matches the physical serving order. The visual layer system should derive what is visible from authoritative successful ingredient/state records, not assume that gameplay action order equals final bowl layering. Before changing recipe progression, inventory consumption or Ledger behavior, make a separate gameplay-contract change with tests and owner review.
+**Important distinction:** the current gameplay recipe validator is a separate interaction contract and currently accepts noodles → beef → broth. Do not silently change that code or claim it matches the physical serving order. The visual layer system should derive what is visible from authoritative successful ingredient/state records, not assume that gameplay action order equals final bowl layering. Before changing recipe progression, inventory consumption or Ledger behavior, make a separate gameplay-contract change with tests and owner review.
 
 ## 4. Prompt templates
 
@@ -94,7 +94,7 @@ For each candidate:
 - Existing `InteractiveBowl` remains the gameplay root and owns the existing collision shape and recipe state.
 - Visual layer scene may contain `BowlBase`, `NoodlesLayer`, `BeefLayer`, `BrothSurface`, and `GarnishLayer`, but those children must not become physics/interactable targets.
 - For the **real-world final bowl appearance**, the layer stack is noodles → beef → broth → garnish. Broth is prepared/kept hot before serving; ladling it is the final liquid-assembly action.
-- For the **current gameplay contract**, successful recipe actions still validate broth → noodles → beef. Until a separate reviewed gameplay change updates that contract, derive visibility from successful `consumed_ingredients` and preparation state; do not hard-code visual order to action order.
+- For the **current gameplay contract**, successful recipe actions validate noodles → beef → broth. Until a separate reviewed gameplay change updates that contract, derive visibility from successful `consumed_ingredients` and preparation state; do not hard-code visual order to action order.
 - Garnish is presentation-only under the current recipe contract; it must not mutate inventory, recipe progress or the Ledger.
 - Successful cancellation returns visuals to a clean bowl. A rejected action must not change the visible layers.
 - Test held/placed transforms, collision state and visual alignment in the actual gameplay camera.
