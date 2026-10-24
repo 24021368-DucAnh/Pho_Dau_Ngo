@@ -31,9 +31,9 @@ Source: `game/scripts/interactive_bowl.gd`
 Sources: `game/scripts/kitchen/kitchen_station.gd`, `game/scripts/kitchen/recipe_data.gd`, `game/data/recipes/pho_bo.tres`, `game/data/recipes/pho_bo_chin.tres`, and `game/tests/test_recipe_validation.gd`.
 
 - `KitchenStation.apply_to_bowl()` calls `preview_action()`, checks inventory, consumes stock, calls `bowl.apply_recipe_step()`, and refunds stock if that call fails.
-- The recipe data and tests define the active sequence as **broth → noodles → beef**, with the beef ingredient/action differing by variant (raw sliced beef for phở tái; cooked sliced beef for phở chín).
+- The current `RecipeData` implementation and `test_recipe_validation.gd` define the active sequence as **noodles → beef → broth**, with the beef ingredient/action differing by variant (raw sliced beef for phở tái; cooked sliced beef for phở chín). This is a source-code baseline, not a claim that the order matches the physical serving sequence.
 - The current gameplay recipes do not contain a garnish step. Garnish may be a presentation layer, but must not be represented as an authoritative consumed ingredient or an extra recipe action without a separate approved gameplay change.
-- Consequently, visuals must derive from successful authoritative state/ingredient IDs, not from a hard-coded assumed visual order. In particular, do not assume noodles are always added before broth.
+- Consequently, visuals must derive from successful authoritative state/ingredient IDs, not from a hard-coded assumed visual order. The code currently adds noodles before broth; visual rendering must not duplicate recipe validation or treat garnish as consumed.
 
 ## 4. Relevant automated test files and exact CI commands
 
