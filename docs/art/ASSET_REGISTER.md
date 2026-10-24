@@ -5,14 +5,19 @@
 
 ## Status vocabulary
 
-`reference` → `proxy` → `first-art-pass` → `final` → `integrated` → `QA`
+`planned / not acquired` → `reference` → `proxy` → `first-art-pass` → `final` → `integrated` → `QA`
 
-Use one primary status per row. Record a stable ID even when the asset is not yet created.
+Use one primary status per row. `planned / not acquired` is a planning-only state for a stable ID whose asset does not exist yet; it is not evidence of a generated model or a maturity/QA state. Never move a generated asset to a later state without the corresponding source, rights, import and visual evidence. Record a stable ID even when the asset is not yet created.
 
 ## Initial register
 
 | Asset ID | Asset / purpose | Priority | Status | Source / creator | License / rights status | Planned action | Runtime / QA evidence |
 |---|---|---:|---|---|---|---|---|
+| FOOD-PHO-001 | Empty ceramic/enamel pho bowl hero mesh | Critical | planned / not acquired | Tripo AI planned; no candidate generated | No generation-specific terms/provenance reviewed yet | Generate isolated bowl candidate; inspect pivot, rim, interior and scale | Not generated; no runtime evidence |
+| FOOD-PHO-002 | Flat rice-noodle mass for modular assembly | Critical | planned / not acquired | Tripo AI planned; no candidate generated | No generation-specific terms/provenance reviewed yet | Generate separate noodles layer that fits inside bowl rim | Not generated; no runtime evidence |
+| FOOD-PHO-003 | Pho broth surface/low volume | Critical | planned / not acquired | Tripo AI planned; no candidate generated | No generation-specific terms/provenance reviewed yet | Generate separate shallow broth surface with clean boundary | Not generated; no runtime evidence |
+| FOOD-PHO-004 | Thin overlapping beef slices | High | planned / not acquired | Tripo AI planned; no candidate generated | No generation-specific terms/provenance reviewed yet | Generate separate slice cluster; inspect silhouette and clipping | Not generated; no runtime evidence |
+| FOOD-PHO-005 | Herb/onion garnish cluster | High | planned / not acquired | Tripo AI planned; no candidate generated | Presentation-only under current recipe contract; generation-specific terms/provenance not reviewed | Generate separate compact garnish layer; must not add recipe/inventory action | Not generated; no runtime evidence |
 | REF-ENV-001 | Old Hanoi collective-housing facade, window/AC/laundry rhythm | High | reference | Figma art-direction board; original vector study | Original board authored for this project; reference only | Validate architectural cues against licensed/permissioned references | Not applicable; not a runtime asset |
 | REF-ENV-002 | Narrow alley / T-junction / worn concrete | High | reference | Figma art-direction board; original vector study | Original board authored for this project; reference only | Keep the first scene compact; verify walk path in graybox | Not applicable |
 | REF-STALL-001 | Pho cart, canopy, stove, pot and worktop | Critical | first-art-pass | Figma art-direction board; original vector study | Original board authored for this project; conceptual vector only, not a 3D asset | Model proxy after graybox scale is accepted | No runtime validation yet |
