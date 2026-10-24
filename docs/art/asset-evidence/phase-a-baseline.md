@@ -70,8 +70,8 @@ Sources: `docs/art/VISUAL_BIBLE.md`, `docs/art/ASSET_REGISTER.md`, and `game/scr
 ## 6. Baseline execution and evidence limitations
 
 - **Source inspection:** completed for the files listed above.
-- **Local Godot tests/import/export:** not run from this connected GitHub inspection environment; do not mark them as passed based on this document.
-- **Latest CI result:** not recorded here because the workflow-run lookup available during this step did not return a run. Verify the latest run directly before using it as a regression baseline.
+- **Local Godot tests/import/export:** not run from this connected GitHub inspection environment.
+- **Existing CI baseline:** GitHub Actions run [#107](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929402162) completed successfully on code SHA `6156febbd395aad9814eec9bf9082c30fe35252b` (2026-10-23). The inspected `main` SHA `55fc09d28cf23b8828ee1ec09cfc04f083378c77` is a documentation-only descendant of that code baseline; this supports reuse of run #107 as existing regression evidence, but it does not test the new asset or prove visual/runtime acceptance of the bowl.
 - **Manual runtime screenshots:** not captured. Must be produced during Phase A acceptance on the actual project/runtime.
 - **Asset generation:** none performed as part of this baseline.
 
