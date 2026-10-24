@@ -6,6 +6,16 @@ extends CharacterBody3D
 const PHO_BO_TAI_RECIPE = preload("res://data/recipes/pho_bo.tres")
 const PHO_BO_CHIN_RECIPE = preload("res://data/recipes/pho_bo_chin.tres")
 
+# M6 provisional slice values. These are NOT an approved price catalogue:
+# DUC-49 economy review is still open, and the values below only reuse the
+# numbers already used by the domain tests (opening cash 100,000 and sale
+# 45,000) so that in-game serving posts the same Ledger movement the tests
+# prove. They must be labelled provisional in any UI or summary text and
+# replaced once the economy review approves real values.
+const PROVISIONAL_DAY_ID: StringName = &"day-01"
+const PROVISIONAL_OPENING_CASH: int = 100000
+const PROVISIONAL_SALE_PRICE: int = 45000
+
 var active_recipe: RecipeData = PHO_BO_TAI_RECIPE
 
 @onready var camera: Camera3D = $Camera3D
@@ -18,6 +28,8 @@ var active_recipe: RecipeData = PHO_BO_TAI_RECIPE
 @onready var order_ticket_label: Label = $HUD/OrderTicket
 @onready var order_manager: OrderManager = $"../OrderManager"
 @onready var serving_service: ServingService = $"../ServingService"
+@onready var ledger: Ledger = $"../Ledger"
+@onready var day_controller: DayController = $"../DayController"
 @onready var service_bowl: InteractiveBowl = $"../Bowl"
 
 var held_bowl: InteractiveBowl
@@ -37,6 +49,21 @@ func _ready() -> void:
 	order_manager.order_changed.connect(_on_order_changed)
 	_refresh_order_ticket()
 	status_label.text = "Nhắm vào bát để cầm. Hoàn thành phiếu, đặt bát rồi giao tại vùng cạnh bàn."
+	# M6 wiring: open the day with the Ledger, then point ServingService at
+	# the same Ledger and day. If wiring fails, the game keeps the previous
+	# behaviour (serving without a Ledger movement) instead of crashing, and
+	# the failure is shown in the status label (this block runs last so the
+	# default status above does not overwrite a wiring failure).
+	var configured := day_controller.configure(ledger, inventory)
+	if bool(configured.get("ok", false)):
+		var started := day_controller.start_day(PROVISIONAL_DAY_ID, PROVISIONAL_OPENING_CASH)
+		if bool(started.get("ok", false)):
+			serving_service.configure_ledger(ledger, PROVISIONAL_DAY_ID)
+		else:
+			status_label.text = "Không mở được ngày bán hàng: " + String(started.get("message", ""))
+	else:
+		status_label.text = "Không cấu hình được Ledger/DayController: " + String(configured.get("message", ""))
+	day_controller.day_closed.connect(_on_day_closed)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -73,6 +100,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event.is_action_pressed("cancel_preparation"):
 		_cancel_preparation()
+		return
+
+	if event.is_action_pressed("close_day"):
+		_close_day()
 		return
 
 	if event.is_action_pressed("interact") or event.is_action_pressed("primary_action"):
@@ -131,7 +162,7 @@ func _interact() -> void:
 		return
 
 	if target is Area3D and target.name == "DeliveryZone":
-		var result := serving_service.serve_order(service_bowl, order_manager, current_order_id, current_table_id)
+		var result := serving_service.serve_order(service_bowl, order_manager, current_order_id, current_table_id, PROVISIONAL_SALE_PRICE)
 		status_label.text = String(result.get("message", "Không thể giao món."))
 		_refresh_order_ticket()
 	elif target is InteractiveBowl:
@@ -157,6 +188,30 @@ func _cancel_preparation() -> void:
 		return
 	var result: Dictionary = held_bowl.cancel_preparation()
 	status_label.text = String(result.get("message", "Không thể hủy bát."))
+
+
+func _close_day() -> void:
+	var result: Dictionary = day_controller.close_day()
+	if not bool(result.get("ok", false)):
+		status_label.text = "Không đóng được ngày: " + String(result.get("message", ""))
+		return
+	_show_day_summary(Dictionary(result.get("summary", {})))
+
+
+func _on_day_closed(summary: Dictionary) -> void:
+	_show_day_summary(summary)
+
+
+func _show_day_summary(summary: Dictionary) -> void:
+	if summary.is_empty():
+		return
+	# All money shown here is provisional until DUC-49 approves real values.
+	status_label.text = "Đã đóng ngày %s (tạm tính). Doanh thu: %d. Tiền cuối ngày: %d. Số giao dịch: %d." % [
+		String(summary.get("day_id", "")),
+		int(summary.get("revenue", 0)),
+		int(summary.get("closing_cash", 0)),
+		int(summary.get("transaction_count", 0)),
+	]
 
 
 func _refresh_prompt() -> void:
