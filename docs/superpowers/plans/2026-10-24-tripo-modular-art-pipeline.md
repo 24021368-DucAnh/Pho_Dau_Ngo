@@ -87,8 +87,8 @@
 - Consumes: Task 2 intake rules and `FOOD-PHO-001` prompt.
 - Produces: one inspected, project-owned bowl model with documented scale, pivot, material dependencies, source/export versions, and known limitations.
 
-- [ ] **Step 1: Generate candidate(s) in Tripo AI.** Save the exact prompt and generation metadata; do not treat prompt text as evidence that a model exists.
-- [ ] **Step 2: Select one candidate against the Visual Bible.** Reject obvious AI artifacts, logos, watermarks, unstable rim thickness, bad interior surfaces, or unrealistic bowl proportions.
+- [ ] **Step 1: Recover the existing candidate before generating anything.** The user already has an empty-bowl model: prior conversation records `ceramic bowl 3d model.3mf` and a reported conversion `ceramic_bowl_candidate.glb`. Recover those exact files into the active workspace and verify them. Do not spend additional Tripo credits or regenerate the bowl unless the existing candidate fails intake and the owner approves that spend. If the recovered file is a Tripo output, capture its actual prompt/job metadata; do not infer Tripo provenance from the extension.
+- [ ] **Step 2: Evaluate the recovered candidate against the Visual Bible.** Reject obvious artifacts, logos, watermarks, unstable rim thickness, bad interior surfaces, or unrealistic bowl proportions. Record a concrete pass/fail and evidence before choosing repair or rejection.
 - [ ] **Step 3: Clean only if required.** Use Blender only for documented defects (scale, pivot, normals, unwanted geometry, mesh/material separation). Keep a source copy and note every destructive operation.
 - [ ] **Step 4: Import into Godot.** Verify material/texture dependencies and a meaningful base/contact pivot; compare bowl dimensions with the existing counter and bowl placement transform.
 - [ ] **Step 5: Capture neutral and gameplay-camera evidence.** Record import success, dimensions, file size, approximate triangle count, and any visible artifacts.
