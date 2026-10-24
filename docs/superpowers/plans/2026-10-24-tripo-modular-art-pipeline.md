@@ -116,7 +116,7 @@
 - [ ] **Step 5: Handle cancellation/reset and bowl reuse.** Reconcile visual state from authoritative bowl fields after a successful cancellation/reset; rejected actions must not change visuals.
 - [ ] **Step 6: Keep gameplay ownership stable.** Confirm `InteractiveBowl` remains the gameplay root and the original collider, held/placed transforms, and collision-layer behavior are unchanged. Visual ingredient meshes must not become physics targets.
 - [ ] **Step 7: Run focused tests, full tests, and Godot import/export checks.** Record commands and outputs.
-- [ ] **Step 8: Commit.** `git add game/scenes/art/food/pho_bowl_modular.tscn game/scripts/art/pho_bowl_visuals.gd <verified-existing-bowl-scene> <verified-test-files> docs/art/asset-evidence/phase-a-bowl-state-matrix.md && git commit -m "feat: add modular pho bowl visuals"`
+- [ ] **Step 8: Stage and commit.** Stage `game/scenes/art/food/pho_bowl_modular.tscn`, `game/scripts/art/pho_bowl_visuals.gd`, `docs/art/asset-evidence/phase-a-bowl-state-matrix.md`, plus only the exact existing bowl-scene and test paths recorded in `docs/art/asset-evidence/phase-a-baseline.md`. Commit with message `feat: add modular pho bowl visuals`. Do not use literal placeholder paths in shell commands.
 
 **Verification:** all state-matrix tests pass; rejected actions leave visuals unchanged; cancel returns the bowl to clean visuals; bowl interaction/placement and all existing gameplay tests remain unchanged; the art showcase still loads.
 
