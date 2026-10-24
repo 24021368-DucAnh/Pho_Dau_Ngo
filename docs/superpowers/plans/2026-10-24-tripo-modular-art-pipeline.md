@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - Preserve the existing `InteractiveBowl` class and its state/recipe API in `game/scripts/interactive_bowl.gd`.
-- Visuals must reflect successful existing recipe-step transitions; the art scene must not implement duplicate recipe rules.
+- Visuals must reflect successful existing recipe-step transitions by consumed ingredient/state, not by hard-coded sequence. The current recipe contract is broth → noodles → beef for both variants; do not assume noodles are always added first. The art scene must not implement duplicate recipe rules.
 - Preserve bowl ownership, collision, placement, cancellation/reset, serving, inventory, Ledger, order, and day-progression behavior.
 - Keep the art showcase separate from the production entry/gameplay scene until the owner explicitly accepts integration.
 - Prefer GLB/glTF; retain original Tripo exports and prompts/provenance under `art/` and keep runtime-ready models under `game/assets/models/`.
@@ -46,7 +46,7 @@
 - Consumes: existing `InteractiveBowl` state and recipe lifecycle; current project entry scene and art showcase entry point.
 - Produces: a documented baseline of exact scene/script paths, signals/call sites that indicate successful recipe transitions, cancellation/reset behavior, Godot version, CI test/export commands, and current showcase limitations.
 
-- [ ] **Step 1: Trace bowl lifecycle call sites.** Record where `apply_recipe_step` and `cancel_preparation` are invoked and which existing state values/ingredient IDs distinguish noodle, broth, beef, and garnish steps. Do not add a new signal or API until the current contract is understood.
+- [ ] **Step 1: Trace bowl lifecycle call sites.** Record where `KitchenStation.apply_to_bowl` calls `InteractiveBowl.apply_recipe_step` and where `cancel_preparation` is invoked. Record recipe step order from `RecipeData` and the ingredient IDs in `consumed_ingredients`. Current source indicates broth → noodles → beef for both variants; verify from `recipe_data.gd` and tests before relying on it. Garnish is not currently part of the gameplay recipe contract and must remain a visual-only layer unless separately approved. Do not add a new signal or API until the current contract is understood.
 - [ ] **Step 2: Record current automated test commands.** Read the workflow and test harness; copy the exact commands into the baseline note rather than inventing a new runner.
 - [ ] **Step 3: Capture baseline.** Run the existing test suite and relevant Godot import/export check. Record command, commit SHA, pass/fail result, and any pre-existing warning.
 - [ ] **Step 4: Record scene ownership.** Confirm the art showcase entry point and the production entry scene are distinct; document the current bowl visual and collider paths.
@@ -109,10 +109,10 @@
 - Consumes: existing `InteractiveBowl` and recipe lifecycle; model IDs `FOOD-PHO-001` through `FOOD-PHO-005`.
 - Produces: a visuals-only scene/script with named child layers for bowl, noodles, broth, beef, and garnish. It must not mutate `InteractiveBowl` state or decide whether a recipe step is valid.
 
-- [ ] **Step 1: Write failing behavior tests.** Cover: clean bowl shows base only; successful noodle step shows noodles; broth step shows broth; beef step shows beef; garnish step shows garnish; rejected step leaves visuals unchanged; cancellation returns to clean visuals; READY_TO_SERVE shows the complete bowl; visual children do not add collision/interactable targets.
+- [ ] **Step 1: Write failing behavior tests.** Cover: clean bowl shows base only; successful broth step shows broth; successful noodle step shows noodles; successful beef step shows beef; garnish visibility follows the approved visual policy and does not pretend to be a recipe step; rejected step leaves visuals unchanged; cancellation returns to clean visuals; READY_TO_SERVE shows all ingredients actually consumed; visual children do not add collision/interactable targets. Tests must assert against ingredient IDs/state, not assume a fixed ingredient order.
 - [ ] **Step 2: Run tests and confirm the new assertions fail** for the missing visual behavior, using the existing project test runner identified in Task 1.
 - [ ] **Step 3: Implement the visuals-only scene.** Use stable child names `BowlBase`, `NoodlesLayer`, `BrothSurface`, `BeefLayer`, `GarnishLayer`; keep all ingredient visuals under one visual root and hide unprepared layers by default.
-- [ ] **Step 4: Bind visuals to the authoritative successful state transition.** Prefer a signal emitted only after `apply_recipe_step` succeeds if an existing signal/call site can supply the state safely. If a new signal is needed, add it at the domain transition boundary and document it; do not infer progress from button presses or duplicate recipe order in the art script.
+- [ ] **Step 4: Bind visuals to the authoritative successful state transition.** Derive the visible layers from authoritative `consumed_ingredients`/preparation state after `KitchenStation.apply_to_bowl` succeeds. Prefer a signal emitted only after `apply_recipe_step` succeeds if an existing call site can supply the state safely. If a new signal is needed, add it at the domain transition boundary and document it; do not infer progress from button presses or duplicate recipe order in the art script. Do not hard-code garnish as consumed: the current recipes contain broth, noodles and beef only.
 - [ ] **Step 5: Handle cancellation/reset and bowl reuse.** Reconcile visual state from authoritative bowl fields after a successful cancellation/reset; rejected actions must not change visuals.
 - [ ] **Step 6: Keep gameplay ownership stable.** Confirm `InteractiveBowl` remains the gameplay root and the original collider, held/placed transforms, and collision-layer behavior are unchanged. Visual ingredient meshes must not become physics targets.
 - [ ] **Step 7: Run focused tests, full tests, and Godot import/export checks.** Record commands and outputs.
