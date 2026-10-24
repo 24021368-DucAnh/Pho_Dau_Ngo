@@ -1,4 +1,43 @@
-# PROJECT_P — Session Handoff (refreshed 2026-10-23)
+# PROJECT_P — Session Handoff (refreshed 2026-10-24, Phase A continuation)
+
+> **Current-state correction (2026-10-24 ICT):** This block supersedes earlier status snapshots below where they conflict. Recheck live GitHub before any further implementation; this file is a durable handoff, not a substitute for live state.
+
+## Current verified state — Tripo Phase A
+
+- Repository: [24021368-DucAnh/Pho_Dau_Ngo](https://github.com/24021368-DucAnh/Pho_Dau_Ngo), public; default branch `main`.
+- `main` SHA inspected: `55fc09d28cf23b8828ee1ec09cfc04f083378c77` (merge of PR #39, a documentation-only Tripo pipeline design).
+- PR #39 Tripo design: merged.
+- PR #40 Tripo implementation plan: open. Its latest known head after recipe-contract corrections is `8cfdff053ddf7e311f7c73b3df17cd302512e193` on `docs/tripo-art-pipeline-implementation-plan`.
+- PR #41 Phase A baseline/intake: open. Its latest known head before this handoff update is `db7b36adc0e0bbdee84a7ac6f5dbbcb58b0bb32` on `docs/tripo-phase-a-baseline`; this branch contains the corrected baseline, intake pipeline, Asset Register update and `docs/art/asset-evidence/FOOD-PHO-001.md`.
+- Existing GitHub Actions run [#107](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929402162) succeeded on code SHA `6156febbd395aad9814eec9bf9082c30fe35252b`. Main's later changes in the inspected ancestry are documentation-only. This is reusable code regression evidence, not proof of the bowl asset importing, rendering, or passing owner acceptance.
+- The production scene remains `game/scenes/main.tscn`; the art showcase is `game/scenes/stylized_vertical_slice.tscn`. Do not replace the production entry scene as part of the art showcase.
+- Preserve `InteractiveBowl`, its `CollisionShape3D`, ownership/collision transitions, cancellation/reset semantics, recipe API, inventory, Ledger, orders, serving and day progression.
+
+## Critical source-of-truth correction
+
+- Current `game/scripts/kitchen/recipe_data.gd` and `game/tests/test_recipe_validation.gd` define the gameplay sequence as **noodles → beef → broth** for both recipe variants; beef differs by variant (raw sliced beef for phở tái, cooked sliced beef for phở chín).
+- Some earlier Tripo plan/baseline text incorrectly said **broth → noodles → beef**. Corrected in PR #40 and PR #41. Do not reintroduce the stale order.
+- Garnish is presentation-only; it is not a consumed ingredient or a gameplay recipe step.
+- Visuals must derive from authoritative successful `consumed_ingredients` and preparation state. Rejected actions must not change visuals; successful cancellation must clear the layers.
+
+## Empty bowl candidate — current disposition
+
+- User has an existing empty-bowl model. Prior conversation records the source file as `ceramic bowl 3d model.3mf` and a reported conversion candidate as `ceramic_bowl_candidate.glb`.
+- Historical inspection reported 250,898 vertices, 501,804 triangles, dimensions approximately 500 × 500 × 249 mm, a non-watertight mesh, and a GLB candidate around 9 MB. These values must be reverified against the actual binary before acceptance.
+- The source and converted binary are **not present in the current repository tree or active conversation workspace**. Do not claim they were re-opened, imported or tested in this session.
+- Asset Register now marks `FOOD-PHO-001` as `proxy` with unresolved provenance/rights and no Godot runtime evidence. See `docs/art/asset-evidence/FOOD-PHO-001.md`.
+- Do not spend remaining Tripo credits or regenerate the bowl merely to replace an existing candidate. Recover the existing source/export first.
+
+## Next actions and gates
+
+1. Recover the existing `.3mf` source and reported `.glb` conversion into the active workspace; do not ask for regeneration.
+2. Re-measure scale and inspect rim/interior/base, normals, topology/watertightness, pivot, materials and texture dependencies. Use Blender only for concrete defects.
+3. Record provenance and applicable rights terms. Preserve the original source unchanged.
+4. Place reviewed source/export in `art/source/food/` and `art/exports/glb/`; only then promote a validated runtime copy to `game/assets/models/food/FOOD_pho_bowl_ceramic.glb`.
+5. Integrate the bowl as a visual child without replacing the gameplay root or collider. Add/update visual state only after successful authoritative recipe transitions; reset visuals on successful cancellation.
+6. Run the existing Godot 4.4.1 CI checks after code/asset changes, and capture actual in-engine screenshots plus a manual test record. CI alone is not visual acceptance.
+7. Phase B (utensils) and Phase C (cart) remain blocked until Phase A is accepted by the owner.
+
 
 > **Current-state correction (09:11 ICT):** This handoff was originally drafted before PRs #32 and #34 were merged. The historical snapshot below is superseded where it conflicts with this current-state section. Always verify live GitHub state before acting.
 
