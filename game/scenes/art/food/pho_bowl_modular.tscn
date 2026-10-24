@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://pho_bowl_modular_v003"]
+[gd_scene load_steps=9 format=3 uid="uid://scuu5k16flty"]
 
 [ext_resource type="Script" path="res://scripts/art/pho_bowl_visuals.gd" id="1_visuals"]
 [ext_resource type="PackedScene" path="res://assets/models/food/FOOD_pho_bowl_ceramic.glb" id="2_bowl"]
@@ -8,16 +8,30 @@
 [ext_resource type="PackedScene" path="res://assets/models/food/FOOD_pho_beef_slice.glb" id="6_beef"]
 [ext_resource type="PackedScene" path="res://assets/models/food/FOOD_pho_herb_garnish.glb" id="7_garnish"]
 [ext_resource type="PackedScene" path="res://assets/models/food/EXTRA_chopsticks.glb" id="8_chopsticks"]
+[ext_resource type="Script" uid="uid://b4np5l1lnmurf" path="res://scripts/art/pho_bowl_visuals.gd" id="1_visuals"]
+[ext_resource type="PackedScene" uid="uid://dpw0kuafs6n5m" path="res://assets/models/food/FOOD_pho_bowl_ceramic.glb" id="2_bowl"]
+[ext_resource type="PackedScene" uid="uid://cpqtxdj03quxs" path="res://assets/models/food/FOOD_pho_bowl_pattern_blue.glb" id="3_pattern"]
+[ext_resource type="PackedScene" uid="uid://kjel3of0856t" path="res://assets/models/food/FOOD_pho_noodles_flat_rice.glb" id="4_noodles"]
+[ext_resource type="PackedScene" uid="uid://cnexo5vvl7vu3" path="res://assets/models/food/FOOD_pho_broth_surface.glb" id="5_broth"]
+[ext_resource type="PackedScene" uid="uid://criuigu87el2c" path="res://assets/models/food/FOOD_pho_beef_slice.glb" id="6_beef"]
+[ext_resource type="PackedScene" uid="uid://d15t5o4ayj651" path="res://assets/models/food/FOOD_pho_herb_garnish.glb" id="7_garnish"]
 
 [node name="PhoBowlModular" type="Node3D"]
 script = ExtResource("1_visuals")
 
 [node name="BowlBase" type="Node3D" parent="."]
+
 [node name="BowlMesh" parent="BowlBase" instance=ExtResource("2_bowl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000394881, -0.00171173, 0.000605643)
+
 [node name="PatternBlue" parent="BowlBase" instance=ExtResource("3_pattern")]
 
 [node name="NoodlesLayer" parent="." instance=ExtResource("4_noodles")]
+
 [node name="BrothSurface" parent="." instance=ExtResource("5_broth")]
+
 [node name="BeefLayer" parent="." instance=ExtResource("6_beef")]
+
 [node name="GarnishLayer" parent="." instance=ExtResource("7_garnish")]
+
 [node name="ChopsticksExtra" parent="." instance=ExtResource("8_chopsticks")]
