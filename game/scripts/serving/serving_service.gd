@@ -74,6 +74,11 @@ func serve_order(
 	var transition := order_manager.transition_order(order_id, OrderManager.OrderStatus.SERVED)
 	if not bool(transition.get("ok", false)):
 		return {"ok": false, "message": String(transition.get("message", "Không thể hoàn tất đơn.")), "payment_events": 0}
+	# A served bowl is used: it becomes dirty and must be washed before it
+	# can be cooked or served again. This is what makes the multi-order loop
+	# close — serve → dirty → wash → next order — instead of reusing a bowl
+	# that still looks ready.
+	bowl.mark_served_dirty()
 	_paid_order_ids[order_id] = true
 	payment_event_count += 1
 	payment_recorded.emit(order_id, StringName(order.get("recipe_id", &"")), delivery_table_id)
