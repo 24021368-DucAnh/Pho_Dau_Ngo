@@ -21,6 +21,7 @@ var active_recipe: RecipeData = PHO_BO_TAI_RECIPE
 @onready var camera: Camera3D = $Camera3D
 @onready var raycast: RayCast3D = $Camera3D/RayCast3D
 @onready var placement_zone: PlacementZone = $"../PlacementZone"
+@onready var ship_zone: PlacementZone = $"../ShipZone"
 @onready var inventory: InventoryService = $"../Inventory"
 @onready var crosshair_label: Label = $HUD/Center/Crosshair
 @onready var prompt_label: Label = $HUD/Center/Prompt
@@ -48,7 +49,7 @@ func _ready() -> void:
 		status_label.text = String(created_order.get("message", "Không thể tạo đơn đầu tiên."))
 	order_manager.order_changed.connect(_on_order_changed)
 	_refresh_order_ticket()
-	status_label.text = "Nhắm vào bát để cầm. Hoàn thành phiếu, đặt bát rồi giao tại vùng cạnh bàn."
+	status_label.text = "Nhắm vào bát để cầm. Hoàn thành phiếu, mang bát lên bàn giao món bên phải rồi bấm E để ship."
 	# M6 wiring: open the day with the Ledger, then point ServingService at
 	# the same Ledger and day. If wiring fails, the game keeps the previous
 	# behaviour (serving without a Ledger movement) instead of crashing, and
@@ -156,7 +157,14 @@ func _interact() -> void:
 				var order := order_manager.get_order(current_order_id)
 				if int(order.get("status", -1)) == OrderManager.OrderStatus.PREPARING:
 					order_manager.transition_order(current_order_id, OrderManager.OrderStatus.READY)
-			status_label.text = "Đã đặt bát đúng vùng trên bàn."
+			if target.name == "ShipZone" and placed_bowl.is_ready_to_serve():
+				var ship_result := serving_service.serve_order(placed_bowl, order_manager, current_order_id, current_table_id, PROVISIONAL_SALE_PRICE)
+				status_label.text = String(ship_result.get("message", "Không thể giao món."))
+				_refresh_order_ticket()
+			elif placed_bowl.is_ready_to_serve():
+				status_label.text = "Đã đặt bát đúng vùng trên bàn. Mang bát lên bàn giao món bên phải, hoặc nhắm vào bát và bấm E để giao món."
+			else:
+				status_label.text = "Đã đặt bát đúng vùng trên bàn, nhưng bát chưa đủ bước. Cầm lại bát để làm tiếp."
 		else:
 			status_label.text = "Vị trí không hợp lệ. Bát vẫn đang được giữ."
 		return
@@ -167,7 +175,11 @@ func _interact() -> void:
 		_refresh_order_ticket()
 	elif target is InteractiveBowl:
 		var bowl: InteractiveBowl = target as InteractiveBowl
-		if _try_pick_up_bowl(bowl):
+		if int(bowl.state) == InteractiveBowl.BowlState.PLACED and bowl.is_ready_to_serve():
+			var serve_result := serving_service.serve_order(bowl, order_manager, current_order_id, current_table_id, PROVISIONAL_SALE_PRICE)
+			status_label.text = String(serve_result.get("message", "Không thể giao món."))
+			_refresh_order_ticket()
+		elif _try_pick_up_bowl(bowl):
 			var order := order_manager.get_order(current_order_id)
 			if int(order.get("status", -1)) == OrderManager.OrderStatus.ACCEPTED:
 				order_manager.transition_order(current_order_id, OrderManager.OrderStatus.PREPARING)
@@ -226,7 +238,10 @@ func _refresh_prompt() -> void:
 			prompt_label.modulate = prompt_color
 			crosshair_label.modulate = prompt_color
 		elif target is PlacementZone:
-			prompt_label.text = "E / Click: đặt bát vào vùng xanh"
+			if target.name == "ShipZone":
+				prompt_label.text = "E / Click: đặt bát lên bàn giao món để ship"
+			else:
+				prompt_label.text = "E / Click: đặt bát vào vùng xanh"
 			prompt_label.modulate = Color(0.35, 1.0, 0.55)
 			crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 		else:
@@ -238,7 +253,11 @@ func _refresh_prompt() -> void:
 		prompt_label.modulate = Color(0.35, 1.0, 0.55)
 		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 	elif target is InteractiveBowl:
-		prompt_label.text = "E / Click: cầm bát"
+		var prompt_bowl := target as InteractiveBowl
+		if int(prompt_bowl.state) == InteractiveBowl.BowlState.PLACED and prompt_bowl.is_ready_to_serve():
+			prompt_label.text = "E / Click: giao món · bát đã sẵn sàng"
+		else:
+			prompt_label.text = "E / Click: cầm bát"
 		prompt_label.modulate = Color(0.35, 1.0, 0.55)
 		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 	elif target is KitchenStation:
@@ -254,6 +273,7 @@ func _refresh_prompt() -> void:
 
 func _set_placement_zone_active(active: bool) -> void:
 	placement_zone.collision_layer = 2 if active else 0
+	ship_zone.collision_layer = 2 if active else 0
 
 
 func _on_order_changed(_order_id: StringName, _order: Dictionary) -> void:
