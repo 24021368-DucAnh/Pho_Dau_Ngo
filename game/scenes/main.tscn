@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=37 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -9,11 +9,12 @@
 [ext_resource type="Script" uid="uid://c0mvf4mdc3v6m" path="res://scripts/serving/serving_service.gd" id="7_serving"]
 [ext_resource type="Script" uid="uid://bt46enlfwlndn" path="res://scripts/economy/ledger.gd" id="8_ledger"]
 [ext_resource type="Script" uid="uid://buew2gb0adptx" path="res://scripts/day_controller.gd" id="9_day"]
-[ext_resource type="PackedScene" path="res://assets/models/props/PROP_table_v009.glb" id="10_table"]
-[ext_resource type="PackedScene" path="res://assets/models/props/VN_PlasticStool_Red.glb" id="11_stool"]
-[ext_resource type="PackedScene" path="res://assets/models/props/POT_broth_v1.glb" id="12_pot"]
-[ext_resource type="PackedScene" path="res://assets/models/props/LADLE_pho_v2.glb" id="13_ladle"]
-[ext_resource type="PackedScene" path="res://assets/models/props/PROP_tissue_box_v7.glb" id="14_tissue"]
+[ext_resource type="PackedScene" uid="uid://cce1h2pwfoaji" path="res://assets/models/props/PROP_table_v009.glb" id="10_table"]
+[ext_resource type="PackedScene" uid="uid://c6j1qv1mtklx2" path="res://assets/models/props/VN_PlasticStool_Red.glb" id="11_stool"]
+[ext_resource type="PackedScene" uid="uid://c45g2vmxo2v3u" path="res://assets/models/props/POT_broth_v1.glb" id="12_pot"]
+[ext_resource type="PackedScene" uid="uid://c3b6evpw0bhte" path="res://assets/models/props/LADLE_pho_v2.glb" id="13_ladle"]
+[ext_resource type="PackedScene" uid="uid://ba1jkhxur07r8" path="res://assets/models/props/PROP_tissue_box_v7.glb" id="14_tissue"]
+[ext_resource type="PackedScene" uid="uid://gkshau5vlgyt" path="res://assets/models/props/TRAY_metal_game.glb" id="15_tray"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -41,15 +42,8 @@ size = Vector3(12, 3, 0.2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
 size = Vector3(12, 3, 0.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_table"]
-albedo_color = Color(0.3, 0.18, 0.11, 1)
-roughness = 0.9
-
-[sub_resource type="BoxMesh" id="BoxMesh_table"]
-size = Vector3(2, 1, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_table"]
-size = Vector3(2, 1, 1)
+[sub_resource type="BoxShape3D" id="BoxShape3D_table_real"]
+size = Vector3(0.655, 0.5, 0.455)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone"]
 size = Vector3(1.4, 0.25, 0.6)
@@ -76,28 +70,27 @@ radial_segments = 24
 height = 0.12
 radius = 0.24
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_table"]
+albedo_color = Color(0.3, 0.18, 0.11, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_table"]
+size = Vector3(2, 1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_table"]
+size = Vector3(2, 1, 1)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_station"]
 size = Vector3(0.34, 0.3, 0.34)
-
-[sub_resource type="BoxMesh" id="BoxMesh_station"]
-size = Vector3(0.36, 0.12, 0.34)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_stool"]
-size = Vector3(0.84, 0.5, 0.42)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_table_real"]
-size = Vector3(0.655, 0.5, 0.455)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_stool_real"]
 size = Vector3(0.344, 0.275, 0.344)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
-radius = 0.35
-height = 1.8
-
+radius = 0.25
+height = 1.2
 
 [sub_resource type="LabelSettings" id="LabelSettings_hud"]
-font_color = Color(1, 1, 1, 1)
 outline_size = 6
 outline_color = Color(0, 0, 0, 1)
 shadow_size = 4
@@ -253,9 +246,8 @@ station_label = "Khay bánh phở"
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NoodlesStation"]
 shape = SubResource("BoxShape3D_station")
 
-[node name="StationVisual" type="MeshInstance3D" parent="NoodlesStation"]
-material_override = SubResource("StandardMaterial3D_wall")
-mesh = SubResource("BoxMesh_station")
+[node name="StationVisual" parent="NoodlesStation" instance=ExtResource("15_tray")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
 
 [node name="BeefStation" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.32, 1.18, -0.3)
@@ -269,9 +261,8 @@ station_label = "Khay thịt tái"
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BeefStation"]
 shape = SubResource("BoxShape3D_station")
 
-[node name="StationVisual" type="MeshInstance3D" parent="BeefStation"]
-material_override = SubResource("StandardMaterial3D_table")
-mesh = SubResource("BoxMesh_station")
+[node name="StationVisual" parent="BeefStation" instance=ExtResource("15_tray")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
 
 [node name="CookedBeefStation" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.69, 1.18, -0.3)
@@ -285,9 +276,8 @@ station_label = "Khay thịt chín đã nấu và thái lát"
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CookedBeefStation"]
 shape = SubResource("BoxShape3D_station")
 
-[node name="StationVisual" type="MeshInstance3D" parent="CookedBeefStation"]
-material_override = SubResource("StandardMaterial3D_bowl")
-mesh = SubResource("BoxMesh_station")
+[node name="StationVisual" parent="CookedBeefStation" instance=ExtResource("15_tray")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
 
 [node name="CustomerStoolProxy" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.65, 0, -2.7)
@@ -355,7 +345,6 @@ collide_with_areas = true
 [node name="HUD" type="CanvasLayer" parent="Player"]
 
 [node name="OrderTicket" type="Label" parent="Player/HUD"]
-label_settings = SubResource("LabelSettings_hud")
 offset_left = 18.0
 offset_top = 18.0
 offset_right = 390.0
@@ -363,6 +352,7 @@ offset_bottom = 104.0
 theme_override_font_sizes/font_size = 17
 text = "PHIẾU MÓN
 Đang nhận đơn..."
+label_settings = SubResource("LabelSettings_hud")
 
 [node name="Center" type="Control" parent="Player/HUD"]
 layout_mode = 3
@@ -374,7 +364,6 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Crosshair" type="Label" parent="Player/HUD/Center"]
-label_settings = SubResource("LabelSettings_hud")
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -389,11 +378,11 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 22
 text = "+"
+label_settings = SubResource("LabelSettings_hud")
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Prompt" type="Label" parent="Player/HUD/Center"]
-label_settings = SubResource("LabelSettings_hud")
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -408,10 +397,10 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 18
 text = "WASD di chuyển · Chuột nhìn · E / Click tương tác"
+label_settings = SubResource("LabelSettings_hud")
 horizontal_alignment = 1
 
 [node name="Status" type="Label" parent="Player/HUD/Center"]
-label_settings = SubResource("LabelSettings_hud")
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -426,4 +415,5 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 16
 text = "Nhắm vào bát để cầm."
+label_settings = SubResource("LabelSettings_hud")
 horizontal_alignment = 1
