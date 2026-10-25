@@ -81,6 +81,7 @@ func apply_recipe_step(action: StringName, recipe: RecipeData) -> bool:
 		preparation_state = PreparationState.READY_TO_SERVE
 	else:
 		preparation_state = PreparationState.IN_PROGRESS
+	_sync_visuals()
 	return true
 
 
@@ -97,6 +98,7 @@ func cancel_preparation() -> Dictionary:
 	prepared_recipe_id = &""
 	consumed_ingredients.clear()
 	preparation_state = PreparationState.CLEAN
+	_sync_visuals()
 	return {
 		"ok": true,
 		"message": "Đã hủy bát. Nguyên liệu đã dùng không được hoàn lại.",
@@ -106,3 +108,13 @@ func cancel_preparation() -> Dictionary:
 
 func is_ready_to_serve() -> bool:
 	return preparation_state == PreparationState.READY_TO_SERVE
+
+
+# Visuals-only sync: pushes the authoritative consumed_ingredients to the
+# modular visual child when it exists (gameplay scene). Isolated bowls
+# created from script alone have no BowlVisuals child, so this is a no-op
+# there and never changes recipe, inventory, Ledger or collision state.
+func _sync_visuals() -> void:
+	var visuals := get_node_or_null("BowlVisuals") as PhoBowlVisuals
+	if visuals != null:
+		visuals.apply_state(consumed_ingredients)

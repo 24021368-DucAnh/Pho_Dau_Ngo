@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=38 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://y7k6i2njv5on" path="res://assets/models/props/LADLE_pho_v2.glb" id="13_ladle"]
 [ext_resource type="PackedScene" uid="uid://ba1jkhxur07r8" path="res://assets/models/props/PROP_tissue_box_v7.glb" id="14_tissue"]
 [ext_resource type="PackedScene" uid="uid://gkshau5vlgyt" path="res://assets/models/props/TRAY_metal_game.glb" id="15_tray"]
+[ext_resource type="PackedScene" uid="uid://scuu5k16flty" path="res://scenes/art/food/pho_bowl_modular.tscn" id="16_bowl_modular"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -159,12 +160,11 @@ collision_layer = 2
 collision_mask = 0
 script = ExtResource("2_bowl")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Bowl"]
-material_override = SubResource("StandardMaterial3D_bowl")
-mesh = SubResource("CylinderMesh_bowl")
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Bowl"]
 shape = SubResource("CylinderShape3D_bowl")
+
+[node name="BowlVisuals" parent="Bowl" instance=ExtResource("16_bowl_modular")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.06, 0)
 
 [node name="LeftWall" type="StaticBody3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6, 1.5, -1)
