@@ -3,11 +3,15 @@ class_name InventoryService
 
 signal stock_changed(ingredient_id: StringName, amount: int)
 
+# Provisional slice-day stock, sized for the M7 requirement of at least 10
+# bowl cycles (one unit of each ingredient per bowl). Scarcity, restock and
+# supplier rules are post-slice scope; until then the loop must not stall
+# on stock after 3 bowls.
 @export var starting_stock: Dictionary = {
-	&"broth": 3,
-	&"noodles": 3,
-	&"raw_sliced_beef": 3,
-	&"cooked_sliced_beef": 3,
+	&"broth": 10,
+	&"noodles": 10,
+	&"raw_sliced_beef": 10,
+	&"cooked_sliced_beef": 10,
 }
 
 var _stock: Dictionary = {}

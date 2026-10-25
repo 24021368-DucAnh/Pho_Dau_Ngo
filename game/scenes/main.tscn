@@ -326,6 +326,18 @@ shape = SubResource("BoxShape3D_zone")
 material_override = SubResource("StandardMaterial3D_zone")
 mesh = SubResource("BoxMesh_zone")
 
+[node name="WashZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.6, -0.3)
+collision_layer = 2
+collision_mask = 0
+
+[node name="WashCollision" type="CollisionShape3D" parent="WashZone"]
+shape = SubResource("BoxShape3D_zone")
+
+[node name="WashVisual" type="MeshInstance3D" parent="WashZone"]
+material_override = SubResource("StandardMaterial3D_zone")
+mesh = SubResource("BoxMesh_zone")
+
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 1)
 script = ExtResource("1_player")

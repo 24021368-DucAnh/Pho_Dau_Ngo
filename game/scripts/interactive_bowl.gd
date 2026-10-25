@@ -58,6 +58,8 @@ func can_apply_recipe_step(action: StringName, recipe: RecipeData) -> bool:
 		return false
 	if preparation_state == PreparationState.READY_TO_SERVE:
 		return false
+	if preparation_state == PreparationState.DIRTY:
+		return false
 	if prepared_recipe_id != &"" and prepared_recipe_id != recipe.recipe_id:
 		return false
 
@@ -104,6 +106,35 @@ func cancel_preparation() -> Dictionary:
 		"message": "Đã hủy bát. Nguyên liệu đã dùng không được hoàn lại.",
 		"wasted": wasted,
 	}
+
+
+func is_dirty() -> bool:
+	return preparation_state == PreparationState.DIRTY
+
+
+# Called by ServingService after a successful serve. The bowl stays PLACED
+# with its leftovers visible (ingredients are NOT cleared) until it is
+# washed, so a served bowl can never be re-served or re-cooked as-is.
+# Returns false unless the bowl was ready to serve.
+func mark_served_dirty() -> bool:
+	if preparation_state != PreparationState.READY_TO_SERVE:
+		return false
+	preparation_state = PreparationState.DIRTY
+	return true
+
+
+# Washing is the only way back from DIRTY. It requires the bowl to be HELD
+# (the player carries it to the wash zone) and resets it to a clean bowl:
+# no ingredients, no recipe, step index back to zero, visuals clean.
+func wash() -> Dictionary:
+	if state != BowlState.HELD or preparation_state != PreparationState.DIRTY:
+		return {"ok": false, "message": "Chỉ rửa được bát bẩn đang cầm trên tay."}
+	recipe_step_index = 0
+	prepared_recipe_id = &""
+	consumed_ingredients.clear()
+	preparation_state = PreparationState.CLEAN
+	_sync_visuals()
+	return {"ok": true, "message": "Đã rửa sạch bát."}
 
 
 func is_ready_to_serve() -> bool:
