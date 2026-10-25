@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=31 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -9,6 +9,11 @@
 [ext_resource type="Script" uid="uid://c0mvf4mdc3v6m" path="res://scripts/serving/serving_service.gd" id="7_serving"]
 [ext_resource type="Script" uid="uid://bt46enlfwlndn" path="res://scripts/economy/ledger.gd" id="8_ledger"]
 [ext_resource type="Script" uid="uid://buew2gb0adptx" path="res://scripts/day_controller.gd" id="9_day"]
+[ext_resource type="PackedScene" path="res://assets/models/props/PROP_table_v009.glb" id="10_table"]
+[ext_resource type="PackedScene" path="res://assets/models/props/VN_PlasticStool_Red.glb" id="11_stool"]
+[ext_resource type="PackedScene" path="res://assets/models/props/POT_broth_v1.glb" id="12_pot"]
+[ext_resource type="PackedScene" path="res://assets/models/props/LADLE_pho_v2.glb" id="13_ladle"]
+[ext_resource type="PackedScene" path="res://assets/models/props/PROP_tissue_box_v7.glb" id="14_tissue"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -80,6 +85,12 @@ size = Vector3(0.36, 0.12, 0.34)
 [sub_resource type="BoxShape3D" id="BoxShape3D_stool"]
 size = Vector3(0.84, 0.5, 0.42)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_table_real"]
+size = Vector3(0.655, 0.5, 0.455)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_stool_real"]
+size = Vector3(0.344, 0.275, 0.344)
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
 height = 1.8
@@ -124,17 +135,16 @@ mesh = SubResource("BoxMesh_wall")
 shape = SubResource("BoxShape3D_wall")
 
 [node name="Table" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Table"]
-material_override = SubResource("StandardMaterial3D_table")
-mesh = SubResource("BoxMesh_table")
+[node name="TableMesh" parent="Table" instance=ExtResource("10_table")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Table"]
-shape = SubResource("BoxShape3D_table")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("BoxShape3D_table_real")
 
 [node name="PlacementZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2.7)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("3_zone")
@@ -151,7 +161,7 @@ material_override = SubResource("StandardMaterial3D_zone")
 mesh = SubResource("BoxMesh_zone")
 
 [node name="Bowl" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.06, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.56, -2.7)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("2_bowl")
@@ -198,10 +208,14 @@ transform = Transform3D(1.1, 0, 0, 0, 0.12, 0, 0, 0, 1.1, 0, 0.58, 0)
 material_override = SubResource("StandardMaterial3D_wall")
 mesh = SubResource("BoxMesh_table")
 
-[node name="StockPotProxy" type="MeshInstance3D" parent="PhoCart"]
-transform = Transform3D(1.7, 0, 0, 0, 3.5, 0, 0, 0, 1.7, 0.35, 0.78, 0)
-material_override = SubResource("StandardMaterial3D_bowl")
-mesh = SubResource("CylinderMesh_bowl")
+[node name="StockPot" parent="PhoCart" instance=ExtResource("12_pot")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.64, 0)
+
+[node name="LadleHooked" parent="PhoCart" instance=ExtResource("13_ladle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.527, 0.6415, 0)
+
+[node name="TissueBox" parent="PhoCart" instance=ExtResource("14_tissue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0.64, 0.3)
 
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource("5_inventory")
@@ -276,28 +290,25 @@ material_override = SubResource("StandardMaterial3D_bowl")
 mesh = SubResource("BoxMesh_station")
 
 [node name="CustomerStoolProxy" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.65, 0.25, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.65, 0, -2.7)
 
-[node name="StoolMesh" type="MeshInstance3D" parent="CustomerStoolProxy"]
-transform = Transform3D(0.42, 0, 0, 0, 0.5, 0, 0, 0, 0.42, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_table")
-mesh = SubResource("BoxMesh_table")
+[node name="StoolMesh" parent="CustomerStoolProxy" instance=ExtResource("11_stool")]
 
 [node name="StoolCollision" type="CollisionShape3D" parent="CustomerStoolProxy"]
-shape = SubResource("BoxShape3D_stool")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1375, 0)
+shape = SubResource("BoxShape3D_stool_real")
 
 [node name="ShipTable" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.5, -1.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -1.6)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="ShipTable"]
-material_override = SubResource("StandardMaterial3D_table")
-mesh = SubResource("BoxMesh_table")
+[node name="ShipTableMesh" parent="ShipTable" instance=ExtResource("10_table")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ShipTable"]
-shape = SubResource("BoxShape3D_table")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("BoxShape3D_table_real")
 
 [node name="ShipZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1, -1.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.5, -1.6)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("3_zone")
@@ -314,7 +325,7 @@ material_override = SubResource("StandardMaterial3D_zone")
 mesh = SubResource("BoxMesh_zone")
 
 [node name="DeliveryZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -1.85)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -1.85)
 collision_layer = 2
 collision_mask = 0
 
