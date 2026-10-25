@@ -36,6 +36,7 @@ var active_recipe: RecipeData = PHO_BO_TAI_RECIPE
 var held_bowl: InteractiveBowl
 var current_order_id: StringName = &"order-001"
 var current_table_id: StringName = &"table-1"
+var _order_counter: int = 1
 var _stations: Array[KitchenStation] = []
 
 
@@ -149,6 +150,16 @@ func _interact() -> void:
 			var station: KitchenStation = target as KitchenStation
 			var result: Dictionary = station.apply_to_bowl(held_bowl, active_recipe, inventory)
 			status_label.text = String(result.get("message", "Thao tác chưa thực hiện."))
+		elif target is Area3D and target.name == "WashZone":
+			var wash_result: Dictionary = held_bowl.wash()
+			if bool(wash_result.get("ok", false)):
+				if _create_next_order():
+					status_label.text = "Đã rửa sạch bát. Đơn mới đã lên phiếu."
+				else:
+					status_label.text = "Đã rửa sạch bát nhưng không tạo được đơn tiếp theo."
+			else:
+				status_label.text = String(wash_result.get("message", "Không rửa được bát."))
+			_refresh_order_ticket()
 		elif target is PlacementZone and held_bowl.try_place(target as Node):
 			var placed_bowl := held_bowl
 			held_bowl = null
@@ -190,6 +201,8 @@ func _interact() -> void:
 		status_label.text = "Cầm bát trước khi thao tác tại trạm."
 	elif target is PlacementZone:
 		status_label.text = "Cần cầm bát trước khi đặt."
+	elif target is Area3D and target.name == "WashZone":
+		status_label.text = "Cầm bát bẩn tới chậu rửa rồi bấm E để rửa."
 	else:
 		status_label.text = "Chưa nhắm vào vật có thể tương tác."
 
@@ -237,6 +250,15 @@ func _refresh_prompt() -> void:
 			var prompt_color: Color = Color(0.35, 1.0, 0.55) if bool(preview.get("ok", false)) else Color(1.0, 0.72, 0.28)
 			prompt_label.modulate = prompt_color
 			crosshair_label.modulate = prompt_color
+		elif target is Area3D and target.name == "WashZone":
+			if held_bowl.is_dirty():
+				prompt_label.text = "E / Click: rửa bát"
+				prompt_label.modulate = Color(0.35, 1.0, 0.55)
+				crosshair_label.modulate = Color(0.35, 1.0, 0.55)
+			else:
+				prompt_label.text = "Chậu rửa — bát này không bẩn"
+				prompt_label.modulate = Color(1.0, 0.72, 0.28)
+				crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 		elif target is PlacementZone:
 			if target.name == "ShipZone":
 				prompt_label.text = "E / Click: đặt bát lên bàn giao món để ship"
@@ -252,10 +274,16 @@ func _refresh_prompt() -> void:
 		prompt_label.text = "E / Click: giao món · kiểm tra đúng phiếu và bàn"
 		prompt_label.modulate = Color(0.35, 1.0, 0.55)
 		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
+	elif target is Area3D and target.name == "WashZone":
+		prompt_label.text = "Chậu rửa bát — cầm bát bẩn tới đây"
+		prompt_label.modulate = Color(1.0, 0.72, 0.28)
+		crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 	elif target is InteractiveBowl:
 		var prompt_bowl := target as InteractiveBowl
 		if int(prompt_bowl.state) == InteractiveBowl.BowlState.PLACED and prompt_bowl.is_ready_to_serve():
 			prompt_label.text = "E / Click: giao món · bát đã sẵn sàng"
+		elif prompt_bowl.is_dirty():
+			prompt_label.text = "E / Click: cầm bát bẩn đi rửa"
 		else:
 			prompt_label.text = "E / Click: cầm bát"
 		prompt_label.modulate = Color(0.35, 1.0, 0.55)
@@ -293,7 +321,23 @@ func _refresh_order_ticket() -> void:
 		OrderManager.OrderStatus.CANCELLED: "ĐÃ HỦY",
 	}
 	var recipe_name := active_recipe.display_name
-	order_ticket_label.text = "PHIẾU #001  ·  BÀN 1\n%s\nTrạng thái: %s\nĐã thu: %d đơn" % [recipe_name, status_names.get(int(order.get("status", -1)), "KHÔNG RÕ"), serving_service.payment_event_count]
+	var order_no := String(order.get("order_id", "")).replace("order-", "")
+	var table_no := String(order.get("table_id", "")).replace("table-", "")
+	order_ticket_label.text = "PHIẾU #%s  ·  BÀN %s\n%s\nTrạng thái: %s\nĐã thu: %d đơn" % [order_no, table_no, recipe_name, status_names.get(int(order.get("status", -1)), "KHÔNG RÕ"), serving_service.payment_event_count]
+
+
+# Multi-order loop: washing a dirty bowl is what opens the next order. The
+# new order uses whatever recipe is currently selected, so the player can
+# press V after a serve (allowed once the order is SERVED) to change the
+# next order's recipe before washing. Called only on a successful wash.
+func _create_next_order() -> bool:
+	_order_counter += 1
+	var next_id := StringName("order-%03d" % _order_counter)
+	var created := order_manager.create_order(next_id, active_recipe.recipe_id, current_table_id)
+	if bool(created.get("ok", false)):
+		current_order_id = next_id
+		return true
+	return false
 
 
 func _try_pick_up_bowl(bowl: InteractiveBowl) -> bool:
