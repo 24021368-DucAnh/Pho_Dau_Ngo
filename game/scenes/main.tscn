@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://cce1h2pwfoaji" path="res://assets/models/props/PROP_table_v009.glb" id="10_table"]
 [ext_resource type="PackedScene" uid="uid://c6j1qv1mtklx2" path="res://assets/models/props/VN_PlasticStool_Red.glb" id="11_stool"]
 [ext_resource type="PackedScene" uid="uid://c45g2vmxo2v3u" path="res://assets/models/props/POT_broth_v1.glb" id="12_pot"]
-[ext_resource type="PackedScene" uid="uid://c3b6evpw0bhte" path="res://assets/models/props/LADLE_pho_v2.glb" id="13_ladle"]
+[ext_resource type="PackedScene" uid="uid://y7k6i2njv5on" path="res://assets/models/props/LADLE_pho_v2.glb" id="13_ladle"]
 [ext_resource type="PackedScene" uid="uid://ba1jkhxur07r8" path="res://assets/models/props/PROP_tissue_box_v7.glb" id="14_tissue"]
 [ext_resource type="PackedScene" uid="uid://gkshau5vlgyt" path="res://assets/models/props/TRAY_metal_game.glb" id="15_tray"]
 
