@@ -120,3 +120,19 @@ For each asset, create `docs/art/asset-evidence/<ASSET-ID>.md` with:
 - Tripo account/plan rights terms have not been recorded for a specific generation.
 - Runtime model scale/pivot and performance budgets remain unmeasured.
 - Phase B utensils and Phase C cart remain blocked until Phase A is accepted by the owner in-engine.
+
+
+## 10. Current execution status and next gate (2026-10-25)
+
+The Phase A baseline and intake workflow are documented and PR #41 is merged. The empty-bowl candidate now exists as a user-provided 3MF plus a conversation-workspace GLB conversion, but neither binary is committed to the repository. Intake inspection found a large reported mesh (about 501,804 triangles), dimensions around 500 × 500 × 249 mm, non-watertight topology and degenerate-triangle concerns. These are blockers to acceptance, not automatic proof that the model is unusable as a static render mesh.
+
+**Do next, in this order:**
+1. Open the original 3MF and GLB in Blender or another 3D mesh editor; compare silhouette, interior, wall thickness, rim, foot, normals and orientation.
+2. Verify real-world dimensions and set intended Godot scale from measured bowl proportions; do not blindly scale a 500 mm-wide object into the scene.
+3. Decide whether the topology defects are visible or harmful for the intended static mesh. Clean only concrete defects, save a new version, and retain the source.
+4. Record source provenance/rights. If unknown, keep the asset blocked from release/redistribution pending owner review.
+5. Import the candidate into a disposable Godot 4.4.1 scene and inspect materials, transforms and import warnings. Do not wire it into `main.tscn` yet.
+6. If the import and appearance are acceptable, create the evidence screenshots and update `FOOD-PHO-001.md` and the Asset Register with measured values and exact commit SHA.
+7. Only after the owner accepts the isolated in-engine bowl should work proceed to modular ingredient layers. Phase B utensils and Phase C cart remain blocked.
+
+Do not add the source/GLB to Git until provenance, binary size, repository policy and file usefulness are checked. Do not claim that CI validates the visual model; CI export success and owner visual acceptance are separate gates.
