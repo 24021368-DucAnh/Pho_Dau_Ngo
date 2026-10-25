@@ -33,7 +33,7 @@ func _run() -> void:
 	_check(scene_instance.get_node_or_null("LeftWall") is StaticBody3D, "graybox has a left alley wall")
 	_check(scene_instance.get_node_or_null("RightWall") is StaticBody3D, "graybox has a right alley wall")
 	_check(scene_instance.get_node_or_null("PhoCart") is StaticBody3D, "graybox has a pho cart/workstation proxy")
-	_check(scene_instance.get_node_or_null("PhoCart/StockPotProxy") is MeshInstance3D, "graybox has a stock-pot visual proxy")
+	_check(scene_instance.get_node_or_null("PhoCart/StockPot") is Node3D, "cart has a stock-pot prop (real pot GLB, replaced greybox proxy in PR #47)")
 	_check(scene_instance.get_node_or_null("BrothStation") is KitchenStation, "graybox has an interactive broth station")
 	_check(scene_instance.get_node_or_null("NoodlesStation") is KitchenStation, "graybox has an interactive noodle station")
 	_check(scene_instance.get_node_or_null("BeefStation") is KitchenStation, "graybox has an interactive raw sliced beef station for pho tai")
@@ -59,19 +59,24 @@ func _run() -> void:
 		var cart_top_world_y: float = cart_top.global_position.y + (0.5 * cart_top.mesh.get_aabb().size.y * cart_top.global_transform.basis.get_scale().y)
 		for station in [broth_station, noodles_station, beef_station, cooked_station]:
 			if station != null:
-				var visual: MeshInstance3D = station.get_node_or_null("StationVisual") as MeshInstance3D
-				if visual != null:
-					var visual_bottom_y: float = visual.global_position.y - (0.5 * visual.mesh.get_aabb().size.y * visual.global_transform.basis.get_scale().y)
+				var visual_node: Node3D = station.get_node_or_null("StationVisual") as Node3D
+				var visual_mesh: MeshInstance3D = visual_node as MeshInstance3D
+				if visual_mesh != null:
+					var visual_bottom_y: float = visual_mesh.global_position.y - (0.5 * visual_mesh.mesh.get_aabb().size.y * visual_mesh.global_transform.basis.get_scale().y)
 					_check(visual_bottom_y <= cart_top_world_y + 0.02 and visual_bottom_y >= cart_top_world_y - 0.08, "%s visual rests on cart top" % station.name)
+				elif visual_node != null:
+					# GLB prop instance (tray): origin sits at the prop's bottom, so
+					# its own Y must equal the cart-top surface (PR #47).
+					_check(absf(visual_node.global_position.y - cart_top_world_y) <= 0.02, "%s tray bottom rests on cart top" % station.name)
 				else:
 					_check(station.name == "BrothStation", "%s has a visual proxy when expected" % station.name)
 	var scene_bowl_for_transform: Node3D = scene_instance.get_node_or_null("Bowl") as Node3D
 	var scene_marker: Marker3D = scene_instance.get_node_or_null("PlacementZone/PlacementMarker") as Marker3D
 	_check(scene_bowl_for_transform != null and scene_marker != null, "bowl and placement marker exist for transform regression")
 	if scene_bowl_for_transform != null:
-		_check(absf(scene_bowl_for_transform.global_position.y - 1.06) < 0.01, "serving bowl starts at tabletop height, not elevated")
+		_check(absf(scene_bowl_for_transform.global_position.y - 0.56) < 0.01, "serving bowl starts at tabletop height, not elevated")
 	if scene_bowl_for_transform != null and scene_marker != null:
-		_check(absf(scene_marker.global_position.y - 1.06) < 0.01, "placement marker keeps bowl center at tabletop height")
+		_check(absf(scene_marker.global_position.y - 0.56) < 0.01, "placement marker keeps bowl center at tabletop height")
 	_check(scene_zone != null, "scene has a placement target")
 	var scene_raycast: RayCast3D = scene_player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
 	_check(scene_raycast != null, "player has a look-at raycast")
