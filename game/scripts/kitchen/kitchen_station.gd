@@ -11,6 +11,8 @@ func preview_action(bowl: InteractiveBowl, recipe: RecipeData, inventory: Invent
 		return {"ok": false, "message": "Cần có bát trước khi thao tác."}
 	if bowl.state != InteractiveBowl.BowlState.HELD:
 		return {"ok": false, "message": "Cầm bát lên trước khi thao tác tại trạm."}
+	if bowl.preparation_state == InteractiveBowl.PreparationState.DIRTY:
+		return {"ok": false, "message": "Bát bẩn — mang đi rửa trước khi nấu tiếp."}
 	if recipe == null or not recipe.is_valid_recipe():
 		return {"ok": false, "message": "Công thức chưa hợp lệ."}
 	if inventory == null or not is_instance_valid(inventory):
