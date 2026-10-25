@@ -112,6 +112,14 @@ func _run() -> void:
 	_check(bool(order_manager.transition_order(&"order-003", OrderManager.OrderStatus.PREPARING).get("ok", false)), "recovery order transitions to preparing")
 	_check(bool(order_manager.transition_order(&"order-003", OrderManager.OrderStatus.READY).get("ok", false)), "recovery order transitions to ready")
 	_check(bool(ledger.record_transaction(&"sale:order-003", &"day-01", &"sale_revenue", 45000, &"order-003").get("ok", false)), "recovery fixture simulates an already committed sale")
+	# The bowl served for order-001 is dirty now: wash and re-cook it before
+	# it can serve another order, mirroring the in-game loop.
+	_check(bool(bowl.set_held()), "served bowl can be picked up again once dirty")
+	_check(bool(bowl.wash().get("ok", false)), "served bowl washes back to clean")
+	_check(bool(noodle.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "recovery fixture re-adds noodles")
+	_check(bool(beef.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "recovery fixture re-adds tai beef")
+	_check(bool(broth.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "recovery fixture re-finishes bowl with broth")
+	_check(bool(bowl.try_place(placement)), "re-cooked bowl can be placed before recovery delivery")
 	var recovery_result := serving.serve_order(bowl, order_manager, &"order-003", &"table-1", 45000)
 	_check(bool(recovery_result.get("ok", false)), "serving retry recovers from an existing identical Ledger transaction")
 	_check(order_manager.get_order(&"order-003").get("status") == OrderManager.OrderStatus.SERVED, "recovered sale transitions the order to served")
@@ -131,6 +139,14 @@ func _run() -> void:
 	var conflict_serving := ServingService.new()
 	_check(bool(conflict_serving.configure_ledger(conflict_ledger, &"day-conflict").get("ok", false)), "conflict serving configures with its ledger")
 	root.add_child(conflict_serving)
+	# Same wash-and-recook for the conflict fixture, so the conflicting
+	# transaction — not a dirty bowl — is what blocks this delivery.
+	_check(bool(bowl.set_held()), "recovered bowl can be picked up again once dirty")
+	_check(bool(bowl.wash().get("ok", false)), "recovered bowl washes back to clean")
+	_check(bool(noodle.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "conflict fixture re-adds noodles")
+	_check(bool(beef.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "conflict fixture re-adds tai beef")
+	_check(bool(broth.apply_to_bowl(bowl, tai, inventory).get("ok", false)), "conflict fixture re-finishes bowl with broth")
+	_check(bool(bowl.try_place(placement)), "re-cooked bowl can be placed before conflict delivery")
 	var conflict_result := conflict_serving.serve_order(bowl, order_manager, &"order-004", &"table-1", 45000)
 	_check(not bool(conflict_result.get("ok", false)), "serving rejects a conflicting existing transaction payload")
 	_check(order_manager.get_order(&"order-004").get("status") == OrderManager.OrderStatus.READY, "conflicting transaction preserves the ready order")
