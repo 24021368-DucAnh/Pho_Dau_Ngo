@@ -11,21 +11,21 @@
 - **Owner accepted** means the owner reviewed the evidence and explicitly accepted the gate.
 - Never mark an item complete from source inspection alone when its acceptance depends on feel, readability, visuals, collision, camera framing, or performance.
 - Record commit SHA, Godot version, machine/OS for performance checks, and a screenshot or clip for visual/runtime findings.
-- Current verified CI evidence: [run #107 on `main`](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929402162) completed successfully for commit `6156febbd395aad9814eec9bf9082c30fe35252b`. All contract tests, Linux/Windows exports, and artifact upload passed. The current `main` HEAD has since advanced with documentation-only updates; rerun CI after the next code change.
+- Current verified headless evidence (2026-10-26, `main` `071d8cf`, Godot 4.4.1): editor import clean, headless scene run clean, all 6 domain suites PASS. Older CI evidence: [run #107 on `main`](https://github.com/24021368-DucAnh/Pho_Dau_Ngo/actions/runs/39929402162) completed successfully for commit `6156febbd395aad9814eec9bf9082c30fe35252b` (all contract tests, Linux/Windows exports, artifact upload passed). That run is superseded by later code changes; rerun CI on the current commit.
 
 ## 2. Current evidence snapshot
 
 | Area | Evidence available | Status | Next action |
 |---|---|---|---|
-| Production project import/parse | CI run #107 on `main`: passed | Automated pass for recorded SHA `6156febbd395aad9814eec9bf9082c30fe35252b` | Revalidate after next code change |
-| Interaction contract | CI run #107: passed | Automated pass | Manual movement, focus range, pickup and placement still require playtest |
-| Recipe validation | CI run #107: passed | Automated pass | Manual kitchen-loop verification still required |
-| Order lifecycle / serving | CI run #107: passed | Automated pass, including Ledger-backed idempotency tests | Verify the loop in a running build |
-| Desktop exports | CI run #107: Linux and Windows export + artifact upload passed | Automated export pass | Download and launch the artifact on a supported OS |
+| Production project import/parse | Headless import clean on `main` `071d8cf` (2026-10-26); 6 domain suites PASS | Automated pass (headless, not CI) | Rerun CI on the current commit; manual playtest still required |
+| Interaction contract | Domain PASS, including the updated contract for the props scene and the bowl-visuals integration test | Automated pass | Manual movement, focus range, pickup and placement still require playtest |
+| Recipe validation | Domain PASS | Automated pass | Manual kitchen-loop verification still required |
+| Order lifecycle / serving | Domain PASS, including Ledger-backed idempotency tests; in-game day-summary flow exists (HUD + C to close) | Domain automated; in-game flow implemented, manual verification open | M7: verify the loop in a running build, including duplicate serve and closing the day twice |
+| Desktop exports | CI run #107: Linux and Windows export + artifact upload passed (older commit) | Automated export pass (superseded commit) | Rerun on the current commit; download and launch the artifact on a supported OS |
 | Aged-aluminum pot | First art pass in `game/scenes/stylized_vertical_slice.tscn` via `game/scripts/art/stylized_vertical_slice.gd` | Source present; runtime review open | Inspect from showcase camera and gameplay-relevant angles |
-| Production gameplay scene | `game/scenes/main.tscn` remains the configured main scene | Existing graybox/prototype scope | Do not imply the art showcase is integrated into the gameplay scene |
-| End-of-day ledger/summary | `Ledger` and `DayController` exist with automated contract tests; summary is ledger-derived | Domain logic automated; not yet demonstrated as an in-game UI flow | Wire into production gameplay/UI and manually verify close-day flow |
-| Owner visual approval | No runtime screenshot or owner approval attached here | Open | Capture evidence and review before advancing art maturity |
+| Production gameplay scene | `game/scenes/main.tscn` is the configured main scene, with real props (table, pot, ladle, tissue box, trays), Ledger/DayController, ShipTable, 1.7 m player capsule, and modular bowl visuals (PR #53, merged) | Gameplay scene integrated; manual first-person review open | Owner first-person review of props, bowl layers and held-bowl framing; M7 playtest |
+| End-of-day ledger/summary | `Ledger` and `DayController` wired into production gameplay/UI (HUD summary, C to close, idempotent close) with automated contract tests | Implemented; manual verification open | M7: verify close-day flow and reconciliation in a running build |
+| Owner visual approval | Owner viewed the modular bowl in Godot on 2026-10-25 and temporarily closed Phase A; props + integrated bowl visuals still await first-person review | Partial; open | Capture first-person evidence; formal Phase A acceptance still open |
 
 ## 3. Manual gameplay smoke test
 
