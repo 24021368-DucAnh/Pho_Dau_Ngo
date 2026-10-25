@@ -15,13 +15,15 @@
 
 | Asset ID | Intended content | Source file convention | Runtime export convention | Current state |
 |---|---|---|---|---|
-| FOOD-PHO-001 | Empty ceramic/enamel pho bowl | `art/source/food/FOOD-PHO-001_v001_source.*` | `game/assets/models/food/FOOD_pho_bowl_ceramic.glb` | planned / not acquired |
-| FOOD-PHO-002 | Separate flat rice-noodle mass | `art/source/food/FOOD-PHO-002_v001_source.*` | `game/assets/models/food/FOOD_pho_noodles.glb` | planned / not acquired |
-| FOOD-PHO-003 | Thin, overlapping beef slices | `art/source/food/FOOD-PHO-003_v001_source.*` | `game/assets/models/food/FOOD_pho_beef_slices.glb` | planned / not acquired |
-| FOOD-PHO-004 | Broth surface volume/surface | `art/source/food/FOOD-PHO-004_v001_source.*` | `game/assets/models/food/FOOD_pho_broth_surface.glb` | planned / not acquired |
-| FOOD-PHO-005 | Herb/onion garnish cluster | `art/source/food/FOOD-PHO-005_v001_source.*` | `game/assets/models/food/FOOD_pho_garnish.glb` | planned / not acquired |
+| FOOD-PHO-001 | Empty ceramic/enamel pho bowl | `art/source/food/FOOD-PHO-001_v001_source.*` | `game/assets/models/food/FOOD_pho_bowl_ceramic.glb` | first-art-pass (committed via PR #44; viewed in Godot; owner temp-close 2026-10-25, not final acceptance) |
+| FOOD-PHO-002 | Separate flat rice-noodle mass | `art/source/food/FOOD-PHO-002_v001_source.*` | `game/assets/models/food/FOOD_pho_noodles_flat_rice.glb` | first-art-pass (in modular scene; not yet in gameplay `main.tscn`) |
+| FOOD-PHO-003 | Thin, overlapping beef slices | `art/source/food/FOOD-PHO-003_v001_source.*` | `game/assets/models/food/FOOD_pho_beef_slice.glb` | first-art-pass (in modular scene; not yet in gameplay `main.tscn`) |
+| FOOD-PHO-004 | Broth surface volume/surface | `art/source/food/FOOD-PHO-004_v001_source.*` | `game/assets/models/food/FOOD_pho_broth_surface.glb` | first-art-pass (in modular scene; not yet in gameplay `main.tscn`) |
+| FOOD-PHO-005 | Herb/onion garnish cluster | `art/source/food/FOOD-PHO-005_v001_source.*` | `game/assets/models/food/FOOD_pho_herb_garnish.glb` | first-art-pass (in modular scene; not yet in gameplay `main.tscn`) |
 
 The IDs are stable tracking identifiers; their numeric order is not a gameplay sequence. The source extension depends on what Tripo actually provides. Keep original downloads unchanged; the runtime export should be GLB/glTF when supported and validated.
+
+**Reconciliation note 2026-10-26:** the FOOD-PHO-001–005 layers above were self-built in Blender as original geometry, not Tripo generations — the Tripo-first plan was superseded for these layers by owner-directed self-builds. Tripo remains an available tool for future assets; it is not the source of these files, and no Tripo generation terms are recorded for them. The prompt templates in section 4 are kept as guidance, not as evidence that any asset was generated.
 
 ## 3. Real-world serving sequence (visual reference)
 
@@ -114,25 +116,25 @@ For each asset, create `docs/art/asset-evidence/<ASSET-ID>.md` with:
 - Screenshot paths and commit SHA
 - Known limitations, reviewer and next decision
 
-## 9. Current blockers
+## 9. Current blockers (revised 2026-10-26 to match `main` at `7f64796`)
 
-- No Tripo candidates have been generated or inspected in this repository.
-- Tripo account/plan rights terms have not been recorded for a specific generation.
-- Runtime model scale/pivot and performance budgets remain unmeasured.
-- Phase B utensils and Phase C cart remain blocked until Phase A is accepted by the owner in-engine.
+- No Tripo candidates have been generated or inspected in this repository — and none were used for the FOOD-PHO-001–005 layers, which were self-built in Blender instead.
+- Tripo account/plan rights terms have not been recorded for a specific generation (no Tripo generation is claimed for these layers).
+- Bowl source provenance/rights (user-provided `.3mf`) remain unverified; do not mark the bowl cleared.
+- The modular scene is built but not yet instanced in gameplay `main.tscn`; formal Phase A acceptance is still open (owner temp-close 2026-10-25 only).
+- Phase B utensils and Phase C cart, as formal phases, remain open pending final Phase A acceptance — see the gate note in section 10 for how this gate was applied in practice.
 
 
-## 10. Current execution status and next gate (2026-10-25)
+## 10. Current execution status and next gate (revised 2026-10-26)
 
-The Phase A baseline and intake workflow are documented and PR #41 is merged. The empty-bowl candidate now exists as a user-provided 3MF plus a conversation-workspace GLB conversion, but neither binary is committed to the repository. Intake inspection found a large reported mesh (about 501,804 triangles), dimensions around 500 × 500 × 249 mm, non-watertight topology and degenerate-triangle concerns. These are blockers to acceptance, not automatic proof that the model is unusable as a static render mesh.
+The Phase A baseline and intake workflow are documented and PR #41 is merged. The 2026-10-25 statements that "neither binary is committed" and that work must start from a disposable-scene import are superseded: runtime bowl GLBs were committed via PR #44, the modular scene `game/scenes/art/food/pho_bowl_modular.tscn` exists on `main`, the owner viewed it in Godot on 2026-10-25, and Phase A was temporarily closed by the owner the same day. The original intake findings (about 501,804 triangles, around 500 × 500 × 249 mm, non-watertight topology, degenerate-triangle concerns) remain on record as history; the runtime v003 version is decimated to 60,215 triangles / 4.9 MB with dimensions unchanged.
+
+**Gate note — written rule vs applied practice:** as written, Phase B utensils and Phase C cart stay blocked until final Phase A owner acceptance. In practice the owner has since directed, approved and merged individual items outside the formal phases — broth pot (O-tolab CC0, scaled to real size), self-built ladle v2, self-built table v009, shared metal trays and tissue box — all on `main` via PR #47/#50/#51. Those item-by-item waivers do not equal formal Phase B/C acceptance, and they do not close Phase A. Formal Phase B/C work still needs final Phase A acceptance plus an explicit owner call.
 
 **Do next, in this order:**
-1. Open the original 3MF and GLB in Blender or another 3D mesh editor; compare silhouette, interior, wall thickness, rim, foot, normals and orientation.
-2. Verify real-world dimensions and set intended Godot scale from measured bowl proportions; do not blindly scale a 500 mm-wide object into the scene.
-3. Decide whether the topology defects are visible or harmful for the intended static mesh. Clean only concrete defects, save a new version, and retain the source.
-4. Record source provenance/rights. If unknown, keep the asset blocked from release/redistribution pending owner review.
-5. Import the candidate into a disposable Godot 4.4.1 scene and inspect materials, transforms and import warnings. Do not wire it into `main.tscn` yet.
-6. If the import and appearance are acceptable, create the evidence screenshots and update `FOOD-PHO-001.md` and the Asset Register with measured values and exact commit SHA.
-7. Only after the owner accepts the isolated in-engine bowl should work proceed to modular ingredient layers. Phase B utensils and Phase C cart remain blocked.
+1. Instance the modular bowl scene into gameplay `main.tscn` (replacing the cylinder visual) without changing the `InteractiveBowl` root, collision shape, ownership transitions, recipe API, inventory or Ledger; test layer visibility for successful steps, rejected steps, cancellation/reset and bowl reuse in the actual first-person camera.
+2. Re-check the v004 contrast pass in Godot (sent, never re-tested) and decide the bowl-depth question (0.249 m vs gameplay proxy 0.12 m) and the intricate blue scroll pattern; none of these are decided yet.
+3. Record bowl source provenance/rights if it can be resolved; until then keep the bowl out of any "cleared" claim.
+4. Obtain formal Phase A owner acceptance (the 2026-10-25 temp-close is explicitly not final), then scope formal Phase B/C work with the owner.
 
-Do not add the source/GLB to Git until provenance, binary size, repository policy and file usefulness are checked. Do not claim that CI validates the visual model; CI export success and owner visual acceptance are separate gates.
+Do not claim that CI validates the visual model; CI export success and owner visual acceptance are separate gates.
