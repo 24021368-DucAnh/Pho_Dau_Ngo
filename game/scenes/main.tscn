@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=41 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://ba1jkhxur07r8" path="res://assets/models/props/PROP_tissue_box_v7.glb" id="14_tissue"]
 [ext_resource type="PackedScene" uid="uid://gkshau5vlgyt" path="res://assets/models/props/TRAY_metal_game.glb" id="15_tray"]
 [ext_resource type="PackedScene" uid="uid://scuu5k16flty" path="res://scenes/art/food/pho_bowl_modular.tscn" id="16_bowl_modular"]
+[ext_resource type="PackedScene" uid="uid://m57pkfcmctx0y" path="res://assets/models/props/CART_pho_v1.glb" id="17_cart"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -83,6 +84,12 @@ size = Vector3(2, 1, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station"]
 size = Vector3(0.34, 0.3, 0.34)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cart"]
+size = Vector3(1.8, 0.82, 0.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_broth_station"]
+size = Vector3(0.56, 0.4, 0.56)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_stool_real"]
 size = Vector3(0.344, 0.275, 0.344)
@@ -187,28 +194,25 @@ mesh = SubResource("BoxMesh_wall")
 shape = SubResource("BoxShape3D_wall")
 
 [node name="PhoCart" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 0.5, -0.3)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -2.8, 0, -0.3)
 
-[node name="CartBody" type="MeshInstance3D" parent="PhoCart"]
-material_override = SubResource("StandardMaterial3D_table")
-mesh = SubResource("BoxMesh_table")
+[node name="CartMesh" parent="PhoCart" instance=ExtResource("17_cart")]
 
 [node name="CartCollision" type="CollisionShape3D" parent="PhoCart"]
-shape = SubResource("BoxShape3D_table")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.41, 0)
+shape = SubResource("BoxShape3D_cart")
 
-[node name="CartTop" type="MeshInstance3D" parent="PhoCart"]
-transform = Transform3D(1.1, 0, 0, 0, 0.12, 0, 0, 0, 1.1, 0, 0.58, 0)
-material_override = SubResource("StandardMaterial3D_wall")
-mesh = SubResource("BoxMesh_table")
+[node name="CounterTopMarker" type="Marker3D" parent="PhoCart"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.82, 0)
 
 [node name="StockPot" parent="PhoCart" instance=ExtResource("12_pot")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.64, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 0.57, 0)
 
 [node name="LadleHooked" parent="PhoCart" instance=ExtResource("13_ladle")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.527, 0.6415, 0)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0.373, 0.57, 0)
 
 [node name="TissueBox" parent="PhoCart" instance=ExtResource("14_tissue")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0.64, 0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.82, -0.25)
 
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource("5_inventory")
@@ -226,16 +230,16 @@ script = ExtResource("8_ledger")
 script = ExtResource("9_day")
 
 [node name="BrothStation" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.58, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.35, 0.86, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BrothStation"]
-shape = SubResource("BoxShape3D_station")
+shape = SubResource("BoxShape3D_broth_station")
 
 [node name="NoodlesStation" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.95, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.16, 0.86, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
@@ -250,7 +254,7 @@ shape = SubResource("BoxShape3D_station")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
 
 [node name="BeefStation" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.32, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.52, 0.86, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
@@ -265,7 +269,7 @@ shape = SubResource("BoxShape3D_station")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
 
 [node name="CookedBeefStation" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.69, 1.18, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.88, 0.86, -0.3)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("4_station")
