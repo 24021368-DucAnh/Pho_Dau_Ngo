@@ -24,7 +24,14 @@ background_color = Color(0.72, 0.78, 0.72, 1)
 ambient_light_source = 3
 ambient_light_color = Color(0.82, 0.75, 0.6, 1)
 ambient_light_energy = 0.65
-tonemap_mode = 2
+tonemap_mode = 3
+sdfgi_enabled = true
+ssao_enabled = true
+glow_enabled = true
+glow_intensity = 0.4
+fog_enabled = true
+fog_density = 0.015
+fog_light_color = Color(1.0, 0.9, 0.7, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.66, 0.61, 0.49, 1)
@@ -86,6 +93,11 @@ shadow_offset = Vector2(2, 2)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_stylized")
+
+[node name="CartProbe" type="ReflectionProbe" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 1.0, -0.3)
+size = Vector3(4, 3, 3)
+update_mode = 0
 
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.906308, 0.298836, -0.298836, 0, 0.707107, 0.707107, 0.422618, -0.640856, 0.640856, 0, 0, 0)
