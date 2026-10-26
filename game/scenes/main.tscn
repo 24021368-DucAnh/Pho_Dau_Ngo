@@ -17,6 +17,9 @@
 [ext_resource type="PackedScene" uid="uid://scuu5k16flty" path="res://scenes/art/food/pho_bowl_modular.tscn" id="16_bowl_modular"]
 [ext_resource type="PackedScene" uid="uid://dlwugr4w5y4ve" path="res://assets/models/props/CART_pho_v1.glb" id="17_cart"]
 [ext_resource type="PackedScene" uid="uid://da8vsy4837k18" path="res://assets/models/props/PROP_chopstick_holder_v2.glb" id="18_holder"]
+[ext_resource type="PackedScene" uid="uid://bkt8hnqtldbxc" path="res://assets/models/props/CHOPSTICKS_bundle_t1.glb" id="19_bundle1"]
+[ext_resource type="PackedScene" uid="uid://lfaoxyaywc7" path="res://assets/models/props/CHOPSTICKS_bundle_t2.glb" id="20_bundle2"]
+[ext_resource type="PackedScene" uid="uid://clnlojoat1xeb" path="res://assets/models/props/CHOPSTICKS_bundle_t3.glb" id="21_bundle3"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -450,3 +453,12 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.445, 0.5, -2.8)
 
 [node name="TissueTable3" parent="." instance=ExtResource("14_tissue")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.43, 0.5, -2.6)
+
+[node name="ChopsticksBundle1" parent="." instance=ExtResource("19_bundle1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.255, 0.5, -2.8)
+
+[node name="ChopsticksBundle2" parent="." instance=ExtResource("20_bundle2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.955, 0.5, -2.8)
+
+[node name="ChopsticksBundle3" parent="." instance=ExtResource("21_bundle3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.445, 0.5, -2.8)
