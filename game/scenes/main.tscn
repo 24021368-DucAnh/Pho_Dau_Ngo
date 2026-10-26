@@ -34,7 +34,7 @@ fog_density = 0.015
 fog_light_color = Color(1.0, 0.9, 0.7, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.66, 0.61, 0.49, 1)
+albedo_color = Color(0.5, 0.46, 0.41, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(20, 0.2, 20)
@@ -43,7 +43,7 @@ size = Vector3(20, 0.2, 20)
 size = Vector3(20, 0.2, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
-albedo_color = Color(0.83, 0.76, 0.61, 1)
+albedo_color = Color(0.62, 0.6, 0.55, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall"]
 size = Vector3(12, 3, 0.2)
@@ -416,4 +416,37 @@ label_settings = SubResource("LabelSettings_hud")
 horizontal_alignment = 1
 
 [node name="ChopstickHolder" parent="." instance=ExtResource("18_holder")]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.22, 0.5, -2.83)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.255, 0.5, -2.7)
+
+[node name="TissueTable1" parent="." instance=ExtResource("14_tissue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.255, 0.5, -2.7)
+
+[node name="Table2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0, -2.7)
+
+[node name="Table2Mesh" parent="Table2" instance=ExtResource("10_table")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Table2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("BoxShape3D_table_real")
+
+[node name="ChopstickHolder2" parent="." instance=ExtResource("18_holder")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.955, 0.5, -2.7)
+
+[node name="TissueTable2" parent="." instance=ExtResource("14_tissue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.445, 0.5, -2.7)
+
+[node name="Table3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0, -2.7)
+
+[node name="Table3Mesh" parent="Table3" instance=ExtResource("10_table")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Table3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("BoxShape3D_table_real")
+
+[node name="ChopstickHolder3" parent="." instance=ExtResource("18_holder")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.445, 0.5, -2.7)
+
+[node name="TissueTable3" parent="." instance=ExtResource("14_tissue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.955, 0.5, -2.7)
