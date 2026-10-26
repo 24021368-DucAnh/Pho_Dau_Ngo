@@ -416,10 +416,10 @@ label_settings = SubResource("LabelSettings_hud")
 horizontal_alignment = 1
 
 [node name="ChopstickHolder" parent="." instance=ExtResource("18_holder")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.255, 0.5, -2.7)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.255, 0.5, -2.8)
 
 [node name="TissueTable1" parent="." instance=ExtResource("14_tissue")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.255, 0.5, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.27, 0.5, -2.6)
 
 [node name="Table2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0, -2.7)
@@ -431,10 +431,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 shape = SubResource("BoxShape3D_table_real")
 
 [node name="ChopstickHolder2" parent="." instance=ExtResource("18_holder")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.955, 0.5, -2.7)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.955, 0.5, -2.8)
 
 [node name="TissueTable2" parent="." instance=ExtResource("14_tissue")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.445, 0.5, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.97, 0.5, -2.6)
 
 [node name="Table3" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0, -2.7)
@@ -446,7 +446,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 shape = SubResource("BoxShape3D_table_real")
 
 [node name="ChopstickHolder3" parent="." instance=ExtResource("18_holder")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.445, 0.5, -2.7)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.445, 0.5, -2.8)
 
 [node name="TissueTable3" parent="." instance=ExtResource("14_tissue")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.955, 0.5, -2.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.43, 0.5, -2.6)
