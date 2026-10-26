@@ -31,7 +31,7 @@
 - [x] Delivery interaction calls ServingService against the current order and destination table; successful service updates the ticket and payment count.
 - [x] OrderManager now exposes isolated snapshots for all orders, orders filtered by status, and the open-order queue; regression tests cover concurrent order state isolation and queue filtering.
 - [ ] The player HUD and bowl/serving interaction still use a single current order; queue APIs are a domain foundation, not a complete playable multi-order/day loop.
-- [ ] Customer spawning/behavior remains unimplemented; the current scene uses a static stool/customer-side delivery zone.
+- [ ] Customer spawning/behavior remains unimplemented; the current scene uses a static customer-side delivery zone (the licensed stool prop was removed in PR #59/#60; the seat spot is empty).
 - [ ] Manual playtest remains required; automated CI does not prove visual usability or input feel.
 
 ## Next implementation gate
