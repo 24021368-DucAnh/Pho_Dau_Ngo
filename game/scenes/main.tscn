@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=41 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://gkshau5vlgyt" path="res://assets/models/props/TRAY_metal_game.glb" id="15_tray"]
 [ext_resource type="PackedScene" uid="uid://scuu5k16flty" path="res://scenes/art/food/pho_bowl_modular.tscn" id="16_bowl_modular"]
 [ext_resource type="PackedScene" uid="uid://dlwugr4w5y4ve" path="res://assets/models/props/CART_pho_v1.glb" id="17_cart"]
+[ext_resource type="PackedScene" uid="uid://da8vsy4837k18" path="res://assets/models/props/PROP_chopstick_holder_v2.glb" id="18_holder"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -60,6 +61,9 @@ size = Vector3(1.4, 0.02, 0.6)
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_bowl"]
 height = 0.08
 radius = 0.09
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_station"]
+size = Vector3(0.34, 0.3, 0.34)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cart"]
 size = Vector3(1.8, 0.82, 0.8)
@@ -398,3 +402,6 @@ theme_override_font_sizes/font_size = 16
 text = "Nhắm vào bát để cầm."
 label_settings = SubResource("LabelSettings_hud")
 horizontal_alignment = 1
+
+[node name="ChopstickHolder" parent="." instance=ExtResource("18_holder")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.22, 0.5, -2.83)
