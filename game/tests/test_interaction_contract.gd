@@ -49,14 +49,17 @@ func _run() -> void:
 	_check(scene_instance.get_node_or_null("Bowl") is StaticBody3D, "scene has one physical bowl")
 
 	# Regression checks for the reported floating dish / misplaced cart ingredients.
-	var cart_top: MeshInstance3D = scene_instance.get_node_or_null("PhoCart/CartTop") as MeshInstance3D
+	# The real cart GLB (CART_pho_v1) replaced the greybox CartTop in the cart
+	# integration: its counter top is marked by PhoCart/CounterTopMarker at the
+	# cart's counter height (0.82 m), which the station visuals must rest on.
+	var counter_top_marker: Marker3D = scene_instance.get_node_or_null("PhoCart/CounterTopMarker") as Marker3D
 	var broth_station: Node3D = scene_instance.get_node_or_null("BrothStation") as Node3D
 	var noodles_station: Node3D = scene_instance.get_node_or_null("NoodlesStation") as Node3D
 	var beef_station: Node3D = scene_instance.get_node_or_null("BeefStation") as Node3D
 	var cooked_station: Node3D = scene_instance.get_node_or_null("CookedBeefStation") as Node3D
-	_check(cart_top != null, "cart has a top surface for ingredient stations")
-	if cart_top != null:
-		var cart_top_world_y: float = cart_top.global_position.y + (0.5 * cart_top.mesh.get_aabb().size.y * cart_top.global_transform.basis.get_scale().y)
+	_check(counter_top_marker != null, "cart has a counter-top marker for station height checks")
+	if counter_top_marker != null:
+		var cart_top_world_y: float = counter_top_marker.global_position.y
 		for station in [broth_station, noodles_station, beef_station, cooked_station]:
 			if station != null:
 				var visual_node: Node3D = station.get_node_or_null("StationVisual") as Node3D
