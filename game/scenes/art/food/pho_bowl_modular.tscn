@@ -28,3 +28,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000394881, -0.00171173, 0.
 [node name="GarnishLayer" parent="." instance=ExtResource("7_garnish")]
 
 [node name="ChopsticksExtra" parent="." instance=ExtResource("8_chopsticks")]
+transform = Transform3D(0.67, 0, 0, 0, 0.67, 0, 0, 0, 0.67, 0.047, 0.089, 0)
