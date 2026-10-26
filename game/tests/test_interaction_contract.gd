@@ -43,9 +43,10 @@ func _run() -> void:
 	_check(scene_instance.get_node_or_null("ServingService") is ServingService, "scene has one authoritative serving service")
 	_check(scene_instance.get_node_or_null("DeliveryZone") is Area3D, "scene has a player-facing delivery interaction zone")
 	_check(scene_player.get_node_or_null("HUD/OrderTicket") is Label, "player HUD has a visible order ticket")
-	_check(scene_instance.get_node_or_null("CustomerStoolProxy") is StaticBody3D, "graybox has a collidable customer stool")
-	var stool_collision: CollisionShape3D = scene_instance.get_node_or_null("CustomerStoolProxy/StoolCollision") as CollisionShape3D
-	_check(stool_collision != null and stool_collision.shape is BoxShape3D, "customer stool has a physical collision shape")
+	# The licensed stool was removed from the repo (PR #59) and its scene nodes
+	# were removed with it: the customer seat must not come back silently.
+	_check(scene_instance.get_node_or_null("CustomerStoolProxy") == null, "licensed stool proxy stays removed from the scene")
+	_check(scene_instance.get_node_or_null("CustomerStoolProxy/StoolMesh") == null, "licensed stool mesh stays removed from the scene")
 	_check(scene_instance.get_node_or_null("Bowl") is StaticBody3D, "scene has one physical bowl")
 
 	# Regression checks for the reported floating dish / misplaced cart ingredients.
@@ -77,9 +78,9 @@ func _run() -> void:
 	var scene_marker: Marker3D = scene_instance.get_node_or_null("PlacementZone/PlacementMarker") as Marker3D
 	_check(scene_bowl_for_transform != null and scene_marker != null, "bowl and placement marker exist for transform regression")
 	if scene_bowl_for_transform != null:
-		_check(absf(scene_bowl_for_transform.global_position.y - 0.56) < 0.01, "serving bowl starts at tabletop height, not elevated")
+		_check(absf(scene_bowl_for_transform.global_position.y - 0.54) < 0.01, "serving bowl starts at tabletop height, not elevated")
 	if scene_bowl_for_transform != null and scene_marker != null:
-		_check(absf(scene_marker.global_position.y - 0.56) < 0.01, "placement marker keeps bowl center at tabletop height")
+		_check(absf(scene_marker.global_position.y - 0.54) < 0.01, "placement marker keeps bowl center at tabletop height")
 	_check(scene_zone != null, "scene has a placement target")
 	var scene_raycast: RayCast3D = scene_player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
 	_check(scene_raycast != null, "player has a look-at raycast")
