@@ -17,6 +17,9 @@
 [ext_resource type="PackedScene" uid="uid://scuu5k16flty" path="res://scenes/art/food/pho_bowl_modular.tscn" id="16_bowl_modular"]
 [ext_resource type="PackedScene" uid="uid://dlwugr4w5y4ve" path="res://assets/models/props/CART_pho_v1.glb" id="17_cart"]
 [ext_resource type="PackedScene" uid="uid://da8vsy4837k18" path="res://assets/models/props/PROP_chopstick_holder_v2.glb" id="18_holder"]
+[ext_resource type="PackedScene" uid="uid://bkt8hnqtldbxc" path="res://assets/models/props/CHOPSTICKS_bundle_t1.glb" id="19_bundle1"]
+[ext_resource type="PackedScene" uid="uid://lfaoxyaywc7" path="res://assets/models/props/CHOPSTICKS_bundle_t2.glb" id="20_bundle2"]
+[ext_resource type="PackedScene" uid="uid://clnlojoat1xeb" path="res://assets/models/props/CHOPSTICKS_bundle_t3.glb" id="21_bundle3"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -24,10 +27,17 @@ background_color = Color(0.72, 0.78, 0.72, 1)
 ambient_light_source = 3
 ambient_light_color = Color(0.82, 0.75, 0.6, 1)
 ambient_light_energy = 0.65
-tonemap_mode = 2
+tonemap_mode = 3
+sdfgi_enabled = true
+ssao_enabled = true
+glow_enabled = true
+glow_intensity = 0.4
+fog_enabled = true
+fog_density = 0.015
+fog_light_color = Color(1.0, 0.9, 0.7, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.66, 0.61, 0.49, 1)
+albedo_color = Color(0.5, 0.46, 0.41, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(20, 0.2, 20)
@@ -36,7 +46,7 @@ size = Vector3(20, 0.2, 20)
 size = Vector3(20, 0.2, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
-albedo_color = Color(0.83, 0.76, 0.61, 1)
+albedo_color = Color(0.62, 0.6, 0.55, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall"]
 size = Vector3(12, 3, 0.2)
@@ -86,6 +96,11 @@ shadow_offset = Vector2(2, 2)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_stylized")
+
+[node name="CartProbe" type="ReflectionProbe" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 1.0, -0.3)
+size = Vector3(4, 3, 3)
+update_mode = 0
 
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.906308, 0.298836, -0.298836, 0, 0.707107, 0.707107, 0.422618, -0.640856, 0.640856, 0, 0, 0)
@@ -403,4 +418,46 @@ label_settings = SubResource("LabelSettings_hud")
 horizontal_alignment = 1
 
 [node name="ChopstickHolder" parent="." instance=ExtResource("18_holder")]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.22, 0.5, -2.83)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.255, 0.5, -2.8)
+
+[node name="TissueTable1" parent="." instance=ExtResource("14_tissue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.27, 0.5, -2.6)
+
+[node name="Table2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0, -2.7)
+
+[node name="Table2Mesh" parent="Table2" instance=ExtResource("10_table")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Table2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("BoxShape3D_table_real")
+
+[node name="ChopstickHolder2" parent="." instance=ExtResource("18_holder")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.955, 0.5, -2.8)
+
+[node name="TissueTable2" parent="." instance=ExtResource("14_tissue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.97, 0.5, -2.6)
+
+[node name="Table3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0, -2.7)
+
+[node name="Table3Mesh" parent="Table3" instance=ExtResource("10_table")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Table3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("BoxShape3D_table_real")
+
+[node name="ChopstickHolder3" parent="." instance=ExtResource("18_holder")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.445, 0.5, -2.8)
+
+[node name="TissueTable3" parent="." instance=ExtResource("14_tissue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.43, 0.5, -2.6)
+
+[node name="ChopsticksBundle1" parent="." instance=ExtResource("19_bundle1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.255, 0.5, -2.8)
+
+[node name="ChopsticksBundle2" parent="." instance=ExtResource("20_bundle2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.955, 0.5, -2.8)
+
+[node name="ChopsticksBundle3" parent="." instance=ExtResource("21_bundle3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.445, 0.5, -2.8)
