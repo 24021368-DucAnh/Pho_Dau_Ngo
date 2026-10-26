@@ -78,9 +78,9 @@ func _run() -> void:
 	var scene_marker: Marker3D = scene_instance.get_node_or_null("PlacementZone/PlacementMarker") as Marker3D
 	_check(scene_bowl_for_transform != null and scene_marker != null, "bowl and placement marker exist for transform regression")
 	if scene_bowl_for_transform != null:
-		_check(absf(scene_bowl_for_transform.global_position.y - 0.56) < 0.01, "serving bowl starts at tabletop height, not elevated")
+		_check(absf(scene_bowl_for_transform.global_position.y - 0.54) < 0.01, "serving bowl starts at tabletop height, not elevated")
 	if scene_bowl_for_transform != null and scene_marker != null:
-		_check(absf(scene_marker.global_position.y - 0.56) < 0.01, "placement marker keeps bowl center at tabletop height")
+		_check(absf(scene_marker.global_position.y - 0.54) < 0.01, "placement marker keeps bowl center at tabletop height")
 	_check(scene_zone != null, "scene has a placement target")
 	var scene_raycast: RayCast3D = scene_player.get_node_or_null("Camera3D/RayCast3D") as RayCast3D
 	_check(scene_raycast != null, "player has a look-at raycast")

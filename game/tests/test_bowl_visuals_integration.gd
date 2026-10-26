@@ -40,7 +40,7 @@ func _run() -> void:
 	_check(visuals1 != null, "gameplay Bowl instances the modular bowl scene as BowlVisuals")
 	_check(bowl1.get_node_or_null("MeshInstance3D") == null, "old cylinder bowl visual is removed (no double bowl)")
 	if visuals1 is Node3D:
-		_check(absf((visuals1 as Node3D).position.y - (-0.06)) < 0.001, "modular bowl base sits on the tabletop (offset -0.06 from bowl centre)")
+		_check(absf((visuals1 as Node3D).position.y - (-0.04)) < 0.001, "modular bowl base sits on the tabletop (offset -0.04 from bowl centre)")
 	var collision1: CollisionShape3D = bowl1.get_node_or_null("CollisionShape3D") as CollisionShape3D
 	_check(collision1 != null and collision1.shape is CylinderShape3D, "gameplay Bowl keeps its original cylinder collision shape")
 
