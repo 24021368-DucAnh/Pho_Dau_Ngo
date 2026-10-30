@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=57 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -20,6 +20,15 @@
 [ext_resource type="PackedScene" uid="uid://bkt8hnqtldbxc" path="res://assets/models/props/CHOPSTICKS_bundle_t1.glb" id="19_bundle1"]
 [ext_resource type="PackedScene" uid="uid://lfaoxyaywc7" path="res://assets/models/props/CHOPSTICKS_bundle_t2.glb" id="20_bundle2"]
 [ext_resource type="PackedScene" uid="uid://clnlojoat1xeb" path="res://assets/models/props/CHOPSTICKS_bundle_t3.glb" id="21_bundle3"]
+[ext_resource type="Script" uid="uid://b2p1mxpxu65r0" path="res://scripts/art/cart_stainless_finish.gd" id="22_cart_finish"]
+[ext_resource type="Script" uid="uid://y2dlinexv5or" path="res://scripts/gameplay/shift_coordinator.gd" id="23_shift"]
+[ext_resource type="Script" uid="uid://ba36ksvjg1r7" path="res://scripts/tables/table_service.gd" id="24_tables"]
+[ext_resource type="Script" uid="uid://dfdtcfnseg71f" path="res://scripts/customers/customer_director.gd" id="25_customers"]
+[ext_resource type="Script" uid="uid://dkk4kmmwllwd2" path="res://scripts/gameplay/cooking_coordinator.gd" id="26_cooking"]
+[ext_resource type="Script" uid="uid://br1jf7c3gqa08" path="res://scripts/serving/tray_controller.gd" id="27_tray"]
+[ext_resource type="Script" path="res://scripts/customers/meal_service.gd" id="28_meal"]
+[ext_resource type="Script" path="res://scripts/customers/payment_zone.gd" id="29_payment_zone"]
+[ext_resource type="Script" path="res://scripts/washing/wash_batch_service.gd" id="30_wash_batch"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -28,13 +37,13 @@ ambient_light_source = 3
 ambient_light_color = Color(0.82, 0.75, 0.6, 1)
 ambient_light_energy = 0.65
 tonemap_mode = 3
-sdfgi_enabled = true
 ssao_enabled = true
+sdfgi_enabled = true
 glow_enabled = true
 glow_intensity = 0.4
 fog_enabled = true
+fog_light_color = Color(1, 0.9, 0.7, 1)
 fog_density = 0.015
-fog_light_color = Color(1.0, 0.9, 0.7, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.5, 0.46, 0.41, 1)
@@ -58,7 +67,7 @@ size = Vector3(12, 3, 0.2)
 size = Vector3(0.655, 0.5, 0.455)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone"]
-size = Vector3(1.4, 0.25, 0.6)
+size = Vector3(0.56, 0.14, 0.36)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_zone"]
 transparency = 1
@@ -66,7 +75,15 @@ albedo_color = Color(0.12, 0.72, 0.4, 0.28)
 roughness = 0.8
 
 [sub_resource type="BoxMesh" id="BoxMesh_zone"]
-size = Vector3(1.4, 0.02, 0.6)
+size = Vector3(0.56, 0.008, 0.36)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_customer_proxy"]
+albedo_color = Color(0.36, 0.42, 0.48, 1)
+roughness = 0.9
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_customer_proxy"]
+radius = 0.16
+height = 0.65
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_bowl"]
 height = 0.08
@@ -80,6 +97,41 @@ size = Vector3(0.56, 0.4, 0.56)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station"]
 size = Vector3(0.34, 0.3, 0.34)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tray_base"]
+albedo_color = Color(0.66, 0.7, 0.72, 1)
+metallic = 0.72
+roughness = 0.32
+
+[sub_resource type="BoxMesh" id="BoxMesh_tray_base"]
+size = Vector3(0.62, 0.02, 0.42)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wash_stand"]
+size = Vector3(0.68, 0.54, 0.62)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wash_basin"]
+top_radius = 0.27
+bottom_radius = 0.22
+height = 0.16
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wash_water"]
+top_radius = 0.23
+bottom_radius = 0.23
+height = 0.008
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wash_water"]
+albedo_color = Color(0.24, 0.36, 0.37, 1)
+metallic = 0.1
+roughness = 0.18
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tray_slot"]
+size = Vector3(0.22, 0.14, 0.17)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tray_slot"]
+size = Vector3(0.22, 0.008, 0.17)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor_interaction"]
+size = Vector3(0.7, 0.35, 0.7)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.25
@@ -98,9 +150,8 @@ shadow_offset = Vector2(2, 2)
 environment = SubResource("Environment_stylized")
 
 [node name="CartProbe" type="ReflectionProbe" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 1.0, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 1, -0.3)
 size = Vector3(4, 3, 3)
-update_mode = 0
 
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.906308, 0.298836, -0.298836, 0, 0.707107, 0.707107, 0.422618, -0.640856, 0.640856, 0, 0, 0)
@@ -141,6 +192,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2.7)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("3_zone")
+table_id = &"table-1"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlacementZone"]
 shape = SubResource("BoxShape3D_zone")
@@ -149,9 +201,22 @@ shape = SubResource("BoxShape3D_zone")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
 
 [node name="ZoneVisual" type="MeshInstance3D" parent="PlacementZone"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.004, 0)
 material_override = SubResource("StandardMaterial3D_zone")
 mesh = SubResource("BoxMesh_zone")
+
+[node name="CustomerProxy1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.83, -3.12)
+material_override = SubResource("StandardMaterial3D_customer_proxy")
+mesh = SubResource("CapsuleMesh_customer_proxy")
+
+[node name="PaymentZone1" type="Area3D" parent="."]
+position = Vector3(0, 0.9, -3.12)
+script = ExtResource("29_payment_zone")
+table_id = &"table-1"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PaymentZone1"]
+shape = SubResource("BoxShape3D_floor_interaction")
 
 [node name="Bowl" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.54, -2.7)
@@ -163,6 +228,19 @@ script = ExtResource("2_bowl")
 shape = SubResource("CylinderShape3D_bowl")
 
 [node name="BowlVisuals" parent="Bowl" instance=ExtResource("16_bowl_modular")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
+
+[node name="Bowl2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0.54, -2.7)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_bowl")
+bowl_id = &"bowl-2"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bowl2"]
+shape = SubResource("CylinderShape3D_bowl")
+
+[node name="BowlVisuals" parent="Bowl2" instance=ExtResource("16_bowl_modular")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
 
 [node name="LeftWall" type="StaticBody3D" parent="."]
@@ -189,6 +267,7 @@ shape = SubResource("BoxShape3D_wall")
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -2.8, 0, -0.3)
 
 [node name="CartMesh" parent="PhoCart" instance=ExtResource("17_cart")]
+script = ExtResource("22_cart_finish")
 
 [node name="CartCollision" type="CollisionShape3D" parent="PhoCart"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.41, 0)
@@ -220,6 +299,27 @@ script = ExtResource("8_ledger")
 
 [node name="DayController" type="Node" parent="."]
 script = ExtResource("9_day")
+
+[node name="ShiftCoordinator" type="Node" parent="."]
+script = ExtResource("23_shift")
+
+[node name="TableService" type="Node" parent="."]
+script = ExtResource("24_tables")
+
+[node name="CustomerDirector" type="Node" parent="."]
+script = ExtResource("25_customers")
+
+[node name="CookingCoordinator" type="Node" parent="."]
+script = ExtResource("26_cooking")
+
+[node name="TrayController" type="Node" parent="."]
+script = ExtResource("27_tray")
+
+[node name="MealService" type="Node" parent="."]
+script = ExtResource("28_meal")
+
+[node name="WashBatchService" type="Node" parent="."]
+script = ExtResource("30_wash_batch")
 
 [node name="BrothStation" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.35, 0.86, -0.3)
@@ -280,50 +380,87 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -1.6)
 
 [node name="ShipTableMesh" parent="ShipTable" instance=ExtResource("10_table")]
 
+[node name="TrayBase" type="MeshInstance3D" parent="ShipTable"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.505, 0)
+
+[node name="TrayAsset" parent="ShipTable/TrayBase" instance=ExtResource("15_tray")]
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ShipTable"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 shape = SubResource("BoxShape3D_table_real")
 
 [node name="ShipZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.5, -1.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.5, -1.69)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("3_zone")
+tray_slot_index = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ShipZone"]
-shape = SubResource("BoxShape3D_zone")
+shape = SubResource("BoxShape3D_tray_slot")
 
 [node name="PlacementMarker" type="Marker3D" parent="ShipZone"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
 
 [node name="ZoneVisual" type="MeshInstance3D" parent="ShipZone"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.004, 0)
 material_override = SubResource("StandardMaterial3D_zone")
-mesh = SubResource("BoxMesh_zone")
+mesh = SubResource("BoxMesh_tray_slot")
+
+[node name="TraySlot1" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.5, -1.51)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("3_zone")
+tray_slot_index = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TraySlot1"]
+shape = SubResource("BoxShape3D_tray_slot")
+
+[node name="PlacementMarker" type="Marker3D" parent="TraySlot1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+
+[node name="ZoneVisual" type="MeshInstance3D" parent="TraySlot1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.004, 0)
+material_override = SubResource("StandardMaterial3D_zone")
+mesh = SubResource("BoxMesh_tray_slot")
 
 [node name="DeliveryZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -1.85)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.175, -1.85)
 collision_layer = 2
 collision_mask = 0
 
 [node name="DeliveryCollision" type="CollisionShape3D" parent="DeliveryZone"]
-shape = SubResource("BoxShape3D_zone")
-
-[node name="DeliveryVisual" type="MeshInstance3D" parent="DeliveryZone"]
-material_override = SubResource("StandardMaterial3D_zone")
-mesh = SubResource("BoxMesh_zone")
+shape = SubResource("BoxShape3D_floor_interaction")
 
 [node name="WashZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.6, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.66, -0.3)
 collision_layer = 2
 collision_mask = 0
 
 [node name="WashCollision" type="CollisionShape3D" parent="WashZone"]
-shape = SubResource("BoxShape3D_zone")
+shape = SubResource("BoxShape3D_floor_interaction")
 
-[node name="WashVisual" type="MeshInstance3D" parent="WashZone"]
-material_override = SubResource("StandardMaterial3D_zone")
-mesh = SubResource("BoxMesh_zone")
+[node name="WashSign" type="Label3D" parent="."]
+position = Vector3(-1.2, 1.15, -0.3)
+text = "GIÁ BÁT BẨN / RỬA  ·  E"
+font_size = 36
+pixel_size = 0.001
+
+[node name="WashStand" type="MeshInstance3D" parent="."]
+position = Vector3(-1.2, 0.27, -0.3)
+mesh = SubResource("BoxMesh_wash_stand")
+material_override = SubResource("StandardMaterial3D_tray_base")
+
+[node name="WashBasin" type="MeshInstance3D" parent="."]
+position = Vector3(-1.2, 0.62, -0.3)
+mesh = SubResource("CylinderMesh_wash_basin")
+material_override = SubResource("StandardMaterial3D_tray_base")
+
+[node name="WashWater" type="MeshInstance3D" parent="."]
+position = Vector3(-1.2, 0.705, -0.3)
+mesh = SubResource("CylinderMesh_wash_water")
+material_override = SubResource("StandardMaterial3D_wash_water")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 1)
@@ -351,6 +488,15 @@ offset_bottom = 104.0
 theme_override_font_sizes/font_size = 17
 text = "PHIẾU MÓN
 Đang nhận đơn..."
+label_settings = SubResource("LabelSettings_hud")
+
+[node name="CashHUD" type="Label" parent="Player/HUD"]
+offset_left = 18.0
+offset_top = 115.0
+offset_right = 450.0
+offset_bottom = 165.0
+theme_override_font_sizes/font_size = 17
+text = "Tiền hiện có: đang tải..."
 label_settings = SubResource("LabelSettings_hud")
 
 [node name="Center" type="Control" parent="Player/HUD"]
@@ -432,6 +578,37 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0, -2.7)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 shape = SubResource("BoxShape3D_table_real")
 
+[node name="Table2Zone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0.5, -2.7)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("3_zone")
+table_id = &"table-2"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Table2Zone"]
+shape = SubResource("BoxShape3D_zone")
+
+[node name="PlacementMarker" type="Marker3D" parent="Table2Zone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+
+[node name="ZoneVisual" type="MeshInstance3D" parent="Table2Zone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.004, 0)
+material_override = SubResource("StandardMaterial3D_zone")
+mesh = SubResource("BoxMesh_zone")
+
+[node name="CustomerProxy2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0.83, -3.12)
+material_override = SubResource("StandardMaterial3D_customer_proxy")
+mesh = SubResource("CapsuleMesh_customer_proxy")
+
+[node name="PaymentZone2" type="Area3D" parent="."]
+position = Vector3(-1.7, 0.9, -3.12)
+script = ExtResource("29_payment_zone")
+table_id = &"table-2"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PaymentZone2"]
+shape = SubResource("BoxShape3D_floor_interaction")
+
 [node name="ChopstickHolder2" parent="." instance=ExtResource("18_holder")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.955, 0.5, -2.8)
 
@@ -446,6 +623,37 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0, -2.7)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Table3"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 shape = SubResource("BoxShape3D_table_real")
+
+[node name="Table3Zone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0.5, -2.7)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("3_zone")
+table_id = &"table-3"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Table3Zone"]
+shape = SubResource("BoxShape3D_zone")
+
+[node name="PlacementMarker" type="Marker3D" parent="Table3Zone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+
+[node name="ZoneVisual" type="MeshInstance3D" parent="Table3Zone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.004, 0)
+material_override = SubResource("StandardMaterial3D_zone")
+mesh = SubResource("BoxMesh_zone")
+
+[node name="CustomerProxy3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0.83, -3.12)
+material_override = SubResource("StandardMaterial3D_customer_proxy")
+mesh = SubResource("CapsuleMesh_customer_proxy")
+
+[node name="PaymentZone3" type="Area3D" parent="."]
+position = Vector3(1.7, 0.9, -3.12)
+script = ExtResource("29_payment_zone")
+table_id = &"table-3"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PaymentZone3"]
+shape = SubResource("BoxShape3D_floor_interaction")
 
 [node name="ChopstickHolder3" parent="." instance=ExtResource("18_holder")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.445, 0.5, -2.8)

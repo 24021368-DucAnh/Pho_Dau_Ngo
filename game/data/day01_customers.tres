@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CustomerScenario" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/customers/customer_scenario.gd" id="1_scenario"]
+
+[resource]
+script = ExtResource("1_scenario")
+recipes = Array[StringName]([&"pho_bo_tai", &"pho_bo_chin", &"pho_bo_tai"])

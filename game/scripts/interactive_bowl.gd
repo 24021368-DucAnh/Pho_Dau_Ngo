@@ -1,6 +1,12 @@
 extends StaticBody3D
 class_name InteractiveBowl
 
+enum Owner { AVAILABLE, PLAYER, TRAY, TABLE, RACK }
+
+@export var bowl_id: StringName = &"bowl-1"
+var bowl_owner: Owner = Owner.AVAILABLE
+var last_tray_slot_index: int = -1
+
 enum BowlState {
 	AVAILABLE,
 	HELD,
@@ -19,6 +25,7 @@ var preparation_state: int = PreparationState.CLEAN
 var recipe_step_index: int = 0
 var prepared_recipe_id: StringName = &""
 var consumed_ingredients: Array[Dictionary] = []
+var in_service := false
 
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
@@ -29,10 +36,12 @@ func _ready() -> void:
 
 
 func set_held() -> bool:
-	if state == BowlState.HELD:
+	if state == BowlState.HELD or in_service or (bowl_owner == Owner.RACK and preparation_state == PreparationState.DIRTY):
 		return false
 
 	state = BowlState.HELD
+	bowl_owner = Owner.PLAYER
+	last_tray_slot_index = -1
 	collision_layer = 0
 	collision_shape.set_deferred("disabled", true)
 	return true
@@ -47,6 +56,8 @@ func try_place(target: Node) -> bool:
 	var zone: PlacementZone = target as PlacementZone
 	global_transform = zone.get_placement_transform()
 	state = BowlState.PLACED
+	bowl_owner = Owner.TRAY if zone.tray_slot_index >= 0 else Owner.TABLE
+	last_tray_slot_index = zone.tray_slot_index
 	collision_layer = 2
 	collision_mask = 1
 	collision_shape.set_deferred("disabled", false)
@@ -122,6 +133,18 @@ func mark_served_dirty() -> bool:
 	preparation_state = PreparationState.DIRTY
 	return true
 
+func mark_in_service() -> bool:
+	if state != BowlState.PLACED or preparation_state != PreparationState.READY_TO_SERVE:
+		return false
+	in_service = true
+	return true
+
+func finish_consumption() -> bool:
+	if not in_service:
+		return false
+	in_service = false
+	return mark_served_dirty()
+
 
 # Washing is the only way back from DIRTY. It requires the bowl to be HELD
 # (the player carries it to the wash zone) and resets it to a clean bowl:
@@ -135,6 +158,27 @@ func wash() -> Dictionary:
 	preparation_state = PreparationState.CLEAN
 	_sync_visuals()
 	return {"ok": true, "message": "Đã rửa sạch bát."}
+
+func put_in_rack() -> bool:
+	if state != BowlState.HELD or not is_dirty() or in_service:
+		return false
+	state = BowlState.PLACED
+	bowl_owner = Owner.RACK
+	last_tray_slot_index = -1
+	collision_layer = 0
+	return true
+
+func wash_after_batch() -> bool:
+	if bowl_owner != Owner.RACK or not is_dirty() or in_service:
+		return false
+	recipe_step_index = 0
+	prepared_recipe_id = &""
+	consumed_ingredients.clear()
+	preparation_state = PreparationState.CLEAN
+	collision_layer = 2
+	collision_shape.set_deferred("disabled", false)
+	_sync_visuals()
+	return true
 
 
 func is_ready_to_serve() -> bool:

@@ -2,6 +2,7 @@ extends Node
 class_name ServingService
 
 signal payment_recorded(order_id: StringName, recipe_id: StringName, table_id: StringName)
+signal order_delivered(order_id: StringName, table_id: StringName)
 
 var payment_event_count: int = 0
 var _paid_order_ids: Dictionary = {}
@@ -19,6 +20,42 @@ func configure_ledger(ledger: Node, day_id: StringName) -> Dictionary:
 	_ledger = ledger
 	_ledger_day_id = day_id
 	return {"ok": true}
+
+func deliver_order(bowl: InteractiveBowl, orders: OrderManager, order_id: StringName, table_id: StringName) -> Dictionary:
+	if bowl == null or orders == null or not is_instance_valid(bowl):
+		return {"ok": false, "message": "Thiếu bát hoặc hệ thống đơn."}
+	var order := orders.get_order(order_id)
+	if order.is_empty() or int(order.get("status", -1)) != OrderManager.OrderStatus.READY:
+		return {"ok": false, "message": "Đơn chưa sẵn sàng giao."}
+	if bowl.state != InteractiveBowl.BowlState.PLACED or not bowl.is_ready_to_serve():
+		return {"ok": false, "message": "Bát chưa đặt đúng hoặc chưa hoàn thành."}
+	if StringName(order.get("recipe_id", &"")) != bowl.prepared_recipe_id or StringName(order.get("table_id", &"")) != table_id:
+		return {"ok": false, "message": "Sai món hoặc sai bàn."}
+	var moved := orders.transition_order(order_id, OrderManager.OrderStatus.SERVED)
+	if not bool(moved.get("ok", false)):
+		return moved
+	bowl.mark_in_service()
+	order_delivered.emit(order_id, table_id)
+	return {"ok": true, "message": "Đã giao món. Chờ khách ăn xong rồi thanh toán."}
+
+func settle_order(orders: OrderManager, order_id: StringName, sale_amount: int) -> Dictionary:
+	if orders == null or _ledger == null or sale_amount <= 0:
+		return {"ok": false, "message": "Thiếu đơn, Ledger hoặc giá bán hợp lệ."}
+	if _paid_order_ids.has(order_id):
+		return {"ok": false, "message": "Đơn đã thanh toán."}
+	var order := orders.get_order(order_id)
+	if order.is_empty() or int(order.get("payment_status", -1)) != OrderManager.PaymentStatus.PAYMENT_PENDING:
+		return {"ok": false, "message": "Khách chưa ăn xong hoặc đơn đã thanh toán."}
+	var posted: Dictionary = _ledger.record_transaction(StringName("sale:%s" % String(order_id)), _ledger_day_id, &"sale_revenue", sale_amount, order_id)
+	if not bool(posted.get("ok", false)):
+		return {"ok": false, "message": "Không ghi được tiền: %s" % String(posted.get("reason", "lỗi"))}
+	var paid := orders.set_paid(order_id)
+	if not bool(paid.get("ok", false)):
+		return paid
+	_paid_order_ids[order_id] = true
+	payment_event_count += 1
+	payment_recorded.emit(order_id, StringName(order.get("recipe_id", &"")), StringName(order.get("table_id", &"")))
+	return {"ok": true, "message": "Đã thu tiền một lần.", "payment_events": 1}
 
 
 func serve_order(
@@ -79,6 +116,8 @@ func serve_order(
 	# close — serve → dirty → wash → next order — instead of reusing a bowl
 	# that still looks ready.
 	bowl.mark_served_dirty()
+	order_manager.set_payment_pending(order_id)
+	order_manager.set_paid(order_id)
 	_paid_order_ids[order_id] = true
 	payment_event_count += 1
 	payment_recorded.emit(order_id, StringName(order.get("recipe_id", &"")), delivery_table_id)
