@@ -1,6 +1,9 @@
 extends Area3D
 class_name PlacementZone
 
+@export var table_id: StringName = &""
+@export var tray_slot_index: int = -1
+
 @onready var placement_marker: Marker3D = $PlacementMarker
 
 

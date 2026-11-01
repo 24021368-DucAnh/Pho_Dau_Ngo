@@ -27,28 +27,43 @@ var active_recipe: RecipeData = PHO_BO_TAI_RECIPE
 @onready var prompt_label: Label = $HUD/Center/Prompt
 @onready var status_label: Label = $HUD/Center/Status
 @onready var order_ticket_label: Label = $HUD/OrderTicket
+@onready var cash_label: Label = $HUD/CashHUD
 @onready var order_manager: OrderManager = $"../OrderManager"
 @onready var serving_service: ServingService = $"../ServingService"
 @onready var ledger: Ledger = $"../Ledger"
 @onready var day_controller: DayController = $"../DayController"
-@onready var service_bowl: InteractiveBowl = $"../Bowl"
+@onready var shift_coordinator: ShiftCoordinator = $"../ShiftCoordinator"
+@onready var table_service: TableService = $"../TableService"
+@onready var customer_director: CustomerDirector = $"../CustomerDirector"
+@onready var cooking_coordinator: CookingCoordinator = $"../CookingCoordinator"
+@onready var tray_controller: TrayController = $"../TrayController"
+@onready var meal_service: MealService = $"../MealService"
+@onready var wash_batch: WashBatchService = $"../WashBatchService"
+@onready var tray_slot_1: PlacementZone = $"../TraySlot1"
+@onready var tray_base: MeshInstance3D = $"../ShipTable/TrayBase"
 
 var held_bowl: InteractiveBowl
 var current_order_id: StringName = &"order-001"
 var current_table_id: StringName = &"table-1"
-var _order_counter: int = 1
+var _table_zones: Array[PlacementZone] = []
 var _stations: Array[KitchenStation] = []
+var _tray_home: Array[Transform3D] = []
 
 
 func _ready() -> void:
 	_stations = [get_node("../NoodlesStation") as KitchenStation, get_node("../BeefStation") as KitchenStation, get_node("../CookedBeefStation") as KitchenStation, get_node("../BrothStation") as KitchenStation]
+	_table_zones = [placement_zone, get_node("../Table2Zone") as PlacementZone, get_node("../Table3Zone") as PlacementZone]
+	_tray_home = [tray_base.global_transform, ship_zone.global_transform, tray_slot_1.global_transform]
 	_set_placement_zone_active(false)
 	if not OS.has_feature("headless"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	var created_order := order_manager.create_order(current_order_id, active_recipe.recipe_id, current_table_id)
-	if not bool(created_order.get("ok", false)):
-		status_label.text = String(created_order.get("message", "Không thể tạo đơn đầu tiên."))
 	order_manager.order_changed.connect(_on_order_changed)
+	cooking_coordinator.configure(order_manager)
+	meal_service.configure(order_manager)
+	meal_service.meal_finished.connect(_on_meal_finished)
+	wash_batch.configure([get_node("../Bowl") as InteractiveBowl, get_node("../Bowl2") as InteractiveBowl])
+	wash_batch.wash_finished.connect(_on_wash_finished)
+	table_service.table_changed.connect(_on_table_changed)
 	_refresh_order_ticket()
 	status_label.text = "Nhắm vào bát để cầm. Hoàn thành phiếu, mang bát lên bàn giao món bên phải rồi bấm E để ship."
 	# M6 wiring: open the day with the Ledger, then point ServingService at
@@ -58,14 +73,24 @@ func _ready() -> void:
 	# default status above does not overwrite a wiring failure).
 	var configured := day_controller.configure(ledger, inventory)
 	if bool(configured.get("ok", false)):
-		var started := day_controller.start_day(PROVISIONAL_DAY_ID, PROVISIONAL_OPENING_CASH)
+		var shift_configured := shift_coordinator.configure(order_manager, serving_service, day_controller, inventory)
+		var started := shift_coordinator.open_shift(PROVISIONAL_DAY_ID, PROVISIONAL_OPENING_CASH) if bool(shift_configured.get("ok", false)) else shift_configured
 		if bool(started.get("ok", false)):
 			serving_service.configure_ledger(ledger, PROVISIONAL_DAY_ID)
+			serving_service.payment_recorded.connect(_on_payment_recorded)
+			_refresh_cash_hud()
+			var setup := customer_director.configure(table_service, order_manager, load("res://data/day01_customers.tres"))
+			if bool(setup.get("ok", false)):
+				customer_director.start_shift()
+				_select_order(&"order-001")
+			else:
+				status_label.text = String(setup.get("message", "Không nạp được khách."))
 		else:
 			status_label.text = "Không mở được ngày bán hàng: " + String(started.get("message", ""))
 	else:
 		status_label.text = "Không cấu hình được Ledger/DayController: " + String(configured.get("message", ""))
 	day_controller.day_closed.connect(_on_day_closed)
+	shift_coordinator.shift_phase_changed.connect(_on_shift_phase_changed)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -88,16 +113,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.rotate_x(-event.relative.y * mouse_sensitivity)
 		camera.rotation.x = clampf(camera.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
 
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_V:
-		var current_order := order_manager.get_order(current_order_id)
-		if not current_order.is_empty() and int(current_order.get("status", -1)) != OrderManager.OrderStatus.SERVED and int(current_order.get("status", -1)) != OrderManager.OrderStatus.CANCELLED:
-			status_label.text = "Hoàn thành phiếu hiện tại trước khi đổi món."
-			return
-		if held_bowl != null and is_instance_valid(held_bowl) and held_bowl.prepared_recipe_id != &"":
-			status_label.text = "Bát này đã bắt đầu theo phiếu " + String(held_bowl.prepared_recipe_id) + ". Hãy hoàn thành hoặc hủy bát trước khi đổi phiếu."
-			return
-		active_recipe = PHO_BO_CHIN_RECIPE if active_recipe == PHO_BO_TAI_RECIPE else PHO_BO_TAI_RECIPE
-		status_label.text = "Đã chọn phiếu: " + active_recipe.display_name + ". Chọn đúng khay thịt theo công thức."
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_T:
+		_toggle_tray()
 		return
 
 	if event.is_action_pressed("cancel_preparation"):
@@ -138,29 +155,73 @@ func _process(_delta: float) -> void:
 	if held_bowl != null and is_instance_valid(held_bowl):
 		held_bowl.global_position = camera.global_position + camera.global_basis * Vector3(0.0, -0.28, -0.72)
 		held_bowl.global_rotation = camera.global_rotation
+	if tray_controller.is_carried():
+		_update_carried_tray()
 	_refresh_prompt()
 
 
 func _interact() -> void:
 	raycast.force_raycast_update()
 	var target: Object = raycast.get_collider() if raycast.is_colliding() else null
+	if target is PaymentZone:
+		_collect_payment(target as PaymentZone)
+		return
+	if tray_controller.is_carried() and target is PlacementZone and target.table_id != &"":
+		_deliver_from_tray(target as PlacementZone)
+		return
 
 	if held_bowl != null:
 		if target is KitchenStation:
 			var station: KitchenStation = target as KitchenStation
+			var bound_order := cooking_coordinator.lookup_bowl_order(held_bowl.bowl_id)
+			if bound_order != &"" and bound_order != current_order_id:
+				status_label.text = "Bát này thuộc phiếu %s. Nhấn V để chọn đúng phiếu." % String(bound_order)
+				return
+			if bound_order == &"" and bool(station.preview_action(held_bowl, active_recipe, inventory).get("ok", false)):
+				var binding := cooking_coordinator.bind_bowl_to_order(held_bowl.bowl_id, current_order_id)
+				if not bool(binding.get("ok", false)):
+					status_label.text = String(binding.get("message", "Không gắn được bát với phiếu."))
+					return
 			var result: Dictionary = station.apply_to_bowl(held_bowl, active_recipe, inventory)
 			status_label.text = String(result.get("message", "Thao tác chưa thực hiện."))
+			if bool(result.get("ok", false)):
+				var active_order := order_manager.get_order(current_order_id)
+				if int(active_order.get("status", -1)) == OrderManager.OrderStatus.ACCEPTED:
+					order_manager.transition_order(current_order_id, OrderManager.OrderStatus.PREPARING)
 		elif target is Area3D and target.name == "WashZone":
-			var wash_result: Dictionary = held_bowl.wash()
+			var wash_result: Dictionary = wash_batch.enqueue(held_bowl.bowl_id)
+			status_label.text = String(wash_result.get("message", "Không rửa được bát."))
 			if bool(wash_result.get("ok", false)):
-				if _create_next_order():
-					status_label.text = "Đã rửa sạch bát. Đơn mới đã lên phiếu."
-				else:
-					status_label.text = "Đã rửa sạch bát nhưng không tạo được đơn tiếp theo."
-			else:
-				status_label.text = String(wash_result.get("message", "Không rửa được bát."))
+				var rack_state: Dictionary = wash_batch.get_state()
+				var rack_index: int = int(rack_state.get("queued_count", 0)) + int(rack_state.get("washing_count", 0)) + int(rack_state.get("clean_count", 0)) - 1
+				held_bowl.global_position = Vector3(-1.37 + float(rack_index % 2) * 0.34, 0.82, -0.42 + float(rack_index / 2) * 0.22)
+				held_bowl.global_rotation = Vector3.ZERO
+				held_bowl = null
+				_set_placement_zone_active(false)
 			_refresh_order_ticket()
-		elif target is PlacementZone and held_bowl.try_place(target as Node):
+		elif target is PlacementZone:
+			var zone := target as PlacementZone
+			if zone.tray_slot_index >= 0:
+				if not held_bowl.is_ready_to_serve() or cooking_coordinator.lookup_bowl_order(held_bowl.bowl_id) == &"":
+					status_label.text = "Khay chỉ nhận bát đã nấu và có phiếu."
+					return
+				var inserted := tray_controller.try_insert(held_bowl.bowl_id, zone.tray_slot_index)
+				if not bool(inserted.get("ok", false)):
+					status_label.text = String(inserted.get("message", "Vị trí khay đã đầy."))
+					return
+			if held_bowl.is_ready_to_serve() and zone.table_id != &"" and not table_service.can_deliver(zone.table_id, current_order_id):
+				status_label.text = "Sai bàn nhận món. Xem số bàn trên phiếu."
+				return
+			if held_bowl.is_ready_to_serve() and zone.table_id != &"":
+				var waiting := order_manager.get_open_orders()
+				if waiting.is_empty() or StringName(waiting[0].get("order_id", &"")) != current_order_id:
+					status_label.text = "Khách đến trước đang chờ. Hãy giao phiếu đầu tiên."
+					return
+			if not held_bowl.try_place(zone):
+				if zone.tray_slot_index >= 0:
+					tray_controller.try_remove(zone.tray_slot_index)
+				status_label.text = "Không đặt được bát vào vùng này."
+				return
 			var placed_bowl := held_bowl
 			held_bowl = null
 			_set_placement_zone_active(false)
@@ -168,29 +229,31 @@ func _interact() -> void:
 				var order := order_manager.get_order(current_order_id)
 				if int(order.get("status", -1)) == OrderManager.OrderStatus.PREPARING:
 					order_manager.transition_order(current_order_id, OrderManager.OrderStatus.READY)
-			if target.name == "ShipZone" and placed_bowl.is_ready_to_serve():
-				var ship_result := serving_service.serve_order(placed_bowl, order_manager, current_order_id, current_table_id, PROVISIONAL_SALE_PRICE)
+			if zone.table_id != &"" and placed_bowl.is_ready_to_serve():
+				var ship_result := serving_service.deliver_order(placed_bowl, order_manager, current_order_id, zone.table_id)
 				status_label.text = String(ship_result.get("message", "Không thể giao món."))
+				if bool(ship_result.get("ok", false)):
+					meal_service.start_meal(current_order_id, table_service.get_customer(zone.table_id))
+					var remaining := order_manager.get_open_orders()
+					if not remaining.is_empty():
+						_select_order(StringName(remaining[0].get("order_id", &"")))
 				_refresh_order_ticket()
 			elif placed_bowl.is_ready_to_serve():
-				status_label.text = "Đã đặt bát đúng vùng trên bàn. Mang bát lên bàn giao món bên phải, hoặc nhắm vào bát và bấm E để giao món."
+				status_label.text = "Bát đã sẵn sàng. Mang tới đúng bàn trên phiếu để giao."
+				if zone.tray_slot_index >= 0:
+					_select_next_order()
 			else:
 				status_label.text = "Đã đặt bát đúng vùng trên bàn, nhưng bát chưa đủ bước. Cầm lại bát để làm tiếp."
 		else:
 			status_label.text = "Vị trí không hợp lệ. Bát vẫn đang được giữ."
 		return
 
-	if target is Area3D and target.name == "DeliveryZone":
-		var result := serving_service.serve_order(service_bowl, order_manager, current_order_id, current_table_id, PROVISIONAL_SALE_PRICE)
-		status_label.text = String(result.get("message", "Không thể giao món."))
-		_refresh_order_ticket()
-	elif target is InteractiveBowl:
+	if target is InteractiveBowl:
 		var bowl: InteractiveBowl = target as InteractiveBowl
-		if int(bowl.state) == InteractiveBowl.BowlState.PLACED and bowl.is_ready_to_serve():
-			var serve_result := serving_service.serve_order(bowl, order_manager, current_order_id, current_table_id, PROVISIONAL_SALE_PRICE)
-			status_label.text = String(serve_result.get("message", "Không thể giao món."))
-			_refresh_order_ticket()
-		elif _try_pick_up_bowl(bowl):
+		if _try_pick_up_bowl(bowl):
+			var bound_order := cooking_coordinator.lookup_bowl_order(bowl.bowl_id)
+			if bound_order != &"":
+				_select_order(bound_order)
 			var order := order_manager.get_order(current_order_id)
 			if int(order.get("status", -1)) == OrderManager.OrderStatus.ACCEPTED:
 				order_manager.transition_order(current_order_id, OrderManager.OrderStatus.PREPARING)
@@ -202,7 +265,8 @@ func _interact() -> void:
 	elif target is PlacementZone:
 		status_label.text = "Cần cầm bát trước khi đặt."
 	elif target is Area3D and target.name == "WashZone":
-		status_label.text = "Cầm bát bẩn tới chậu rửa rồi bấm E để rửa."
+		var result := wash_batch.start_batch()
+		status_label.text = String(result.get("message", "Không thể bắt đầu rửa."))
 	else:
 		status_label.text = "Chưa nhắm vào vật có thể tương tác."
 
@@ -216,11 +280,80 @@ func _cancel_preparation() -> void:
 
 
 func _close_day() -> void:
-	var result: Dictionary = day_controller.close_day()
+	var confirming_early_close := shift_coordinator.phase == ShiftCoordinator.Phase.CLOSING
+	var result: Dictionary = shift_coordinator.request_close()
+	if not bool(result.get("ok", false)):
+		status_label.text = "Không đóng được ngày: " + String(result.get("message", ""))
+		return
+	if bool(result.get("already_closed", false)):
+		_show_day_summary(Dictionary(result.get("summary", {})))
+		return
+	if int(result.get("outstanding_orders", 0)) > 0 and not confirming_early_close:
+		status_label.text = "Còn %d đơn chưa phục vụ. Nhấn C lần nữa để đóng sớm." % int(result.get("outstanding_orders", 0))
+		return
+	result = shift_coordinator.finish_close()
 	if not bool(result.get("ok", false)):
 		status_label.text = "Không đóng được ngày: " + String(result.get("message", ""))
 		return
 	_show_day_summary(Dictionary(result.get("summary", {})))
+
+func _on_shift_phase_changed(phase: int) -> void:
+	if phase != ShiftCoordinator.Phase.OPEN:
+		customer_director.stop_arrivals()
+
+func _on_meal_finished(order_id: StringName) -> void:
+	var order := order_manager.get_order(order_id)
+	var table_id := StringName(order.get("table_id", &""))
+	for table_zone in _table_zones:
+		if table_zone.table_id == table_id:
+			table_zone.collision_layer = 0
+	var zone := _payment_zone_for_table(table_id)
+	if zone != null:
+		zone.collision_layer = 2
+	status_label.text = "Khách ở %s ăn xong. Đến bàn nhấn E để thu tiền." % String(table_id)
+
+func _on_wash_finished(bowl_ids: Array) -> void:
+	for bowl_id in bowl_ids:
+		if cooking_coordinator.lookup_bowl_order(StringName(bowl_id)) != &"":
+			cooking_coordinator.release_after_wash(StringName(bowl_id))
+	status_label.text = "Đã rửa xong %d bát. Lấy bát sạch trên giá để dùng tiếp." % bowl_ids.size()
+
+func _payment_zone_for_table(table_id: StringName) -> PaymentZone:
+	for index in range(1, 4):
+		var zone := get_node("../PaymentZone%d" % index) as PaymentZone
+		if zone.table_id == table_id:
+			return zone
+	return null
+
+func _collect_payment(zone: PaymentZone) -> void:
+	if held_bowl != null:
+		status_label.text = "Đặt bát xuống trước khi thu tiền."
+		return
+	for order in order_manager.get_orders():
+		if StringName(order.get("table_id", &"")) != zone.table_id or int(order.get("payment_status", -1)) != OrderManager.PaymentStatus.PAYMENT_PENDING:
+			continue
+		var order_id := StringName(order.get("order_id", &""))
+		var result := serving_service.settle_order(order_manager, order_id, PROVISIONAL_SALE_PRICE)
+		status_label.text = String(result.get("message", "Không thu được tiền."))
+		if bool(result.get("ok", false)):
+			zone.collision_layer = 0
+			var bowl := _get_bowl_by_order(order_id)
+			if bowl != null:
+				bowl.finish_consumption()
+			table_service.release_table(zone.table_id)
+		return
+	status_label.text = "Bàn này chưa chờ thanh toán."
+
+func _get_bowl_by_order(order_id: StringName) -> InteractiveBowl:
+	for bowl in [get_node("../Bowl") as InteractiveBowl, get_node("../Bowl2") as InteractiveBowl]:
+		if cooking_coordinator.lookup_bowl_order(bowl.bowl_id) == order_id:
+			return bowl
+	return null
+
+func _on_table_changed(table_id: StringName, customer_id: StringName) -> void:
+	var proxy_names := {&"table-1": "CustomerProxy1", &"table-2": "CustomerProxy2", &"table-3": "CustomerProxy3"}
+	if proxy_names.has(table_id):
+		get_node("../" + String(proxy_names[table_id])).visible = customer_id != &""
 
 
 func _on_day_closed(summary: Dictionary) -> void:
@@ -252,7 +385,7 @@ func _refresh_prompt() -> void:
 			crosshair_label.modulate = prompt_color
 		elif target is Area3D and target.name == "WashZone":
 			if held_bowl.is_dirty():
-				prompt_label.text = "E / Click: rửa bát"
+				prompt_label.text = "E / Click: đặt bát bẩn lên giá"
 				prompt_label.modulate = Color(0.35, 1.0, 0.55)
 				crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 			else:
@@ -260,28 +393,28 @@ func _refresh_prompt() -> void:
 				prompt_label.modulate = Color(1.0, 0.72, 0.28)
 				crosshair_label.modulate = Color(1.0, 0.72, 0.28)
 		elif target is PlacementZone:
-			if target.name == "ShipZone":
-				prompt_label.text = "E / Click: đặt bát lên bàn giao món để ship"
+			if target.table_id != &"":
+				prompt_label.text = "E / Click: giao tại " + String(target.table_id)
 			else:
-				prompt_label.text = "E / Click: đặt bát vào vùng xanh"
+				prompt_label.text = "E / Click: đặt bát tạm"
 			prompt_label.modulate = Color(0.35, 1.0, 0.55)
 			crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 		else:
 			prompt_label.text = "Mang bát tới: bánh phở → thịt đúng trạng thái → chan nước dùng cuối cùng · Q: hủy bát"
 			prompt_label.modulate = Color(1.0, 0.72, 0.28)
 			crosshair_label.modulate = Color(1.0, 0.72, 0.28)
-	elif target is Area3D and target.name == "DeliveryZone":
-		prompt_label.text = "E / Click: giao món · kiểm tra đúng phiếu và bàn"
-		prompt_label.modulate = Color(0.35, 1.0, 0.55)
-		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 	elif target is Area3D and target.name == "WashZone":
-		prompt_label.text = "Chậu rửa bát — cầm bát bẩn tới đây"
+		prompt_label.text = "E / Click: bắt đầu rửa bát trên giá"
 		prompt_label.modulate = Color(1.0, 0.72, 0.28)
 		crosshair_label.modulate = Color(1.0, 0.72, 0.28)
+	elif target is PaymentZone:
+		prompt_label.text = "E / Click: thu tiền tại " + String(target.table_id)
+		prompt_label.modulate = Color(0.35, 1.0, 0.55)
+		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 	elif target is InteractiveBowl:
 		var prompt_bowl := target as InteractiveBowl
 		if int(prompt_bowl.state) == InteractiveBowl.BowlState.PLACED and prompt_bowl.is_ready_to_serve():
-			prompt_label.text = "E / Click: giao món · bát đã sẵn sàng"
+			prompt_label.text = "E / Click: cầm bát tới đúng bàn"
 		elif prompt_bowl.is_dirty():
 			prompt_label.text = "E / Click: cầm bát bẩn đi rửa"
 		else:
@@ -293,19 +426,37 @@ func _refresh_prompt() -> void:
 		prompt_label.text = "Cầm bát trước khi dùng: " + station.station_label
 		prompt_label.modulate = Color(1.0, 0.72, 0.28)
 		crosshair_label.modulate = Color(1.0, 0.72, 0.28)
+	elif target is PlacementZone and tray_controller.is_carried() and target.table_id != &"":
+		prompt_label.text = "E / Click: giao bát trên khay tại " + String(target.table_id)
+		prompt_label.modulate = Color(0.35, 1.0, 0.55)
+		crosshair_label.modulate = Color(0.35, 1.0, 0.55)
 	else:
-		prompt_label.text = "WASD di chuyển · Chuột nhìn · E / Click tương tác · V đổi phở tái/chín"
+		prompt_label.text = "WASD di chuyển · E / Click tương tác · T bưng/đặt khay · Q hủy bát"
 		prompt_label.modulate = Color(1.0, 1.0, 1.0)
 		crosshair_label.modulate = Color(1.0, 1.0, 1.0)
 
 
 func _set_placement_zone_active(active: bool) -> void:
-	placement_zone.collision_layer = 2 if active else 0
-	ship_zone.collision_layer = 2 if active else 0
+	for zone in _table_zones:
+		var payment_waiting := false
+		for order in order_manager.get_unpaid_delivered_orders():
+			if StringName(order.get("table_id", &"")) == zone.table_id and int(order.get("payment_status", -1)) == OrderManager.PaymentStatus.PAYMENT_PENDING:
+				payment_waiting = true
+				break
+		zone.collision_layer = 0 if payment_waiting else (2 if active or tray_controller.is_carried() else 0)
+	ship_zone.collision_layer = 2 if active and not tray_controller.is_carried() else 0
+	tray_slot_1.collision_layer = 2 if active and not tray_controller.is_carried() else 0
 
 
 func _on_order_changed(_order_id: StringName, _order: Dictionary) -> void:
 	_refresh_order_ticket()
+
+func _on_payment_recorded(_order_id: StringName, _recipe_id: StringName, _table_id: StringName) -> void:
+	_refresh_cash_hud()
+
+func _refresh_cash_hud() -> void:
+	var totals := ledger.get_day_totals(PROVISIONAL_DAY_ID)
+	cash_label.text = "Tiền hiện có: %d đ  ·  Doanh thu: %d đ (tạm tính)" % [int(totals.get("closing_cash", 0)), int(totals.get("revenue", 0))]
 
 
 func _refresh_order_ticket() -> void:
@@ -320,24 +471,111 @@ func _refresh_order_ticket() -> void:
 		OrderManager.OrderStatus.SERVED: "ĐÃ PHỤC VỤ",
 		OrderManager.OrderStatus.CANCELLED: "ĐÃ HỦY",
 	}
-	var recipe_name := active_recipe.display_name
+	var recipe_name := PHO_BO_CHIN_RECIPE.display_name if StringName(order.get("recipe_id", &"")) == PHO_BO_CHIN_RECIPE.recipe_id else PHO_BO_TAI_RECIPE.display_name
 	var order_no := String(order.get("order_id", "")).replace("order-", "")
 	var table_no := String(order.get("table_id", "")).replace("table-", "")
 	order_ticket_label.text = "PHIẾU #%s  ·  BÀN %s\n%s\nTrạng thái: %s\nĐã thu: %d đơn" % [order_no, table_no, recipe_name, status_names.get(int(order.get("status", -1)), "KHÔNG RÕ"), serving_service.payment_event_count]
 
 
-# Multi-order loop: washing a dirty bowl is what opens the next order. The
-# new order uses whatever recipe is currently selected, so the player can
-# press V after a serve (allowed once the order is SERVED) to change the
-# next order's recipe before washing. Called only on a successful wash.
-func _create_next_order() -> bool:
-	_order_counter += 1
-	var next_id := StringName("order-%03d" % _order_counter)
-	var created := order_manager.create_order(next_id, active_recipe.recipe_id, current_table_id)
-	if bool(created.get("ok", false)):
-		current_order_id = next_id
-		return true
-	return false
+func _select_order(order_id: StringName) -> void:
+	var order := order_manager.get_order(order_id)
+	if order.is_empty():
+		return
+	current_order_id = order_id
+	current_table_id = StringName(order.get("table_id", &""))
+	active_recipe = PHO_BO_CHIN_RECIPE if StringName(order.get("recipe_id", &"")) == PHO_BO_CHIN_RECIPE.recipe_id else PHO_BO_TAI_RECIPE
+	_refresh_order_ticket()
+	status_label.text = "Đã chọn phiếu %s, %s. Nấu đúng công thức rồi mang tới %s." % [String(order_id), active_recipe.display_name, String(current_table_id)]
+
+func _select_next_order() -> void:
+	var open_orders := order_manager.get_open_orders()
+	if open_orders.is_empty():
+		status_label.text = "Không còn đơn cần nấu."
+		return
+	for index in open_orders.size():
+		if StringName(open_orders[index].get("order_id", &"")) == current_order_id and index + 1 < open_orders.size():
+			_select_order(StringName(open_orders[index + 1].get("order_id", &"")))
+			return
+
+func _toggle_tray() -> void:
+	if held_bowl != null:
+		status_label.text = "Đặt bát xuống trước khi bưng khay."
+		return
+	if tray_controller.is_carried():
+		tray_controller.end_carry()
+		for index in _tray_home.size():
+			[tray_base, ship_zone, tray_slot_1][index].global_transform = _tray_home[index]
+		_update_tray_bowls()
+		for bowl_id in tray_controller.get_slots():
+			var tray_bowl := _get_bowl_by_id(StringName(bowl_id))
+			if tray_bowl != null:
+				tray_bowl.collision_layer = 2
+		_set_placement_zone_active(false)
+		status_label.text = "Đã đặt khay về bàn chuẩn bị."
+		return
+	if global_position.distance_to(get_node("../ShipTable").global_position) > 2.5:
+		status_label.text = "Lại gần bàn đặt khay để bưng."
+		return
+	tray_controller.begin_carry()
+	_set_placement_zone_active(false)
+	_update_carried_tray()
+	status_label.text = "Đang bưng khay. Nhắm đúng bàn và bấm E để giao bát trên khay; T đặt khay về bàn."
+
+func _update_carried_tray() -> void:
+	var center := camera.global_position + camera.global_basis * Vector3(0.0, -0.43, -0.88)
+	var basis_yaw := global_basis
+	tray_base.global_transform = Transform3D(basis_yaw, center)
+	ship_zone.global_transform = Transform3D(basis_yaw, center + basis_yaw * Vector3(0, 0.04, -0.09))
+	tray_slot_1.global_transform = Transform3D(basis_yaw, center + basis_yaw * Vector3(0, 0.04, 0.09))
+	_update_tray_bowls()
+
+func _update_tray_bowls() -> void:
+	var slots := tray_controller.get_slots()
+	for index in slots.size():
+		var bowl := _get_bowl_by_id(StringName(slots[index]))
+		if bowl != null:
+			bowl.global_transform = (ship_zone if index == 0 else tray_slot_1).get_placement_transform()
+			if tray_controller.is_carried():
+				bowl.collision_layer = 0
+
+func _get_bowl_by_id(bowl_id: StringName) -> InteractiveBowl:
+	for bowl in [get_node("../Bowl") as InteractiveBowl, get_node("../Bowl2") as InteractiveBowl]:
+		if bowl.bowl_id == bowl_id:
+			return bowl
+	return null
+
+func _deliver_from_tray(zone: PlacementZone) -> void:
+	var slots := tray_controller.get_slots()
+	for index in slots.size():
+		var bowl := _get_bowl_by_id(StringName(slots[index]))
+		if bowl == null:
+			continue
+		var order_id := cooking_coordinator.lookup_bowl_order(bowl.bowl_id)
+		var order := order_manager.get_order(order_id)
+		if StringName(order.get("table_id", &"")) != zone.table_id:
+			continue
+		var waiting := order_manager.get_open_orders()
+		if waiting.is_empty() or StringName(waiting[0].get("order_id", &"")) != order_id:
+			status_label.text = "Khách đến trước đang chờ. Hãy giao phiếu đầu tiên."
+			return
+		if not bowl.is_ready_to_serve():
+			status_label.text = "Bát trên khay chưa nấu xong."
+			return
+		tray_controller.try_remove(index)
+		bowl.set_held()
+		bowl.try_place(zone)
+		if int(order.get("status", -1)) == OrderManager.OrderStatus.PREPARING:
+			order_manager.transition_order(order_id, OrderManager.OrderStatus.READY)
+		var served := serving_service.deliver_order(bowl, order_manager, order_id, zone.table_id)
+		status_label.text = String(served.get("message", "Không thể giao món."))
+		if bool(served.get("ok", false)):
+			meal_service.start_meal(order_id, table_service.get_customer(zone.table_id))
+			var remaining := order_manager.get_open_orders()
+			if not remaining.is_empty():
+				_select_order(StringName(remaining[0].get("order_id", &"")))
+		_refresh_order_ticket()
+		return
+	status_label.text = "Trên khay không có bát cho bàn này."
 
 
 func _try_pick_up_bowl(bowl: InteractiveBowl) -> bool:
@@ -345,8 +583,18 @@ func _try_pick_up_bowl(bowl: InteractiveBowl) -> bool:
 		return false
 	if held_bowl != null and is_instance_valid(held_bowl):
 		return false
+	var was_on_rack := bowl.bowl_owner == InteractiveBowl.Owner.RACK
+	var tray_slot := bowl.last_tray_slot_index
+	if tray_slot >= 0:
+		var removed := tray_controller.try_remove(tray_slot)
+		if not bool(removed.get("ok", false)) or StringName(removed.get("bowl_id", &"")) != bowl.bowl_id:
+			return false
 	if not bowl.set_held():
+		if tray_slot >= 0:
+			tray_controller.try_insert(bowl.bowl_id, tray_slot)
 		return false
+	if was_on_rack:
+		wash_batch.take_clean(bowl.bowl_id)
 	held_bowl = bowl
 	_set_placement_zone_active(true)
 	return true
