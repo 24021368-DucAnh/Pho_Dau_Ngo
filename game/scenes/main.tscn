@@ -1,4 +1,4 @@
-[gd_scene load_steps=57 format=3 uid="uid://ba2dxob7c8ayd"]
+[gd_scene load_steps=62 format=3 uid="uid://ba2dxob7c8ayd"]
 
 [ext_resource type="Script" uid="uid://dtqffbe2sc3te" path="res://scripts/player_controller.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://yo74tfu1o4lr" path="res://scripts/interactive_bowl.gd" id="2_bowl"]
@@ -16,7 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://gkshau5vlgyt" path="res://assets/models/props/TRAY_metal_game.glb" id="15_tray"]
 [ext_resource type="PackedScene" uid="uid://scuu5k16flty" path="res://scenes/art/food/pho_bowl_modular.tscn" id="16_bowl_modular"]
 [ext_resource type="PackedScene" uid="uid://dlwugr4w5y4ve" path="res://assets/models/props/CART_pho_v1.glb" id="17_cart"]
-[ext_resource type="PackedScene" uid="uid://da8vsy4837k18" path="res://assets/models/props/PROP_chopstick_holder_v2.glb" id="18_holder"]
+[ext_resource type="PackedScene" path="res://assets/models/props/PROP_chopstick_holder_v2_OPT.glb" id="18_holder"]
 [ext_resource type="PackedScene" uid="uid://bkt8hnqtldbxc" path="res://assets/models/props/CHOPSTICKS_bundle_t1.glb" id="19_bundle1"]
 [ext_resource type="PackedScene" uid="uid://lfaoxyaywc7" path="res://assets/models/props/CHOPSTICKS_bundle_t2.glb" id="20_bundle2"]
 [ext_resource type="PackedScene" uid="uid://clnlojoat1xeb" path="res://assets/models/props/CHOPSTICKS_bundle_t3.glb" id="21_bundle3"]
@@ -29,6 +29,12 @@
 [ext_resource type="Script" path="res://scripts/customers/meal_service.gd" id="28_meal"]
 [ext_resource type="Script" path="res://scripts/customers/payment_zone.gd" id="29_payment_zone"]
 [ext_resource type="Script" path="res://scripts/washing/wash_batch_service.gd" id="30_wash_batch"]
+
+[ext_resource type="PackedScene" path="res://assets/models/props/PROP_noodle_blanching_strainer_v002_GAME.glb" id="prop_v005_1"]
+[ext_resource type="PackedScene" path="res://assets/models/props/PROP_garlic_vinegar_jar_v005_OPT.glb" id="prop_v005_2"]
+[ext_resource type="PackedScene" path="res://assets/models/props/PROP_chili_paste_jar_v005_OPT.glb" id="prop_v005_3"]
+[ext_resource type="PackedScene" path="res://assets/models/props/PROP_inox_pepper_shaker_v003.glb" id="prop_v005_4"]
+[ext_resource type="PackedScene" path="res://assets/models/props/Pho_Dau_Ngo_Tra_Da_OPT.glb" id="prop_tra_da_opt"]
 
 [sub_resource type="Environment" id="Environment_stylized"]
 background_mode = 1
@@ -569,6 +575,9 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.255, 0.5, -2.8)
 [node name="TissueTable1" parent="." instance=ExtResource("14_tissue")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.27, 0.5, -2.6)
 
+[node name="TraDaTable1" parent="Table" instance=ExtResource("prop_tra_da_opt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.5, 0.10)
+
 [node name="Table2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0, -2.7)
 
@@ -669,3 +678,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.955, 0.5, -2.8)
 
 [node name="ChopsticksBundle3" parent="." instance=ExtResource("21_bundle3")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.445, 0.5, -2.8)
+
+# PHO_DAU_NGO_PROPS_V005_INTEGRATION — placements require Godot visual verification
+
+[node name="StrainerV002" parent="PhoCart" instance=ExtResource("prop_v005_1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.68000, 0.72000, 0.00000)
+
+[node name="GarlicJarV005" parent="Table3" instance=ExtResource("prop_v005_2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.10000, 0.50000, -0.08000)
+
+[node name="ChiliJarV005" parent="Table3" instance=ExtResource("prop_v005_3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25000, 0.50000, -0.08000)
+
+[node name="PepperShakerV003" parent="Table3" instance=ExtResource("prop_v005_4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13000, 0.50000, 0.12000)

@@ -131,6 +131,7 @@ func mark_served_dirty() -> bool:
 	if preparation_state != PreparationState.READY_TO_SERVE:
 		return false
 	preparation_state = PreparationState.DIRTY
+	_sync_visuals()
 	return true
 
 func mark_in_service() -> bool:
@@ -192,4 +193,4 @@ func is_ready_to_serve() -> bool:
 func _sync_visuals() -> void:
 	var visuals := get_node_or_null("BowlVisuals") as PhoBowlVisuals
 	if visuals != null:
-		visuals.apply_state(consumed_ingredients)
+		visuals.apply_state(consumed_ingredients, is_dirty())

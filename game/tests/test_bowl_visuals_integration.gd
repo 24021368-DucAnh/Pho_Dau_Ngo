@@ -56,6 +56,7 @@ func _run() -> void:
 	_check(not _visible(visuals1, "BrothSurface"), "clean bowl hides broth")
 	_check(not _visible(visuals1, "GarnishLayer"), "clean bowl hides garnish")
 	_check(not _visible(visuals1, "ChopsticksExtra"), "clean bowl hides chopsticks")
+	_check(not _visible(visuals1, "LeftoversLayer"), "clean bowl hides leftovers")
 
 	# Rejected step must not change visuals.
 	_check(bool(bowl1.call("set_held")), "scene bowl can be picked up")
@@ -75,7 +76,29 @@ func _run() -> void:
 	_check(_visible(visuals1, "BrothSurface"), "broth step shows broth")
 	_check(_visible(visuals1, "GarnishLayer"), "ready bowl shows garnish")
 	_check(_visible(visuals1, "ChopsticksExtra"), "ready bowl shows chopsticks")
+	_check(not _visible(visuals1, "LeftoversLayer"), "ready bowl hides leftovers")
 	_check(bowl1.is_ready_to_serve(), "bowl is ready to serve after all three steps")
+	_check(bowl1.try_place(scene1.get_node("PlacementZone")), "ready bowl can be placed before eating")
+	_check(bowl1.mark_served_dirty(), "eaten bowl becomes dirty")
+	_check(_visible(visuals1, "LeftoversLayer"), "dirty bowl shows leftovers")
+	_check(not _visible(visuals1, "NoodlesLayer"), "dirty bowl hides full noodles")
+	_check(not _visible(visuals1, "BrothSurface"), "dirty bowl hides full broth")
+	_check(not _visible(visuals1, "BeefLayer"), "dirty bowl hides full beef")
+	_check(not _visible(visuals1, "GarnishLayer"), "dirty bowl hides garnish")
+	_check(not _visible(visuals1, "ChopsticksExtra"), "dirty bowl hides chopsticks")
+	_check(bowl1.set_held(), "dirty bowl can be taken to wash")
+	_check(bool(bowl1.wash().get("ok", false)), "dirty bowl can be washed")
+	_check(not _visible(visuals1, "LeftoversLayer"), "washing hides leftovers")
+	for step in recipe.steps_for_recipe():
+		_check(bowl1.apply_recipe_step(StringName(step["action_id"]), recipe), "bowl can be prepared again after washing")
+	_check(bowl1.try_place(scene1.get_node("PlacementZone")), "prepared bowl can be served again")
+	_check(bowl1.mark_in_service(), "customer can start eating")
+	_check(bowl1.finish_consumption(), "meal completion marks bowl dirty")
+	_check(_visible(visuals1, "LeftoversLayer"), "meal completion shows leftovers")
+	_check(bowl1.set_held(), "dirty bowl can be carried to rack")
+	_check(bowl1.put_in_rack(), "dirty bowl can enter wash rack")
+	_check(bowl1.wash_after_batch(), "batch wash cleans the bowl")
+	_check(not _visible(visuals1, "LeftoversLayer"), "batch wash hides leftovers")
 
 	scene1.queue_free()
 	await process_frame
